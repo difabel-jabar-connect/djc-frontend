@@ -1,0 +1,3 @@
+# Setiap path memiliki minimal dua code owner agar penulis PR tidak menjadi satu-satunya pemberi approval.
+*          @farhanhaiko @SaladinSetyo
+/.github/  @SaladinSetyo @deonaja
