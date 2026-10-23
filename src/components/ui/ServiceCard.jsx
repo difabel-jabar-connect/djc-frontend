@@ -1,6 +1,6 @@
 import { Link } from 'react-router';
 import { getCategory } from '@/features/search/catalog';
-import { buildProviderPath } from '@/routes/paths';
+import { buildBookingPath, buildProviderPath } from '@/routes/paths';
 import { formatRating, formatRupiah } from '@/lib/format';
 import { MapPinIcon, StarFilledIcon } from './icons';
 import './ServiceCard.css';
@@ -65,7 +65,7 @@ export default function ServiceCard({ provider, headingLevel = 3 }) {
           Lihat Profil
         </Link>
         <Link
-          to={`${profilePath}#pesan`}
+          to={buildBookingPath(provider.id)}
           className="btn btn--primary btn--block"
           aria-label={`Pesan layanan ${provider.name}`}
         >

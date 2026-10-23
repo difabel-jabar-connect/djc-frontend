@@ -8,6 +8,7 @@ export const PATHS = {
   map: '/map',
   about: '/tentang',
   providerDetail: '/provider/:id',
+  booking: '/pesan/:id',
   login: '/login',
   register: '/register',
   customerBookings: '/bookings',
@@ -26,3 +27,14 @@ export function buildServicesPath(params = {}) {
 }
 
 export const buildProviderPath = (id) => `/provider/${encodeURIComponent(id)}`;
+
+/** URL halaman pemesanan; `params` opsional (paket, tanggal) diteruskan sebagai query. */
+export function buildBookingPath(id, params = {}) {
+  const search = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value) search.set(key, value);
+  });
+  const query = search.toString();
+  const path = `/pesan/${encodeURIComponent(id)}`;
+  return query ? `${path}?${query}` : path;
+}

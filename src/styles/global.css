@@ -44,7 +44,8 @@ a {
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
@@ -492,6 +493,82 @@ main:focus {
   right: 12px;
 }
 
+.input-shell--area {
+  align-items: flex-start;
+  min-height: 76px;
+  padding-block: 12px;
+}
+
+.input-shell--area .input-shell__control {
+  line-height: 24px;
+  resize: vertical;
+}
+
+.input-shell__icon--top {
+  margin-top: 2px;
+}
+
+.input-shell--invalid {
+  border-color: var(--color-danger);
+}
+
+.field {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.field-label {
+  margin: 0;
+  font-weight: 600;
+}
+
+.field-required {
+  color: #b91c1c;
+}
+
+.field-hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.9375rem;
+}
+
+.field-error {
+  margin: 0;
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.field-count {
+  justify-self: end;
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* Ringkasan error formulir */
+.error-summary {
+  padding: var(--space-3) 20px;
+  border: 2px solid var(--color-danger);
+  border-radius: var(--radius);
+  background: var(--color-danger-bg);
+}
+
+.error-summary h2 {
+  margin: 0 0 var(--space-2);
+  color: var(--color-danger);
+  font-size: var(--font-size-md);
+}
+
+.error-summary ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.error-summary a {
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
 /* ===== Navigasi & label kecil ===== */
 .breadcrumb {
   display: flex;
@@ -540,9 +617,168 @@ main:focus {
   cursor: pointer;
 }
 
+.link-button--flush {
+  justify-self: start;
+  padding-inline: 0;
+}
+
 .link-button:disabled {
   color: var(--color-text-muted);
   cursor: not-allowed;
+}
+
+.breadcrumb--chevron {
+  gap: var(--space-1);
+}
+
+.breadcrumb--chevron li {
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumb--chevron a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.breadcrumb--chevron [aria-current='page'] {
+  color: var(--color-text-muted);
+}
+
+.pill--success {
+  gap: var(--space-2);
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #16a34a;
+  box-shadow: 0 0 0 3px #bbf7d0;
+}
+
+.text-star {
+  color: var(--color-star);
+}
+
+.btn--md {
+  min-height: 52px;
+  padding-inline: 28px;
+  font-weight: 700;
+}
+
+.link-arrow--offset {
+  justify-self: start;
+  text-underline-offset: 4px;
+}
+
+/* Ikon dalam kotak berwarna */
+.icon-tile {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius);
+  background: var(--color-accent-soft);
+  color: #0c7272;
+}
+
+.icon-tile--lg {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+}
+
+.icon-tile--primary {
+  background: var(--color-primary);
+  color: #ffffff;
+}
+
+.icon-tile--soft {
+  background: var(--color-surface);
+  color: var(--color-primary);
+}
+
+.icon-tile--xl {
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+  background: var(--color-surface);
+}
+
+.icon-tile--white {
+  width: 40px;
+  height: 40px;
+  background: var(--color-bg);
+  color: var(--color-primary);
+}
+
+/* Catatan informasi abu-abu */
+.info-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: var(--space-3) 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: #f9fafb;
+}
+
+.info-note__icon {
+  flex: none;
+  margin-top: 1px;
+  color: var(--color-primary);
+}
+
+.info-note p {
+  margin: 0;
+}
+
+.info-note__title {
+  font-weight: 700;
+}
+
+.info-note__text {
+  color: var(--color-text-muted);
+}
+
+/* Grid kartu 3 kolom */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (max-width: 900px) {
+  .card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .card-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.rating-stars {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.rating-stars__on {
+  color: var(--color-star);
+}
+
+.rating-stars__off {
+  color: #9ca3af;
 }
 
 /* ===== Halaman & komponen dasar ===== */

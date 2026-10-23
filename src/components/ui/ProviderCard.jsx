@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { buildProviderPath } from '@/routes/paths';
+import { buildBookingPath, buildProviderPath } from '@/routes/paths';
 import { formatRating, formatRupiah } from '@/lib/format';
 import StarIcon from './StarIcon';
 import LocationIcon from './LocationIcon';
@@ -67,7 +67,7 @@ export default function ProviderCard({ provider, headingLevel = 3 }) {
           Lihat Profil
         </Link>
         <Link
-          to={`${profilePath}#pesan`}
+          to={buildBookingPath(provider.id)}
           className="btn btn--primary btn--block"
           aria-label={`Pesan sekarang ke ${provider.name}`}
         >
