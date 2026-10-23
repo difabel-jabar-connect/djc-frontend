@@ -1,21 +1,31 @@
-# Dependency
-node_modules/
+# Dependensi & hasil build
+node_modules
+dist
+dist-ssr
+build
+coverage
+*.local
 
-# Environment dan secret
+# Environment — JANGAN commit kredensial
 .env
 .env.*
 !.env.example
 
-# Build dan coverage
-dist/
-build/
-coverage/
-
 # Log
+logs
 *.log
 npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
 
-# Editor dan sistem operasi
+# Editor & OS
+.vscode/*
+!.vscode/extensions.json
+.idea
 .DS_Store
-.idea/
-.vscode/
+Thumbs.db
+*.suo
+*.sw?
+
+# Vercel
+.vercel
