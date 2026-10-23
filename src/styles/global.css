@@ -406,6 +406,145 @@ main:focus {
   flex: none;
 }
 
+/* ===== Form: kotak input berikon (desain Cari Layanan) ===== */
+.input-shell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  min-height: 52px;
+  padding-inline: 14px;
+  border: 1.5px solid var(--color-input-border);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+}
+
+.input-shell--lg {
+  gap: 12px;
+  min-height: 60px;
+  padding-inline: 20px;
+}
+
+.input-shell--sm {
+  min-height: 44px;
+  padding-inline: 14px 12px;
+}
+
+.input-shell:focus-within {
+  border-color: var(--color-primary);
+  outline: 3px solid var(--color-focus-outline);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px var(--color-focus);
+}
+
+.input-shell__icon {
+  flex: none;
+  color: var(--color-accent);
+}
+
+.input-shell__icon--primary {
+  color: var(--color-primary);
+}
+
+.input-shell__control {
+  flex: 1;
+  min-width: 0;
+  align-self: stretch;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+}
+
+.input-shell--lg .input-shell__control {
+  font-size: var(--font-size-md);
+}
+
+.input-shell__control::placeholder {
+  color: var(--color-text-muted);
+  opacity: 1;
+}
+
+.input-shell__control:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.input-shell__select {
+  width: 100%;
+  padding-right: 28px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  appearance: none;
+}
+
+.input-shell__chevron {
+  position: absolute;
+  right: 14px;
+  color: var(--color-text);
+  pointer-events: none;
+}
+
+.input-shell--sm .input-shell__chevron {
+  right: 12px;
+}
+
+/* ===== Navigasi & label kecil ===== */
+.breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  color: var(--color-text-body);
+  list-style: none;
+}
+
+.breadcrumb a {
+  font-weight: 600;
+  text-underline-offset: 3px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  justify-self: start;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  line-height: 18px;
+}
+
+.link-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-primary);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+
+.link-button:disabled {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
 /* ===== Halaman & komponen dasar ===== */
 .page {
   padding-block: var(--space-5);

@@ -1,0 +1,135 @@
+.service-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  height: 100%;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+  box-shadow:
+    0 1px 3px rgb(11 60 110 / 6%),
+    0 4px 12px rgb(11 60 110 / 6%);
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+.service-card:hover {
+  border-color: var(--color-accent-strong);
+  box-shadow:
+    0 4px 10px rgb(11 60 110 / 8%),
+    0 16px 40px rgb(11 60 110 / 12%);
+}
+
+.service-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.service-card__avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: var(--font-size-md);
+  font-weight: 700;
+}
+
+.service-card__category {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.service-card__category img {
+  flex: none;
+}
+
+.service-card__info {
+  display: grid;
+  gap: 6px;
+}
+
+.service-card__name {
+  margin: 0;
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.service-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--color-text-muted);
+  line-height: 21px;
+}
+
+.service-card__meta svg {
+  flex: none;
+}
+
+.service-card__meta strong {
+  color: var(--color-text);
+}
+
+.service-card__star {
+  color: var(--color-star);
+}
+
+.service-card__desc {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: var(--color-text-muted);
+  line-height: 24px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.service-card__price {
+  display: grid;
+  margin: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+.service-card__price-label {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  line-height: 18px;
+}
+
+.service-card__price-value {
+  color: var(--color-primary);
+  font-size: var(--font-size-lg);
+  font-weight: 800;
+  line-height: 28px;
+}
+
+.service-card__price-unit {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+}
+
+.service-card__actions {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: auto;
+}

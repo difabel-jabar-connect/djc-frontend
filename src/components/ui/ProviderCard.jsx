@@ -52,7 +52,9 @@ export default function ProviderCard({ provider, headingLevel = 3 }) {
         <span className="provider-card__price-label">Mulai dari</span>
         <span>
           <strong className="provider-card__price-value">{formatRupiah(provider.priceFrom)}</strong>
-          <span className="provider-card__price-unit">/{provider.priceUnit}</span>
+          {provider.priceUnit && (
+            <span className="provider-card__price-unit">/{provider.priceUnit}</span>
+          )}
         </span>
       </p>
 
