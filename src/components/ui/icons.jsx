@@ -346,3 +346,51 @@ export const QuoteIcon = ({ size = 32, ...props }) => (
     <path d="M7.5 6C4.9 6 3 8 3 10.6c0 2.4 1.7 4.2 4 4.2.3 0 .6 0 .8-.1-.5 1.6-1.9 2.9-3.6 3.3l.5 1.5C8.1 18.8 11 15.9 11 11.6V10.4C11 8 9.6 6 7.5 6zm10 0C14.9 6 13 8 13 10.6c0 2.4 1.7 4.2 4 4.2.3 0 .6 0 .8-.1-.5 1.6-1.9 2.9-3.6 3.3l.5 1.5c3.4-.7 6.3-3.6 6.3-7.9V10.4C21 8 19.6 6 17.5 6z" />
   </svg>
 );
+
+export const MailIcon = (p) => (
+  <Svg {...p}>
+    <rect width="20" height="16" x="2" y="4" rx="2" />
+    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+  </Svg>
+);
+
+export const EyeIcon = (p) => (
+  <Svg {...p}>
+    <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
+    <circle cx="12" cy="12" r="3" />
+  </Svg>
+);
+
+export const EyeOffIcon = (p) => (
+  <Svg {...p}>
+    <path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49" />
+    <path d="M14.084 14.158a3 3 0 0 1-4.242-4.242" />
+    <path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143" />
+    <path d="m2 2 20 20" />
+  </Svg>
+);
+
+export const ArrowLeftIcon = (p) => (
+  <Svg strokeWidth={2.25} {...p}>
+    <path d="m12 19-7-7 7-7" />
+    <path d="M19 12H5" />
+  </Svg>
+);
+
+/** Tanda "G" monokrom untuk tombol masuk dengan Google (sesuai desain). */
+export const GoogleMarkIcon = ({ size = 22, ...props }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+    focusable="false"
+    {...props}
+  >
+    <circle cx="12" cy="12" r="10.5" fill="none" stroke="currentColor" strokeWidth="1.75" />
+    <path
+      d="M16.6 10.9 H12.2 V13.3 H14.6 C14.2 14.6 13.2 15.4 11.9 15.4 C10 15.4 8.6 13.9 8.6 12 C8.6 10.1 10 8.6 11.9 8.6 C12.8 8.6 13.6 8.9 14.1 9.4 L15.8 7.8 C14.8 6.9 13.4 6.3 11.9 6.3 C8.7 6.3 6.2 8.8 6.2 12 C6.2 15.2 8.7 17.7 11.9 17.7 C15 17.7 17.1 15.5 17.1 12.2 C17.1 11.7 16.9 11.2 16.6 10.9 Z"
+      fill="currentColor"
+    />
+  </svg>
+);

@@ -10,6 +10,7 @@ export const PATHS = {
   providerDetail: '/provider/:id',
   booking: '/pesan/:id',
   login: '/login',
+  forgotPassword: '/lupa-kata-sandi',
   register: '/register',
   customerBookings: '/bookings',
   providerDashboard: '/dashboard/provider',
