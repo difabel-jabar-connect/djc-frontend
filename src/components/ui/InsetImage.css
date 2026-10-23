@@ -1,0 +1,31 @@
+.inset-image,
+.inset-image__bleed {
+  position: absolute;
+  display: block;
+}
+
+.inset-image img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+}
+
+.icon-box {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  overflow: hidden;
+}
+
+.icon-box--16 {
+  width: 16px;
+  height: 16px;
+}
+
+.icon-box--20 {
+  width: 20px;
+  height: 20px;
+}

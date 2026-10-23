@@ -1,8 +1,9 @@
 import RootLayout from '@/layouts/RootLayout';
-import HomePage from '@/pages/HomePage';
+import HomePage from '@/pages/home/HomePage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import ServicesPage from '@/pages/services/ServicesPage';
 import MapPage from '@/pages/map/MapPage';
+import AboutPage from '@/pages/about/AboutPage';
 import ProviderDetailPage from '@/pages/providers/ProviderDetailPage';
 import LoginPage from '@/pages/auth/LoginPage';
 import RegisterPage from '@/pages/auth/RegisterPage';
@@ -24,6 +25,7 @@ export const routes = [
       { index: true, element: <HomePage /> },
       { path: PATHS.services, element: <ServicesPage /> },
       { path: PATHS.map, element: <MapPage /> },
+      { path: PATHS.about, element: <AboutPage /> },
       { path: PATHS.providerDetail, element: <ProviderDetailPage /> },
       { path: PATHS.login, element: <LoginPage /> },
       { path: PATHS.register, element: <RegisterPage /> },
