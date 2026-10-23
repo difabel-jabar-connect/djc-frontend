@@ -1,0 +1,123 @@
+.provider-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+  box-shadow: var(--shadow-sm);
+}
+
+.provider-card__head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.provider-card__avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+}
+
+.provider-card__name {
+  margin: 0;
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.provider-card__rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 2px 0 0;
+  font-size: var(--font-size-sm);
+  line-height: 18px;
+}
+
+.provider-card__reviews {
+  color: var(--color-text-muted);
+}
+
+.provider-card__meta {
+  display: grid;
+  gap: 4px;
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.provider-card__category,
+.provider-card__city {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  line-height: 21px;
+}
+
+.provider-card__category {
+  font-weight: 600;
+}
+
+.provider-card__city {
+  min-height: 29px;
+  color: var(--color-text-muted);
+}
+
+.provider-card__category-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: var(--color-accent-soft);
+}
+
+.provider-card__city-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+}
+
+.provider-card__price {
+  display: grid;
+  gap: 2px;
+  margin: var(--space-3) 0 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+
+.provider-card__price-label {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  line-height: 18px;
+}
+
+.provider-card__price-value {
+  color: var(--color-primary);
+  font-size: var(--font-size-lg);
+  font-weight: 800;
+  line-height: 28px;
+}
+
+.provider-card__price-unit {
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.provider-card__actions {
+  display: grid;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 18px;
+}

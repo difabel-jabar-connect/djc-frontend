@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 import { renderAt } from '@/test/renderWithRouter';
@@ -17,15 +17,18 @@ const mockHealthOk = () =>
 describe('Routing dasar', () => {
   beforeEach(mockHealthOk);
 
-  it('menampilkan beranda beserta status API', async () => {
+  it('menampilkan beranda beserta status API (mode development)', async () => {
     renderAt('/');
-    expect(screen.getByRole('heading', { level: 1, name: /difabel jabar connect/i })).toBeVisible();
+    expect(
+      screen.getByRole('heading', { level: 1, name: /temukan layanan terpercaya/i }),
+    ).toBeVisible();
     expect(await screen.findByText(/terhubung ke backend/i)).toBeInTheDocument();
   });
 
   it.each([
     ['/services', /cari layanan/i],
     ['/map', /peta penyedia jasa/i],
+    ['/tentang', /tentang kami/i],
     ['/provider/abc-123', /profil penyedia jasa/i],
     ['/login', /masuk/i],
     ['/register', /daftar akun customer/i],
@@ -45,8 +48,13 @@ describe('Routing dasar', () => {
   it('navigasi utama berpindah halaman', async () => {
     const user = userEvent.setup();
     renderAt('/');
-    await user.click(screen.getByRole('link', { name: 'Peta Penyedia' }));
-    expect(screen.getByRole('heading', { level: 1, name: /peta penyedia jasa/i })).toBeVisible();
+    const nav = screen.getByRole('navigation', { name: /navigasi utama/i });
+    await user.click(within(nav).getByRole('link', { name: 'Tentang' }));
+    expect(screen.getByRole('heading', { level: 1, name: /tentang kami/i })).toBeVisible();
+    expect(within(nav).getByRole('link', { name: 'Tentang' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
   });
 });
 
@@ -66,7 +74,8 @@ describe('Aksesibilitas layout', () => {
   it('memindahkan fokus ke konten utama setelah pindah rute', async () => {
     const user = userEvent.setup();
     renderAt('/');
-    await user.click(screen.getByRole('link', { name: 'Cari Layanan' }));
+    const nav = screen.getByRole('navigation', { name: /navigasi utama/i });
+    await user.click(within(nav).getByRole('link', { name: 'Cari Layanan' }));
     expect(screen.getByRole('main')).toHaveFocus();
   });
 });
