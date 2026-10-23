@@ -1,15 +1,18 @@
-import { Link, NavLink } from 'react-router';
+import { Link, NavLink, useLocation } from 'react-router';
 import logo from '@/assets/icons/logo.svg';
 import loginIcon from '@/assets/icons/login.svg';
 import { PATHS } from '@/routes/paths';
 
 const NAV_ITEMS = [
   { to: PATHS.home, label: 'Beranda', end: true },
-  { to: PATHS.services, label: 'Cari Layanan' },
+  // Profil penyedia & pemesanan adalah bagian dari alur Cari Layanan.
+  { to: PATHS.services, label: 'Cari Layanan', sections: ['/provider/', '/pesan/'] },
   { to: PATHS.about, label: 'Tentang' },
 ];
 
 export default function Header() {
+  const { pathname } = useLocation();
+
   return (
     <header className="app-header">
       <div className="container app-header__inner">
@@ -24,9 +27,15 @@ export default function Header() {
           <ul className="nav-list">
             {NAV_ITEMS.map((item) => (
               <li key={item.to}>
-                <NavLink to={item.to} end={item.end} className="nav-link">
-                  {item.label}
-                </NavLink>
+                {item.sections?.some((prefix) => pathname.startsWith(prefix)) ? (
+                  <Link to={item.to} className="nav-link active" aria-current="true">
+                    {item.label}
+                  </Link>
+                ) : (
+                  <NavLink to={item.to} end={item.end} className="nav-link">
+                    {item.label}
+                  </NavLink>
+                )}
               </li>
             ))}
           </ul>

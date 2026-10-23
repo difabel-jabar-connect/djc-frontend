@@ -5,6 +5,7 @@ import ServicesPage from '@/pages/services/ServicesPage';
 import MapPage from '@/pages/map/MapPage';
 import AboutPage from '@/pages/about/AboutPage';
 import ProviderDetailPage from '@/pages/providers/ProviderDetailPage';
+import BookingPage from '@/pages/booking/BookingPage';
 import LoginPage from '@/pages/auth/LoginPage';
 import RegisterPage from '@/pages/auth/RegisterPage';
 import CustomerBookingsPage from '@/pages/customer/CustomerBookingsPage';
@@ -27,6 +28,7 @@ export const routes = [
       { path: PATHS.map, element: <MapPage /> },
       { path: PATHS.about, element: <AboutPage /> },
       { path: PATHS.providerDetail, element: <ProviderDetailPage /> },
+      { path: PATHS.booking, element: <BookingPage /> },
       { path: PATHS.login, element: <LoginPage /> },
       { path: PATHS.register, element: <RegisterPage /> },
       { path: PATHS.customerBookings, element: <CustomerBookingsPage /> },
