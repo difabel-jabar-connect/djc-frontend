@@ -6,7 +6,7 @@ Repositori ini berisi **fondasi awal** frontend (React 18 + Vite). Fitur produk 
 
 | Item          | Nilai                                       |
 | ------------- | ------------------------------------------- |
-| Stack         | React 18, Vite 6, React Router 6            |
+| Stack         | React 18, Vite 6, React Router 7            |
 | Kualitas kode | ESLint 9 (+ `jsx-a11y` strict), Prettier 3  |
 | Testing       | Vitest 3, Testing Library, jsdom            |
 | Deploy target | Vercel Hobby                                |
@@ -133,6 +133,11 @@ Proteksi rute berdasarkan peran (customer/provider/admin) ditambahkan di **SP1-0
 - Tidak menyimpan secret DB atau JWT di frontend. Sesi memakai **HttpOnly cookie** → `apiRequest` selalu memakai `credentials: 'include'`. **Jangan** simpan token di `localStorage`.
 - Frontend tidak membuat keputusan otorisasi final; semua dicek ulang oleh backend.
 - Frontend hanya menerima `public_lat`/`public_lng` (koordinat kasar ~1 km), tidak pernah koordinat presisi provider.
+
+**Kontrak API:**
+
+- Respons sukses berbentuk `{ "data": ... }`. `apiRequest` mengembalikan payload utuh, jadi baca hasilnya dari `res.data`.
+- Respons gagal berbentuk `{ "error": { "code", "message", "details" } }` dan dilempar sebagai `ApiError` (`status`, `code`, `message`, `details`).
 
 **Aksesibilitas (WCAG 2.1 AA):**
 

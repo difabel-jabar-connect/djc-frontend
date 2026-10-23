@@ -18,6 +18,9 @@ export class ApiError extends Error {
  * Wrapper fetch minimal.
  * - `credentials: 'include'` → sesi memakai HttpOnly cookie dari backend.
  *   Token JWT TIDAK disimpan di localStorage (batasan arsitektur klien).
+ * - Kontrak backend: sukses `{ "data": ... }`, gagal
+ *   `{ "error": { "code", "message", "details" } }`. Fungsi ini mengembalikan
+ *   payload utuh; pemanggil membaca `res.data`.
  */
 export async function apiRequest(path, { method = 'GET', body, headers, signal } = {}) {
   const url = `${getApiBaseUrl()}${path.startsWith('/') ? path : `/${path}`}`;
@@ -46,10 +49,11 @@ export async function apiRequest(path, { method = 'GET', body, headers, signal }
   const payload = isJson ? await response.json().catch(() => null) : null;
 
   if (!response.ok) {
-    throw new ApiError(payload?.message || `Permintaan gagal (HTTP ${response.status}).`, {
+    const error = payload?.error;
+    throw new ApiError(error?.message || `Permintaan gagal (HTTP ${response.status}).`, {
       status: response.status,
-      code: payload?.code || `HTTP_${response.status}`,
-      details: payload,
+      code: error?.code || `HTTP_${response.status}`,
+      details: error?.details ?? null,
     });
   }
 

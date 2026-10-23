@@ -7,7 +7,7 @@ const mockHealthOk = () =>
   vi.stubGlobal(
     'fetch',
     vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ status: 'ok' }), {
+      new Response(JSON.stringify({ data: { status: 'ok' } }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
       }),

@@ -11,8 +11,8 @@ export default function ApiStatus() {
   const check = useCallback(async (signal) => {
     setState({ status: 'loading', message: '' });
     try {
-      const data = await getHealth({ signal });
-      setState({ status: 'ok', message: data?.status ?? 'ok' });
+      const res = await getHealth({ signal });
+      setState({ status: 'ok', message: res?.data?.status ?? 'ok' });
     } catch (error) {
       if (error?.name === 'AbortError') return;
       setState({ status: 'error', message: error.message });

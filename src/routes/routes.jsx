@@ -11,16 +11,6 @@ import ProviderDashboardPage from '@/pages/provider/ProviderDashboardPage';
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
 import { PATHS } from './paths';
 
-// Opt-in perilaku React Router v7 sejak awal agar upgrade nanti mulus.
-export const routerFutureFlags = {
-  v7_relativeSplatPath: true,
-  v7_fetcherPersist: true,
-  v7_normalizeFormMethod: true,
-  v7_partialHydration: true,
-  v7_skipActionErrorRevalidation: true,
-};
-export const providerFutureFlags = { v7_startTransition: true };
-
 /**
  * Definisi rute (dipisah dari router agar mudah diuji dengan MemoryRouter).
  * Proteksi rute berbasis peran (customer/provider/admin) akan ditambahkan

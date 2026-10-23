@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import ApiStatus from '@/components/common/ApiStatus';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { appName } from '@/config/env';

@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import PlaceholderPage from '@/components/common/PlaceholderPage';
 
 export default function ProviderDetailPage() {

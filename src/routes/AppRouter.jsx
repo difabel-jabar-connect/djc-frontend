@@ -1,8 +1,9 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { routes, routerFutureFlags, providerFutureFlags } from './routes';
+import { createBrowserRouter } from 'react-router';
+import { RouterProvider } from 'react-router/dom';
+import { routes } from './routes';
 
-const router = createBrowserRouter(routes, { future: routerFutureFlags });
+const router = createBrowserRouter(routes);
 
 export default function AppRouter() {
-  return <RouterProvider router={router} future={providerFutureFlags} />;
+  return <RouterProvider router={router} />;
 }
