@@ -12,11 +12,18 @@
 }
 
 /* ----- Panel kiri ----- */
+/* Panel kiri setinggi layar & menempel saat digulir, agar ilustrasi dan teksnya
+   tidak bergeser/berubah skala ketika tinggi form berubah (mis. Pengguna ↔ Mitra). */
 .auth-intro {
-  position: relative;
+  position: sticky;
+  top: 0;
+  align-self: start;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 640px;
   overflow: hidden;
   padding: 80px;
   background: linear-gradient(140deg, #0b3c6e 0%, #0b4a72 45%, #0c7272 100%);
@@ -85,6 +92,7 @@
 }
 
 .auth-intro__text p:not(.auth-intro__title) {
+  max-width: 26rem; /* tidak tertimpa pin dekoratif di tengah ilustrasi */
   margin: 0;
   color: rgb(255 255 255 / 85%);
   font-size: var(--font-size-md);
@@ -421,6 +429,9 @@
   }
 
   .auth-intro {
+    position: relative;
+    height: auto;
+    min-height: 0;
     padding: var(--space-4) var(--gutter) var(--space-5);
   }
 
