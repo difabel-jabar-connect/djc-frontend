@@ -62,6 +62,7 @@
   --radius-pill: 999px;
   --container-max: 75rem; /* 1200px */
   --gutter: clamp(1rem, 0.5rem + 2vw, 1.5rem);
+  --header-height: 89px; /* tinggi header situs yang sticky */
 
   /* Bayangan */
   --shadow-sm: 0 1px 1.5px rgb(11 60 110 / 6%), 0 4px 6px rgb(11 60 110 / 6%);

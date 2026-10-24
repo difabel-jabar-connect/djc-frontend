@@ -151,8 +151,16 @@ main:focus {
 
 /* ----- Header (Figma: 1. NAVBAR) ----- */
 .app-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
   border-bottom: 1px solid var(--color-border);
   background: var(--color-bg);
+}
+
+/* Lompatan ke #anchor tidak tertutup header sticky. */
+html:has(.app-header) {
+  scroll-padding-top: calc(var(--header-height) + var(--space-3));
 }
 
 .app-header__inner {
@@ -210,6 +218,10 @@ main:focus {
 }
 
 @media (max-width: 900px) {
+  :root {
+    --header-height: 129px; /* nav turun ke baris kedua */
+  }
+
   .app-header__inner {
     padding-block: var(--space-3);
   }
