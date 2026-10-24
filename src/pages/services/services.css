@@ -327,65 +327,6 @@
   line-height: 28px;
 }
 
-.mini-map {
-  position: relative;
-  padding: var(--space-2);
-  border-radius: var(--radius);
-  background: var(--color-surface);
-}
-
-.mini-map__viewport {
-  overflow: hidden;
-  border-radius: var(--radius-sm);
-}
-
-.mini-map__svg {
-  display: block;
-  width: 100%;
-  height: auto;
-  transition: transform 0.2s ease;
-}
-
-.mini-map__markers {
-  fill: #ffffff;
-  font-family: var(--font-family);
-  font-size: 26px;
-  font-weight: 800;
-}
-
-.mini-map__zoom {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius);
-  background: var(--color-bg);
-  box-shadow: 0 1px 3px rgb(11 60 110 / 10%);
-}
-
-.mini-map__zoom button {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border: 0;
-  background: var(--color-bg);
-  color: var(--color-primary);
-  cursor: pointer;
-}
-
-.mini-map__zoom button + button {
-  border-top: 1px solid var(--color-border);
-}
-
-.mini-map__zoom button:disabled {
-  color: #9ca3af;
-  cursor: not-allowed;
-}
-
 .city-counts {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

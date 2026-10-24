@@ -36,8 +36,8 @@ describe('Routing dasar', () => {
     ['/lupa-kata-sandi', /lupa kata sandi/i],
     ['/register', /daftar akun customer/i],
     ['/bookings', /pesanan saya/i],
-    ['/dashboard/provider', /dasbor penyedia jasa/i],
-    ['/admin', /dasbor administrator/i],
+    ['/dashboard/provider', /selamat datang/i],
+    ['/admin', /dashboard monitoring program/i],
   ])('rute %s merender halaman placeholder', (path, heading) => {
     renderAt(path);
     expect(screen.getByRole('heading', { level: 1, name: heading })).toBeInTheDocument();

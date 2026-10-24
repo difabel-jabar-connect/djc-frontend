@@ -1,0 +1,255 @@
+/* ===== Dashboard Pengelola ===== */
+
+.dash-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.dash-header__eyebrow,
+.dash-header__lead {
+  margin: 0;
+  color: var(--color-text-body);
+}
+
+.dash-header__eyebrow {
+  font-weight: 600;
+}
+
+.dash-header__title {
+  margin: 4px 0;
+  color: var(--color-primary);
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  line-height: 40px;
+  letter-spacing: -0.3px;
+}
+
+.dash-header__lead {
+  line-height: 26px;
+}
+
+.dash-header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.dash-period {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  margin: 0;
+  padding: 0 14px;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.dash-period__icon {
+  color: #0c7272;
+}
+
+.dash-header__button {
+  min-height: 48px;
+  padding-inline: 18px;
+  background: var(--color-bg);
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(0, 1.1fr);
+  gap: 20px;
+}
+
+.admin-quote {
+  display: grid;
+  align-content: center;
+  gap: 10px;
+  margin: 0;
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  background: var(--color-accent-soft);
+}
+
+.admin-quote__icon {
+  color: #0c7272;
+}
+
+.admin-quote blockquote {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-style: italic;
+  font-weight: 500;
+  line-height: 23px;
+}
+
+.admin-charts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.dash-map {
+  padding: 6px;
+}
+
+.dash-map .mini-map__zoom {
+  top: 10px;
+  right: 10px;
+}
+
+.admin-tables {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.15fr) minmax(0, 0.85fr);
+  align-items: start;
+  gap: 20px;
+}
+
+.admin-side {
+  display: grid;
+  gap: 20px;
+}
+
+.verif-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.verif-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-block: 10px;
+  border-bottom: 1px solid #eef0f3;
+}
+
+.verif-list li:last-child {
+  border-bottom: 0;
+}
+
+.verif-list__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+.verif-list__icon--warning {
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.verif-list__icon--orange {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.verif-list__icon--success {
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.verif-list__icon--danger {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.verif-list__label {
+  flex: 1;
+  font-size: 0.9375rem;
+  line-height: 20px;
+}
+
+.verif-list__value {
+  font-size: var(--font-size-md);
+  font-weight: 800;
+}
+
+.verif-list__value--warning {
+  color: #b45309;
+}
+
+.verif-list__value--orange {
+  color: #c2410c;
+}
+
+.verif-list__value--success {
+  color: #15803d;
+}
+
+.verif-list__value--danger {
+  color: #b91c1c;
+}
+
+.target {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.target__text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  color: var(--color-text-body);
+  font-size: var(--font-size-sm);
+}
+
+.target__text strong {
+  color: var(--color-text);
+  font-size: 0.9375rem;
+}
+
+.target__note {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: #f7fbfe;
+  font-size: var(--font-size-sm);
+  font-style: italic;
+  font-weight: 500;
+  line-height: 21px;
+}
+
+@media (max-width: 1280px) {
+  .admin-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-quote {
+    grid-column: 1 / -1;
+  }
+
+  .admin-charts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-tables {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .admin-side {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .admin-stats,
+  .admin-charts,
+  .admin-tables,
+  .admin-side {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
