@@ -34,7 +34,7 @@ describe('Routing dasar', () => {
     ['/pesan/rizki-maulana', /pemesanan layanan/i],
     ['/login', /selamat datang kembali/i],
     ['/lupa-kata-sandi', /lupa kata sandi/i],
-    ['/register', /daftar akun customer/i],
+    ['/register', /mulai terhubung bersama kami/i],
     ['/bookings', /pesanan saya/i],
     ['/dashboard/provider', /selamat datang/i],
     ['/admin', /dashboard monitoring program/i],

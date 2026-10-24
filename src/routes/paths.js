@@ -12,6 +12,7 @@ export const PATHS = {
   login: '/login',
   forgotPassword: '/lupa-kata-sandi',
   register: '/register',
+  registerSuccess: '/register/berhasil',
   customerBookings: '/bookings',
   providerDashboard: '/dashboard/provider',
   adminDashboard: '/admin',

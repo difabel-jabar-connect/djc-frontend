@@ -115,7 +115,7 @@ export default function HeroSection() {
               Cari Layanan
               <img src={arrowRightWhite} alt="" width="20" height="20" />
             </Link>
-            <Link to={PATHS.register} className="btn btn--outline btn--lg">
+            <Link to={`${PATHS.register}?peran=mitra`} className="btn btn--outline btn--lg">
               <img src={daftarMitraIcon} alt="" width="20" height="20" />
               Daftar Mitra
             </Link>

@@ -76,7 +76,7 @@
   gap: 14px;
 }
 
-.auth-intro__text h1 {
+.auth-intro__text .auth-intro__title {
   margin: 0;
   font-size: clamp(1.75rem, 1.2rem + 1.5vw, 2.25rem);
   font-weight: 700;
@@ -84,7 +84,7 @@
   letter-spacing: -0.4px;
 }
 
-.auth-intro__text p {
+.auth-intro__text p:not(.auth-intro__title) {
   margin: 0;
   color: rgb(255 255 255 / 85%);
   font-size: var(--font-size-md);
@@ -448,5 +448,325 @@
   .auth-intro__text p {
     font-size: var(--font-size-base);
     line-height: 26px;
+  }
+}
+
+/* ===== Daftar & Pendaftaran Berhasil ===== */
+.auth-card--wide {
+  max-width: 480px;
+  gap: var(--space-3);
+  padding: 36px 40px;
+}
+
+.auth-field {
+  gap: 6px;
+}
+
+.auth-field .auth-input {
+  height: 48px;
+}
+
+/* Pilihan peran (segmented control dari radio) */
+.role-switch {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.role-switch legend {
+  float: left;
+  width: 100%;
+  margin-bottom: var(--space-2);
+  padding: 0;
+}
+
+.role-switch__options {
+  display: grid;
+  clear: both;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border-radius: 14px;
+  background: #eef2f6;
+}
+
+.role-switch__option {
+  position: relative;
+  cursor: pointer;
+}
+
+.role-switch__option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.role-switch__option span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  color: #374151;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.role-switch__option input:checked + span {
+  background: var(--color-primary);
+  box-shadow: 0 1px 3px rgb(11 60 110 / 25%);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.role-switch__option input:focus-visible + span {
+  outline: 3px solid var(--color-focus-outline);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px var(--color-focus);
+}
+
+.role-switch__help {
+  display: flex;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--color-text-body);
+  font-size: var(--font-size-sm);
+  line-height: 20px;
+}
+
+.role-switch__help svg {
+  flex: none;
+  margin-top: 2px;
+  color: #0c7272;
+}
+
+/* Prefix +62 & select */
+.auth-input--prefixed {
+  overflow: hidden;
+  padding-left: 0;
+}
+
+.auth-input__prefix {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  padding: 0 12px 0 14px;
+  border-right: 1px solid #d1d5db;
+  background: #f3f4f6;
+  font-weight: 600;
+}
+
+.auth-input {
+  position: relative;
+}
+
+.auth-select {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 28px 0 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  appearance: none;
+}
+
+.auth-select:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.auth-select--placeholder {
+  color: var(--color-text-muted);
+}
+
+.auth-select option {
+  color: var(--color-text);
+}
+
+.auth-select__chevron {
+  position: absolute;
+  right: 14px;
+  color: var(--color-text);
+  pointer-events: none;
+}
+
+/* Kekuatan kata sandi */
+.strength {
+  display: grid;
+  gap: 6px;
+}
+
+.strength__bars {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.strength__bars span {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-border);
+}
+
+.strength__bars--weak .is-on {
+  background: #dc2626;
+}
+
+.strength__bars--medium .is-on {
+  background: #d97706;
+}
+
+.strength__bars--strong .is-on {
+  background: #16a34a;
+}
+
+.strength__text {
+  color: var(--color-text-body);
+  font-size: var(--font-size-sm);
+}
+
+/* Persetujuan & catatan */
+.auth-agree {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: 44px;
+  padding-top: 2px;
+  font-size: 0.9375rem;
+  line-height: 22px;
+}
+
+.auth-agree input {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 1px 0 0;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.auth-agree label {
+  cursor: pointer;
+}
+
+.auth-agree a {
+  color: #0c7272;
+  font-weight: 700;
+  text-underline-offset: 3px;
+}
+
+.auth-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px var(--space-3);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+.auth-notice .icon-tile {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+}
+
+.auth-notice p {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  line-height: 21px;
+}
+
+/* Pendaftaran berhasil */
+.auth-success {
+  justify-items: center;
+  gap: 22px;
+  padding: 40px;
+  text-align: center;
+}
+
+.auth-success__text {
+  display: grid;
+  gap: 10px;
+}
+
+.auth-success__text h1 {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 36px;
+}
+
+.auth-success__text p {
+  margin: 0;
+  color: var(--color-text-body);
+  line-height: 26px;
+}
+
+.auth-success__text strong {
+  color: var(--color-text);
+}
+
+.auth-pending {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  padding: 14px var(--space-3);
+  border: 1px solid #fde68a;
+  border-radius: var(--radius);
+  background: #fffbeb;
+  font-size: 0.9375rem;
+  line-height: 22px;
+  text-align: left;
+}
+
+.auth-pending__icon {
+  flex: none;
+  margin-top: 2px;
+  color: #b45309;
+}
+
+.auth-pending strong {
+  display: block;
+  color: #b45309;
+  font-size: var(--font-size-sm);
+}
+
+.auth-success .auth-submit {
+  justify-self: stretch;
+  gap: var(--space-2);
+}
+
+.auth-success__resend {
+  margin: 0;
+  color: var(--color-text-body);
+  font-size: 0.9375rem;
+}
+
+.auth-text-button {
+  min-height: 44px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: #0c7272;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+@media (max-width: 480px) {
+  .auth-card--wide,
+  .auth-success {
+    padding: var(--space-4) 20px;
   }
 }
