@@ -121,3 +121,53 @@
   margin-top: auto;
   padding-top: 18px;
 }
+
+/* Varian Beranda setelah masuk: favorit & jarak */
+.provider-card--favoritable {
+  position: relative;
+}
+
+.provider-card--favoritable .provider-card__head > div {
+  padding-right: 36px;
+}
+
+.provider-card__favorite {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--color-bg);
+  color: var(--color-text-body);
+  cursor: pointer;
+}
+
+.provider-card__favorite:hover {
+  background: var(--color-accent-soft);
+}
+
+.provider-card__favorite[aria-pressed='true'] {
+  color: #be123c;
+}
+
+.provider-card__favorite[aria-pressed='true'] svg {
+  fill: currentColor;
+}
+
+.provider-card__distance {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 6px;
+  margin: var(--space-3) 0 0;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-soft);
+  color: #0c7272;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+}

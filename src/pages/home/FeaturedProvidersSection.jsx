@@ -5,8 +5,8 @@ import { FEATURED_PROVIDERS } from '@/features/providers/featuredProviders';
 import { PATHS } from '@/routes/paths';
 import SectionHeader from './SectionHeader';
 
-/** Section 3. PENYEDIA UNGGULAN */
-export default function FeaturedProvidersSection() {
+/** Section 3. PENYEDIA UNGGULAN. Setelah masuk, kartu punya tombol favorit. */
+export default function FeaturedProvidersSection({ favorites, onToggleFavorite }) {
   return (
     <section className="home-section home-section--tinted" aria-labelledby="featured-title">
       <div className="container">
@@ -25,7 +25,11 @@ export default function FeaturedProvidersSection() {
         <ul className="featured__list">
           {FEATURED_PROVIDERS.map((provider) => (
             <li key={provider.id}>
-              <ProviderCard provider={provider} />
+              <ProviderCard
+                provider={provider}
+                favorite={favorites?.includes(provider.id)}
+                onToggleFavorite={onToggleFavorite}
+              />
             </li>
           ))}
         </ul>

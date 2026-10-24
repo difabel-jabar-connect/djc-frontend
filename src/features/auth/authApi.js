@@ -28,3 +28,16 @@ export async function register(payload) {
 export async function resendVerification(email) {
   await api.post('/auth/verification/resend', { email });
 }
+
+/**
+ * POST /auth/password/forgot — kirim tautan reset (berlaku 30 menit) ke email.
+ * 404 bila email tidak terdaftar. Path mengikuti rancangan Auth API; sesuaikan bila berubah.
+ */
+export async function requestPasswordReset(email) {
+  await api.post('/auth/password/forgot', { email });
+}
+
+/** POST /auth/password/reset — simpan kata sandi baru. 410 bila tautan kedaluwarsa. */
+export async function resetPassword({ token, password }) {
+  await api.post('/auth/password/reset', { token, password });
+}

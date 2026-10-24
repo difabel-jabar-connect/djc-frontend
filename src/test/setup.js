@@ -7,10 +7,26 @@ afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
   vi.unstubAllEnvs();
+  sessionStorage.clear();
+  localStorage.clear();
 });
 
 // jsdom tidak mengimplementasikan scrollTo.
 window.scrollTo = () => {};
+
+// jsdom belum mendukung <dialog>.showModal()/close(); cukup atur atribut `open`
+// dan kirim event `close` seperti browser.
+if (!HTMLDialogElement.prototype.showModal) {
+  HTMLDialogElement.prototype.showModal = function showModal() {
+    this.open = true;
+  };
+  HTMLDialogElement.prototype.close = function close(returnValue) {
+    if (!this.open) return;
+    if (returnValue !== undefined) this.returnValue = returnValue;
+    this.open = false;
+    this.dispatchEvent(new Event('close'));
+  };
+}
 
 // Di Node 24, `Request` bawaan Node (undici) menolak AbortSignal milik jsdom,
 // padahal React Router membuat Request setiap navigasi. Signal tidak dibutuhkan

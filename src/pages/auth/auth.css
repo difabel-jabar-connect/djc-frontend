@@ -165,6 +165,52 @@
     0 16px 40px rgb(11 60 110 / 8%);
 }
 
+.auth-demo {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  max-width: 440px;
+  padding: 20px 24px;
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background: #f7fafc;
+}
+
+.auth-demo h2 {
+  margin: 0;
+  font-size: var(--font-size-base);
+}
+
+.auth-demo p {
+  margin: 0;
+  color: var(--color-text-body);
+  font-size: 0.9375rem;
+}
+
+.auth-demo ul {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.auth-demo .btn {
+  flex-direction: column;
+  gap: 0;
+  height: auto;
+  min-height: 56px;
+  padding: 6px 8px;
+  line-height: 1.3;
+}
+
+.auth-demo__name {
+  color: var(--color-text-body);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
 .auth-card__head {
   display: grid;
   gap: 6px;
@@ -780,4 +826,264 @@
   .auth-success {
     padding: var(--space-4) 20px;
   }
+}
+
+/* ===== Lupa Kata Sandi (4 layar) ===== */
+.auth-card__head--center {
+  justify-items: center;
+  gap: 14px;
+}
+
+.auth-card__head h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 32px;
+}
+
+.auth-card__head--center p {
+  margin-top: -8px;
+  line-height: 23px;
+}
+
+.auth-card__icon {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-primary);
+}
+
+.auth-card--reset {
+  gap: 18px;
+  padding: 36px 40px;
+}
+
+.auth-card__foot--inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  margin: 0;
+}
+
+.field-error__row {
+  display: flex;
+  gap: 6px;
+  font-size: var(--font-size-sm);
+  line-height: 20px;
+}
+
+.field-error__row svg {
+  flex: none;
+}
+
+.field-error__row .auth-link {
+  min-height: 0;
+  color: var(--color-primary);
+  font-size: inherit;
+  text-decoration: underline;
+}
+
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spin {
+    animation: none;
+  }
+}
+
+/* Kekuatan & syarat kata sandi */
+.pw-check {
+  display: grid;
+  gap: 8px;
+}
+
+.strength__text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.strength__text--strong strong,
+.strength__text--strong svg {
+  color: #15803d;
+}
+
+.strength__text--medium strong,
+.strength__text--medium svg {
+  color: #b45309;
+}
+
+.strength__text--weak strong,
+.strength__text--weak svg {
+  color: #b91c1c;
+}
+
+.pw-check__list {
+  display: grid;
+  gap: 6px;
+  margin: 2px 0 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: #f7fafc;
+  font-size: var(--font-size-sm);
+  line-height: 20px;
+  list-style: none;
+}
+
+.pw-check__list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-body);
+}
+
+.pw-check__list li.is-met {
+  color: var(--color-text);
+}
+
+.pw-check__list svg {
+  flex: none;
+  color: var(--color-text-muted);
+}
+
+.pw-check__state {
+  margin-left: auto;
+  font-weight: 600;
+}
+
+.is-met .pw-check__state {
+  color: #15803d;
+}
+
+.pw-match {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: #15803d;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.auth-submit-hint {
+  margin: -8px 0 0;
+  color: var(--color-text-body);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+
+.auth-expired {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #fecaca;
+  border-left: 4px solid #dc2626;
+  border-radius: var(--radius);
+  background: #fef2f2;
+}
+
+.auth-expired__text {
+  display: flex;
+  gap: 10px;
+}
+
+.auth-expired__text svg {
+  flex: none;
+  margin-top: 1px;
+  color: #b91c1c;
+}
+
+.auth-expired__text span {
+  display: grid;
+  gap: 2px;
+  color: #7f1d1d;
+  font-size: var(--font-size-sm);
+  line-height: 20px;
+}
+
+.auth-expired__text strong {
+  color: #b91c1c;
+  font-size: 0.9375rem;
+}
+
+.auth-success__text--compact {
+  gap: 8px;
+}
+
+.auth-success__text--compact h1 {
+  color: var(--color-text);
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 32px;
+}
+
+.auth-success__text--compact p {
+  font-size: 0.9375rem;
+  line-height: 24px;
+}
+
+.auth-resend {
+  display: grid;
+  justify-items: center;
+}
+
+.auth-resend .auth-success__resend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 2px 4px;
+}
+
+.auth-text-button:disabled {
+  color: var(--color-text-muted);
+  text-decoration: none;
+  cursor: not-allowed;
+}
+
+.auth-countdown {
+  color: var(--color-text-muted);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.auth-resend__hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  line-height: 20px;
+}
+
+.auth-demo-note {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius);
+  background: #f7fafc;
+  color: var(--color-text-body);
+  font-size: var(--font-size-sm);
+}
+
+.auth-success__text--brand h1 {
+  color: var(--color-primary);
+}
+
+/* Sembunyikan tombol "lihat sandi" bawaan Edge — sudah ada tombol mata sendiri. */
+.auth-input input::-ms-reveal,
+.auth-input input::-ms-clear {
+  display: none;
 }

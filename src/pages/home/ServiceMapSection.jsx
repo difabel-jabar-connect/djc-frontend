@@ -83,13 +83,73 @@ const STATS = [
 
 const mapAlt = `Peta Jawa Barat dengan titik layanan di ${MAP_POINTS.map((p) => p.city).join(', ')}`;
 
-/** Section 4. PETA SEBARAN */
-export default function ServiceMapSection() {
+const PIN_PATH = 'M12 22 C11 19 5 15 5 10 A7 7 0 1 1 19 10 C19 15 13 19 12 22 Z';
+
+function LegendPin({ color }) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d={PIN_PATH} fill={color} />
+      <circle cx="12" cy="10" r="2.6" fill="#fff" />
+    </svg>
+  );
+}
+
+/** Lokasi pengguna + radius ±5 km di atas ilustrasi peta (koordinat kotak 642×490). */
+function UserLocationOverlay() {
+  return (
+    <svg
+      className="service-map__overlay"
+      viewBox="0 0 642 490"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <circle
+        cx="321"
+        cy="262"
+        r="74"
+        fill="#14a3a3"
+        fillOpacity="0.08"
+        stroke="#0c7272"
+        strokeWidth="2.5"
+        strokeDasharray="7 7"
+      />
+      <g transform="translate(316 292)">
+        <path
+          d="M0 0 C-3 -8 -17 -16 -17 -32 A17 17 0 1 1 17 -32 C17 -16 3 -8 0 0 Z"
+          fill="#0b3c6e"
+          stroke="#fff"
+          strokeWidth="3"
+        />
+        <circle cx="0" cy="-32" r="6" fill="#fff" />
+        <rect x="-56" y="8" width="112" height="28" rx="9" fill="#0b3c6e" />
+        <text
+          x="0"
+          y="27"
+          textAnchor="middle"
+          fontFamily="Plus Jakarta Sans, system-ui, sans-serif"
+          fontSize="14"
+          fontWeight="700"
+          fill="#fff"
+        >
+          Lokasi Anda
+        </text>
+      </g>
+    </svg>
+  );
+}
+
+/**
+ * Section 4. PETA SEBARAN. `userCity` (Beranda setelah masuk) menampilkan lokasi pengguna,
+ * radius ±5 km, dan legenda.
+ */
+export default function ServiceMapSection({ userCity }) {
+  const alt = userCity ? `${mapAlt}. Lokasi Anda: ${userCity}, dengan radius sekitar 5 km` : mapAlt;
+
   return (
     <section className="home-section" aria-labelledby="map-title">
       <div className="container service-map">
         <figure className="service-map__figure">
-          <div className="service-map__canvas" role="img" aria-label={mapAlt}>
+          <div className="service-map__canvas" role="img" aria-label={alt}>
             <InsetImage src={mapLayer1} inset="7.94% 4.47% 1.73% 5.59%" bleed="-1.13% -0.87%" />
             <InsetImage src={mapLayer2} inset="5.9% 5.4% 3.78% 4.66%" bleed="-1.13% -0.87%" />
             <InsetImage src={mapLayer3} inset="7.35% 7.17% 5.71% 6.39%" bleed="-0.18% -0.14%" />
@@ -107,11 +167,45 @@ export default function ServiceMapSection() {
                 </span>
               </span>
             ))}
+            {userCity && <UserLocationOverlay />}
           </div>
-          <figcaption className="service-map__caption">
-            <img src={captionIcon} alt="" width="18" height="18" />
-            Titik layanan aktif · ilustrasi peta disederhanakan
-          </figcaption>
+          {userCity ? (
+            <figcaption className="service-map__caption service-map__legend">
+              <span>
+                <LegendPin color="#14a3a3" />
+                Penyedia layanan
+              </span>
+              <span>
+                <LegendPin color="#0b3c6e" />
+                Lokasi Anda
+              </span>
+              <span>
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="9"
+                    fill="none"
+                    stroke="#0c7272"
+                    strokeWidth="2"
+                    strokeDasharray="3 3"
+                  />
+                </svg>
+                Radius ±5 km
+              </span>
+            </figcaption>
+          ) : (
+            <figcaption className="service-map__caption">
+              <img src={captionIcon} alt="" width="18" height="18" />
+              Titik layanan aktif · ilustrasi peta disederhanakan
+            </figcaption>
+          )}
         </figure>
 
         <div className="service-map__info">

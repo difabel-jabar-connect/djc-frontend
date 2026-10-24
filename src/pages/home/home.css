@@ -475,6 +475,24 @@
   line-height: 18px;
 }
 
+.service-map__overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.service-map__legend {
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+
+.service-map__legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .service-map__info .section-header__desc {
   margin-top: 10px;
   color: var(--color-text-muted);

@@ -44,13 +44,13 @@ export default function AuthIntro({ title, titleAs: Title = 'h1', text, highligh
   );
 }
 
-/** Tautan "Kembali ke Beranda" + hak cipta di bawah kartu auth. */
-export function AuthPageFooter() {
+/** Tautan kembali (default: Beranda) + hak cipta di bawah kartu auth. */
+export function AuthPageFooter({ backTo = PATHS.home, backLabel = 'Kembali ke Beranda' }) {
   return (
     <div className="auth-main__foot">
-      <Link to={PATHS.home} className="auth-back">
+      <Link to={backTo} className="auth-back">
         <ArrowLeftIcon size={18} />
-        Kembali ke Beranda
+        {backLabel}
       </Link>
       <p>© {new Date().getFullYear()} Difabel Jabar Connect</p>
     </div>

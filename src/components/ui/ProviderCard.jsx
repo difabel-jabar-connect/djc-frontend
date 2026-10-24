@@ -3,15 +3,42 @@ import { buildBookingPath, buildProviderPath } from '@/routes/paths';
 import { formatRating, formatRupiah } from '@/lib/format';
 import StarIcon from './StarIcon';
 import LocationIcon from './LocationIcon';
+import { HeartIcon, MapPinIcon } from './icons';
 import './ProviderCard.css';
 
-/** Kartu ringkas penyedia jasa (Figma: Section 3 › List › Item). */
-export default function ProviderCard({ provider, headingLevel = 3 }) {
+const kmFormatter = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 1 });
+
+/**
+ * Kartu ringkas penyedia jasa (Figma: Section 3 › List › Item).
+ * Opsional (Beranda setelah masuk): `distanceKm` (jarak dari pengguna), lokasi dengan
+ * kecamatan, dan tombol favorit (`favorite` + `onToggleFavorite`).
+ */
+export default function ProviderCard({
+  provider,
+  headingLevel = 3,
+  distanceKm,
+  showDistrict = false,
+  favorite,
+  onToggleFavorite,
+}) {
   const Heading = `h${headingLevel}`;
   const profilePath = buildProviderPath(provider.id);
+  const location =
+    showDistrict && provider.district ? `${provider.district}, ${provider.city}` : provider.city;
 
   return (
-    <article className="provider-card">
+    <article className={`provider-card${onToggleFavorite ? ' provider-card--favoritable' : ''}`}>
+      {onToggleFavorite && (
+        <button
+          type="button"
+          className="provider-card__favorite"
+          aria-label={`Simpan ${provider.name} ke favorit`}
+          aria-pressed={Boolean(favorite)}
+          onClick={() => onToggleFavorite(provider.id)}
+        >
+          <HeartIcon size={22} />
+        </button>
+      )}
       <div className="provider-card__head">
         <span
           className="provider-card__avatar"
@@ -31,6 +58,13 @@ export default function ProviderCard({ provider, headingLevel = 3 }) {
         </div>
       </div>
 
+      {distanceKm !== undefined && (
+        <p className="provider-card__distance">
+          <MapPinIcon size={16} strokeWidth={2.25} />
+          {kmFormatter.format(distanceKm)} km dari Anda
+        </p>
+      )}
+
       <ul className="provider-card__meta">
         <li className="provider-card__category">
           <span className="provider-card__category-icon">
@@ -44,7 +78,7 @@ export default function ProviderCard({ provider, headingLevel = 3 }) {
             <LocationIcon />
           </span>
           <span className="visually-hidden">Lokasi: </span>
-          {provider.city}
+          {location}
         </li>
       </ul>
 

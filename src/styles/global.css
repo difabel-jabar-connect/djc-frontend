@@ -217,6 +217,180 @@ html:has(.app-header) {
   font-weight: 700;
 }
 
+/* Header saat masuk (desain Beranda login): notifikasi + menu akun. */
+.app-header--signed-in .app-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.notif-menu,
+.account-menu {
+  position: relative;
+}
+
+.notif-menu__button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.notif-menu__button:hover,
+.account-menu__button:hover {
+  background: var(--color-surface);
+}
+
+.notif-menu__badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border: 2px solid #ffffff;
+  border-radius: var(--radius-pill);
+  background: #dc2626;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.account-menu__button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 10px 0 4px;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--color-text);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.account-menu__avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.notif-menu__panel,
+.account-menu__menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 60;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  box-shadow: var(--shadow-md);
+}
+
+.notif-menu__panel {
+  width: min(340px, calc(100vw - 2 * var(--gutter)));
+  padding: var(--space-2);
+}
+
+.notif-menu__panel[hidden] {
+  display: none;
+}
+
+.notif-menu__title {
+  margin: 0;
+  padding: 6px 10px;
+  font-weight: 700;
+}
+
+.notif-menu__empty {
+  margin: 0;
+  padding: 6px 10px 10px;
+  color: var(--color-text-body);
+}
+
+.notif-menu__list,
+.account-menu__menu {
+  margin: 0;
+  list-style: none;
+}
+
+.notif-menu__list {
+  padding: 0;
+}
+
+.notif-menu__list a {
+  display: grid;
+  gap: 2px;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.notif-menu__list a span {
+  color: var(--color-text-body);
+  font-size: var(--font-size-sm);
+}
+
+.account-menu__menu {
+  min-width: 220px;
+  padding: 6px;
+}
+
+.account-menu__menu a,
+.account-menu__menu button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.notif-menu__list a:hover,
+.account-menu__menu a:hover,
+.account-menu__menu button:hover {
+  background: var(--color-surface);
+}
+
+.account-menu__menu li:last-child button {
+  color: #b91c1c;
+}
+
+@media (max-width: 1180px) {
+  .app-header--signed-in .brand {
+    flex-basis: auto;
+  }
+
+  .account-menu__name {
+    display: none;
+  }
+}
+
 @media (max-width: 900px) {
   :root {
     --header-height: 129px; /* nav turun ke baris kedua */
@@ -236,7 +410,15 @@ html:has(.app-header) {
   }
 
   .app-header__nav .nav-list {
+    flex-wrap: nowrap;
     justify-content: flex-start;
+    gap: var(--space-1);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .app-header__nav .nav-list li {
+    flex: none;
   }
 
   .nav-link {
@@ -391,6 +573,37 @@ html:has(.app-header) {
 
 .btn--outline:hover {
   background: var(--color-surface);
+}
+
+.btn--danger {
+  border-color: #dc2626;
+  background: var(--color-bg);
+  color: #b91c1c;
+}
+
+.btn--danger:hover {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.btn--danger-solid {
+  border-color: #dc2626;
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.btn--danger-solid:hover {
+  border-color: #b91c1c;
+  background: #b91c1c;
+}
+
+/* Tombol nonaktif (mis. Kirim Ulasan sebelum memilih bintang). */
+.btn:disabled:not([aria-busy='true']),
+.btn:disabled:not([aria-busy='true']):hover {
+  border-color: #d1d5db;
+  background: #f3f4f6;
+  color: var(--color-text-body);
+  cursor: not-allowed;
 }
 
 .btn--lg {
@@ -943,4 +1156,114 @@ html:has(.app-header) {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ===== Input rating bintang (Beri Ulasan) ===== */
+.star-input {
+  display: flex;
+  gap: 4px;
+}
+
+.star-input__star {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.star-input__star:hover svg {
+  fill: #fde68a;
+}
+
+.star-input__star--on,
+.star-input__star--on:hover svg {
+  color: var(--color-star);
+  fill: var(--color-star);
+}
+
+.star-input__star--on svg {
+  fill: var(--color-star);
+}
+
+/* ===== Badge status pesanan ===== */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1.5px solid var(--badge-border);
+  border-radius: var(--radius-pill);
+  background: var(--badge-bg);
+  color: var(--badge-text);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.status-badge--lg {
+  height: 40px;
+  padding: 0 14px;
+  font-size: var(--font-size-base);
+}
+
+.tone-warning {
+  --badge-bg: #fffbeb;
+  --badge-border: #d97706;
+  --badge-text: #92400e;
+  --banner-border: #fde68a;
+}
+
+.tone-info {
+  --badge-bg: #eff6ff;
+  --badge-border: #2563eb;
+  --badge-text: #1d4ed8;
+  --banner-border: #bfdbfe;
+}
+
+.tone-teal {
+  --badge-bg: #e3f6f6;
+  --badge-border: #14a3a3;
+  --badge-text: #0c7272;
+  --banner-border: #9ed8d8;
+}
+
+.tone-success {
+  --badge-bg: #f0fdf4;
+  --badge-border: #16a34a;
+  --badge-text: #166534;
+  --banner-border: #bbf7d0;
+}
+
+.tone-neutral {
+  --badge-bg: #f3f4f6;
+  --badge-border: #6b7280;
+  --badge-text: #374151;
+  --banner-border: #d1d5db;
+}
+
+.tone-danger {
+  --badge-bg: #fef2f2;
+  --badge-border: #dc2626;
+  --badge-text: #b91c1c;
+  --banner-border: #fecaca;
+}
+
+/* Avatar inisial penyedia (pesanan, ulasan) — ukuran lewat --avatar-size */
+.booking-avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--avatar-size, 52px);
+  height: var(--avatar-size, 52px);
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: calc(var(--avatar-size, 52px) * 0.36);
+  font-weight: 800;
 }

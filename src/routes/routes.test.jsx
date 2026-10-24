@@ -34,8 +34,12 @@ describe('Routing dasar', () => {
     ['/pesan/rizki-maulana', /pemesanan layanan/i],
     ['/login', /selamat datang kembali/i],
     ['/lupa-kata-sandi', /lupa kata sandi/i],
+    ['/lupa-kata-sandi/cek-email', /cek email anda/i],
+    ['/reset-kata-sandi?token=abc', /atur ulang kata sandi/i],
+    ['/reset-kata-sandi/berhasil', /kata sandi berhasil diubah/i],
     ['/register', /mulai terhubung bersama kami/i],
-    ['/bookings', /pesanan saya/i],
+    // Halaman pelanggan: belum masuk → diarahkan ke halaman Masuk.
+    ['/bookings', /selamat datang kembali/i],
     ['/dashboard/provider', /selamat datang/i],
     ['/admin', /dashboard monitoring program/i],
   ])('rute %s merender halaman placeholder', (path, heading) => {

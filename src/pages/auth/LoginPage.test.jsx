@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 import { renderAt } from '@/test/renderWithRouter';
@@ -96,5 +96,42 @@ describe('Halaman Masuk', () => {
     renderAt('/login');
     await fillAndSubmit(user);
     expect(await screen.findByRole('alert')).toHaveTextContent(/email atau kata sandi salah/i);
+  });
+
+  it('tanpa ?next=, login mengarahkan sesuai peran dari respons API', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValue(
+          jsonResponse({ data: { user: { id: 3, name: 'Deni Setiawan', role: 'provider' } } }),
+        ),
+    );
+    const user = userEvent.setup();
+    const { router } = renderAt('/login');
+    await fillAndSubmit(user);
+    await vi.waitFor(() => expect(router.state.location.pathname).toBe('/dashboard/provider'));
+    expect(JSON.parse(sessionStorage.getItem('djc.session'))).toMatchObject({
+      name: 'Deni Setiawan',
+      role: 'provider',
+      initials: 'DS',
+    });
+  });
+
+  it('akun demo (mode development) langsung masuk sesuai peran', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ data: {} }));
+    vi.stubGlobal('fetch', fetchMock);
+    const user = userEvent.setup();
+    const { router } = renderAt('/login');
+
+    const demo = within(screen.getByRole('region', { name: /akun demo/i }));
+    await user.click(demo.getByRole('button', { name: /pelanggan/i }));
+
+    expect(router.state.location.pathname).toBe('/');
+    expect(await screen.findByRole('heading', { level: 1, name: /halo, budi!/i })).toBeVisible();
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      expect.stringContaining('/auth/login'),
+      expect.anything(),
+    );
   });
 });
