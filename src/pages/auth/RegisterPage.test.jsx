@@ -88,7 +88,9 @@ describe('Halaman Daftar', () => {
       category: 'jahit',
     });
     await vi.waitFor(() => expect(router.state.location.pathname).toBe('/register/berhasil'));
-    expect(screen.getByRole('heading', { level: 1, name: 'Pendaftaran Berhasil!' })).toBeVisible();
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Pendaftaran Berhasil!' }),
+    ).toBeVisible();
     expect(screen.getByText('rina•••@gmail.com')).toBeInTheDocument();
     expect(screen.getByText(/menunggu verifikasi pengelola/i)).toBeInTheDocument();
   });
