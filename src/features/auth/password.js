@@ -31,3 +31,35 @@ export function maskEmail(email) {
   if (!local || !domain) return '';
   return `${local.slice(0, Math.min(4, Math.max(1, local.length - 1)))}•••@${domain}`;
 }
+
+const REQUIREMENTS = [
+  {
+    key: 'length',
+    label: `Minimal ${PASSWORD_MIN} karakter`,
+    test: (p) => p.length >= PASSWORD_MIN,
+  },
+  {
+    key: 'case',
+    label: 'Mengandung huruf besar dan kecil',
+    test: (p) => /[a-z]/.test(p) && /[A-Z]/.test(p),
+  },
+  { key: 'digit', label: 'Mengandung angka', test: (p) => /\d/.test(p) },
+];
+
+const REQUIREMENT_LEVELS = [
+  { label: 'Belum diisi', tone: 'empty' },
+  { label: 'Lemah', tone: 'weak' },
+  { label: 'Sedang', tone: 'medium' },
+  { label: 'Kuat', tone: 'strong' },
+];
+
+/**
+ * Syarat kata sandi baru (desain Atur Ulang Kata Sandi) beserta kekuatannya:
+ * jumlah syarat terpenuhi = skor (0–3). `valid` bila semua syarat terpenuhi.
+ */
+export function checkPasswordRequirements(password = '') {
+  const items = REQUIREMENTS.map(({ key, label, test }) => ({ key, label, met: test(password) }));
+  const met = items.filter((item) => item.met).length;
+  const score = password ? Math.max(met, 1) : 0;
+  return { items, valid: met === items.length, score, ...REQUIREMENT_LEVELS[score] };
+}

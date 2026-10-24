@@ -28,10 +28,11 @@ describe('filterProviders', () => {
   it('menggabungkan filter kategori, lokasi, rating, harga, dan hari', () => {
     expect(
       names(filterProviders(SAMPLE_PROVIDERS, criteria({ lokasi: 'Bandung', rating: '4.5' }))),
-    ).toEqual(['Rizki Maulana', 'Agus Setiawan']);
+    ).toEqual(['Rizki Maulana', 'Agus Setiawan', 'Rina Agustina']);
     expect(names(filterProviders(SAMPLE_PROVIDERS, criteria({ harga: 'lt50' })))).toEqual([
       'Lina Kurnia',
       'Siti Nurjanah',
+      'Rina Agustina',
     ]);
     expect(
       names(
@@ -46,7 +47,7 @@ describe('filterProviders', () => {
     );
     expect(
       filterProviders(SAMPLE_PROVIDERS, criteria({ urut: 'harga' })).map((p) => p.priceFrom),
-    ).toEqual([25000, 30000, 50000, 60000, 75000, 100000]);
+    ).toEqual([25000, 25000, 30000, 50000, 60000, 75000, 100000]);
   });
 });
 

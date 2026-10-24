@@ -502,3 +502,149 @@ export const ClockSmallIcon = (p) => (
     <path d="M12 7v5l3 2" />
   </Svg>
 );
+
+/* —— Ikon desain Pesanan Saya, Detail Pesanan, Beranda (login), Lupa Kata Sandi —— */
+
+export const CheckCircleIcon = (p) => (
+  <Svg {...p}>
+    <circle cx="12" cy="12" r="10" />
+    <path d="m9 12 2 2 4-4" />
+  </Svg>
+);
+
+export const XCircleIcon = (p) => (
+  <Svg {...p}>
+    <circle cx="12" cy="12" r="10" />
+    <path d="m15 9-6 6" />
+    <path d="m9 9 6 6" />
+  </Svg>
+);
+
+export const AlertCircleIcon = (p) => (
+  <Svg {...p}>
+    <circle cx="12" cy="12" r="10" />
+    <path d="M12 8v4" />
+    <path d="M12 16h.01" />
+  </Svg>
+);
+
+export const HelpCircleIcon = (p) => (
+  <Svg {...p}>
+    <circle cx="12" cy="12" r="10" />
+    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+    <path d="M12 17h.01" />
+  </Svg>
+);
+
+/** Status "Berjalan". */
+export const RotateCwIcon = (p) => (
+  <Svg {...p}>
+    <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+    <path d="M21 3v5h-5" />
+  </Svg>
+);
+
+/** "Pesan Lagi". */
+export const RotateCcwIcon = (p) => (
+  <Svg {...p}>
+    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+    <path d="M3 3v5h5" />
+  </Svg>
+);
+
+export const HistoryIcon = (p) => (
+  <Svg {...p}>
+    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+    <path d="M3 3v5h5" />
+    <path d="M12 7v5l4 2" />
+  </Svg>
+);
+
+/** "Muat lebih banyak". */
+export const RefreshIcon = (p) => (
+  <Svg {...p}>
+    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+    <path d="M21 3v5h-5" />
+    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+    <path d="M8 16H3v5" />
+  </Svg>
+);
+
+export const TagIcon = (p) => (
+  <Svg {...p}>
+    <path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" />
+    <circle cx="7.5" cy="7.5" r="1" />
+  </Svg>
+);
+
+export const RouteIcon = (p) => (
+  <Svg {...p}>
+    <circle cx="6" cy="19" r="3" />
+    <path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15" />
+    <circle cx="18" cy="5" r="3" />
+  </Svg>
+);
+
+export const NoteIcon = (p) => (
+  <Svg {...p}>
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    <path d="M8 9h8" />
+    <path d="M8 13h5" />
+  </Svg>
+);
+
+export const ReceiptIcon = (p) => (
+  <Svg {...p}>
+    <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" />
+    <path d="M8 8h8" />
+    <path d="M8 12h8" />
+    <path d="M8 16h5" />
+  </Svg>
+);
+
+export const PhoneIcon = (p) => (
+  <Svg {...p}>
+    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+  </Svg>
+);
+
+/** Gelembung obrolan (WhatsApp). */
+export const ChatIcon = (p) => (
+  <Svg {...p}>
+    <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
+  </Svg>
+);
+
+export const KeyIcon = (p) => (
+  <Svg {...p}>
+    <path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z" />
+    <circle cx="16.5" cy="7.5" r=".5" fill="currentColor" />
+  </Svg>
+);
+
+export const MailOpenIcon = (p) => (
+  <Svg {...p}>
+    <path d="M21.2 8.4c.5.38.8.97.8 1.6v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V10a2 2 0 0 1 .8-1.6l8-6a2 2 0 0 1 2.4 0l8 6Z" />
+    <path d="m22 10-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 10" />
+  </Svg>
+);
+
+export const MinusLineIcon = (p) => (
+  <Svg {...p}>
+    <path d="M5 12h14" />
+  </Svg>
+);
+
+export const DashedCircleIcon = (p) => (
+  <Svg {...p}>
+    <circle cx="12" cy="12" r="9.5" strokeDasharray="3 3" />
+  </Svg>
+);
+
+/** Indikator memuat (berputar; animasi dimatikan oleh prefers-reduced-motion di CSS). */
+export const SpinnerIcon = (p) => (
+  <Svg strokeWidth={3} {...p}>
+    <circle cx="12" cy="12" r="9" strokeOpacity="0.3" />
+    <path d="M21 12a9 9 0 0 0-9-9" />
+  </Svg>
+);

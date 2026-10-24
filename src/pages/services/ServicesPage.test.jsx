@@ -10,7 +10,7 @@ describe('Halaman Cari Layanan', () => {
   it('menampilkan seluruh penyedia beserta sidebar', () => {
     renderAt('/services');
     expect(screen.getByRole('heading', { level: 1, name: 'Cari Layanan' })).toBeInTheDocument();
-    expect(resultCount()).toHaveTextContent('Ditemukan 6 penyedia layanan');
+    expect(resultCount()).toHaveTextContent('Ditemukan 7 penyedia layanan');
     expect(
       screen.getByRole('img', { name: /peta jumlah penyedia: bandung 32/i }),
     ).toBeInTheDocument();
@@ -30,7 +30,7 @@ describe('Halaman Cari Layanan', () => {
     const { router } = renderAt('/services');
 
     await user.click(screen.getByRole('button', { name: 'Kuliner' }));
-    expect(cardNames()).toEqual(['Lina Kurnia']);
+    expect(cardNames()).toEqual(['Lina Kurnia', 'Rina Agustina']);
     expect(router.state.location.search).toBe('?kategori=kuliner');
 
     await user.click(screen.getByRole('button', { name: 'Semua' }));
@@ -46,14 +46,14 @@ describe('Halaman Cari Layanan', () => {
 
     await user.type(within(search).getByLabelText(/kata kunci/i), 'bandung');
     await user.click(within(search).getByRole('button', { name: 'Cari' }));
-    expect(cardNames()).toEqual(['Rizki Maulana', 'Agus Setiawan']);
+    expect(cardNames()).toEqual(['Rizki Maulana', 'Agus Setiawan', 'Rina Agustina']);
 
     await user.selectOptions(screen.getByLabelText('Urutkan:'), 'harga');
-    expect(cardNames()).toEqual(['Rizki Maulana', 'Agus Setiawan']);
+    expect(cardNames()).toEqual(['Rina Agustina', 'Rizki Maulana', 'Agus Setiawan']);
     expect(router.state.location.search).toBe('?q=bandung&urut=harga');
 
     await user.click(within(search).getByRole('button', { name: 'Reset Filter' }));
-    expect(resultCount()).toHaveTextContent('Ditemukan 6 penyedia layanan');
+    expect(resultCount()).toHaveTextContent('Ditemukan 7 penyedia layanan');
     expect(within(search).getByLabelText(/kata kunci/i)).toHaveValue('');
     expect(router.state.location.search).toBe('?urut=harga');
   });

@@ -53,8 +53,8 @@ export const formatShortDate = (date) =>
 export const formatMonthYear = (date) =>
   new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric' }).format(date);
 
-const WEEKDAY_SHORT = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
-const MONTH_SHORT = [
+export const WEEKDAY_SHORT = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+export const MONTH_SHORT = [
   'Jan',
   'Feb',
   'Mar',

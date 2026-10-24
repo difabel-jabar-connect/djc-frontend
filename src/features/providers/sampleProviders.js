@@ -22,6 +22,7 @@ export const SAMPLE_PROVIDERS = [
     category: 'Layanan Kebersihan',
     categoryIcon: kebersihanCardIcon,
     city: 'Bandung',
+    district: 'Cibeunying',
     description: 'Bersih-bersih rumah, kos, dan kantor kecil dengan alat sendiri.',
     priceFrom: 50000,
     priceUnit: 'jam',
@@ -86,6 +87,7 @@ export const SAMPLE_PROVIDERS = [
     category: 'Desain Grafis',
     categoryIcon: desainIcon,
     city: 'Bandung',
+    district: 'Coblong',
     description: 'Desain logo, poster, dan konten media sosial untuk UMKM.',
     priceFrom: 100000,
     availability: ['kerja', 'akhir-pekan'],
@@ -106,7 +108,34 @@ export const SAMPLE_PROVIDERS = [
     priceUnit: 'jam',
     availability: ['akhir-pekan'],
   },
+  {
+    id: 'rina-agustina',
+    name: 'Rina Agustina',
+    initials: 'RA',
+    avatarColor: '#be185d',
+    rating: 4.8,
+    reviewCount: 57,
+    categorySlug: 'kuliner',
+    category: 'Kue & Kuliner Rumahan',
+    categoryIcon: kulinerIcon,
+    city: 'Bandung',
+    district: 'Sukajadi',
+    description: 'Kue kering, kue basah, dan hampers untuk acara keluarga.',
+    priceFrom: 25000,
+    priceUnit: 'pesanan',
+    availability: ['kerja', 'akhir-pekan'],
+  },
 ];
+
+/**
+ * Jarak contoh dari lokasi pengguna demo (Bandung) ke penyedia terdekat.
+ * Nanti dihitung backend dari koordinat (PostGIS) — frontend hanya menampilkan.
+ */
+export const SAMPLE_NEARBY_KM = {
+  'rizki-maulana': 1.2,
+  'agus-setiawan': 2.5,
+  'rina-agustina': 3.1,
+};
 
 /** Jumlah penyedia per kota untuk peta sebaran (contoh dari desain). */
 export const SAMPLE_CITY_STATS = [
@@ -118,3 +147,5 @@ export const SAMPLE_CITY_STATS = [
   { city: 'Karawang', count: 9 },
   { city: 'Sukabumi', count: 8 },
 ];
+
+export const getSampleProvider = (id) => SAMPLE_PROVIDERS.find((provider) => provider.id === id);

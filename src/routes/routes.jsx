@@ -10,16 +10,21 @@ import BookingPage from '@/pages/booking/BookingPage';
 import LoginPage from '@/pages/auth/LoginPage';
 import RegisterPage from '@/pages/auth/RegisterPage';
 import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage';
+import CheckEmailPage from '@/pages/auth/CheckEmailPage';
+import ResetPasswordPage from '@/pages/auth/ResetPasswordPage';
+import ResetPasswordSuccessPage from '@/pages/auth/ResetPasswordSuccessPage';
 import RegisterSuccessPage from '@/pages/auth/RegisterSuccessPage';
 import CustomerBookingsPage from '@/pages/customer/CustomerBookingsPage';
+import BookingDetailPage from '@/pages/customer/BookingDetailPage';
 import ProviderDashboardPage from '@/pages/provider/ProviderDashboardPage';
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
+import RequireAuth from './RequireAuth';
 import { PATHS } from './paths';
 
 /**
  * Definisi rute (dipisah dari router agar mudah diuji dengan MemoryRouter).
- * Proteksi rute berbasis peran (customer/provider/admin) akan ditambahkan
- * pada SP1-04 setelah Auth API backend (SP1-03) tersedia.
+ * Halaman pelanggan dilindungi <RequireAuth>. Proteksi dashboard penyedia/pengelola
+ * menyusul setelah Auth API backend (SP1-03) tersedia.
  */
 export const routes = [
   // Halaman layar penuh (tanpa header & footer situs): auth & dashboard.
@@ -29,6 +34,10 @@ export const routes = [
       { path: PATHS.login, element: <LoginPage /> },
       { path: PATHS.register, element: <RegisterPage /> },
       { path: PATHS.registerSuccess, element: <RegisterSuccessPage /> },
+      { path: PATHS.forgotPassword, element: <ForgotPasswordPage /> },
+      { path: PATHS.forgotPasswordSent, element: <CheckEmailPage /> },
+      { path: PATHS.resetPassword, element: <ResetPasswordPage /> },
+      { path: PATHS.resetPasswordSuccess, element: <ResetPasswordSuccessPage /> },
       { path: PATHS.providerDashboard, element: <ProviderDashboardPage /> },
       { path: PATHS.adminDashboard, element: <AdminDashboardPage /> },
     ],
@@ -43,8 +52,13 @@ export const routes = [
       { path: PATHS.about, element: <AboutPage /> },
       { path: PATHS.providerDetail, element: <ProviderDetailPage /> },
       { path: PATHS.booking, element: <BookingPage /> },
-      { path: PATHS.forgotPassword, element: <ForgotPasswordPage /> },
-      { path: PATHS.customerBookings, element: <CustomerBookingsPage /> },
+      {
+        element: <RequireAuth allow="customer" />,
+        children: [
+          { path: PATHS.customerBookings, element: <CustomerBookingsPage /> },
+          { path: PATHS.bookingDetail, element: <BookingDetailPage /> },
+        ],
+      },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

@@ -1,6 +1,9 @@
 import { useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { isDev } from '@/config/env';
+import { useAuth } from '@/context/useAuth';
+import { DEMO_ACCOUNTS, homePathFor } from '@/features/auth/session';
 import { login } from '@/features/auth/authApi';
 import { safeRedirectPath } from '@/features/auth/redirect';
 import { PATHS } from '@/routes/paths';
@@ -18,6 +21,12 @@ import AuthIntro, { AuthPageFooter } from './AuthIntro';
 import './auth.css';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const DEMO_ROLES = [
+  { key: 'customer', label: 'Pelanggan' },
+  { key: 'provider', label: 'Penyedia' },
+  { key: 'admin', label: 'Pengelola' },
+];
 
 const HIGHLIGHTS = [
   { text: 'Penyedia terverifikasi', icon: ShieldCheckIcon },
@@ -38,6 +47,7 @@ function validate({ email, password }) {
 export default function LoginPage() {
   useDocumentTitle('Masuk');
   const navigate = useNavigate();
+  const { signIn } = useAuth();
   const [searchParams] = useSearchParams();
   const [form, setForm] = useState({ email: '', password: '', remember: false });
   const [showPassword, setShowPassword] = useState(false);
@@ -53,6 +63,12 @@ export default function LoginPage() {
     }
   };
 
+  /** Kembali ke halaman tujuan (`?next=`) atau halaman awal sesuai peran. */
+  const goAfterLogin = (sessionUser) => {
+    const next = searchParams.get('next');
+    navigate(next ? safeRedirectPath(next) : homePathFor(sessionUser?.role), { replace: true });
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     const nextErrors = validate(form);
@@ -65,9 +81,13 @@ export default function LoginPage() {
 
     setStatus({ state: 'loading', message: '' });
     try {
-      await login({ email: form.email.trim(), password: form.password, remember: form.remember });
-      // TODO(SP1-04): simpan profil pengguna di AuthContext & arahkan sesuai peran.
-      navigate(safeRedirectPath(searchParams.get('next')), { replace: true });
+      const data = await login({
+        email: form.email.trim(),
+        password: form.password,
+        remember: form.remember,
+      });
+      const sessionUser = signIn(data?.user ?? data);
+      goAfterLogin(sessionUser);
     } catch (error) {
       const message =
         error?.status === 401
@@ -236,6 +256,28 @@ export default function LoginPage() {
             </p>
           </div>
         </form>
+
+        {/* Backend auth belum tersedia: akun demo hanya muncul di mode development. */}
+        {isDev && (
+          <section className="auth-demo" aria-labelledby="demo-title">
+            <h2 id="demo-title">Akun demo (mode development)</h2>
+            <p>Masuk tanpa backend untuk mencoba tampilan tiap peran.</p>
+            <ul>
+              {DEMO_ROLES.map(({ key, label }) => (
+                <li key={key}>
+                  <button
+                    type="button"
+                    className="btn btn--outline btn--block"
+                    onClick={() => goAfterLogin(signIn(DEMO_ACCOUNTS[key]))}
+                  >
+                    {label}
+                    <span className="auth-demo__name">{DEMO_ACCOUNTS[key].name}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         <AuthPageFooter />
       </main>

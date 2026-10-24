@@ -1,75 +1,12 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import logo from '@/assets/icons/logo.svg';
 import { useRouteFocus } from '@/hooks/useRouteFocus';
-import { logout } from '@/features/auth/authApi';
+import { useAuth } from '@/context/useAuth';
 import { PATHS } from '@/routes/paths';
+import UserMenu from '@/components/ui/UserMenu';
 import { BellIcon, ChevronDownIcon, LogOutIcon } from '@/components/ui/icons';
 import './dashboard.css';
-
-/** Menu akun di topbar (pola disclosure: tombol + daftar tautan). */
-function UserMenu({ user, items }) {
-  const [open, setOpen] = useState(false);
-  const menuId = useId();
-  const rootRef = useRef(null);
-  const buttonRef = useRef(null);
-
-  useEffect(() => {
-    if (!open) return undefined;
-    const onPointer = (event) => {
-      if (!rootRef.current?.contains(event.target)) setOpen(false);
-    };
-    const onKey = (event) => {
-      if (event.key === 'Escape') {
-        setOpen(false);
-        buttonRef.current?.focus();
-      }
-    };
-    document.addEventListener('pointerdown', onPointer);
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('pointerdown', onPointer);
-      document.removeEventListener('keydown', onKey);
-    };
-  }, [open]);
-
-  return (
-    <div className="dash-user" ref={rootRef}>
-      <button
-        ref={buttonRef}
-        type="button"
-        className="dash-user__button"
-        aria-expanded={open}
-        aria-controls={menuId}
-        onClick={() => setOpen((value) => !value)}
-      >
-        <span className="dash-avatar" style={{ backgroundColor: user.color }} aria-hidden="true">
-          {user.initials}
-        </span>
-        <span className="dash-user__text">
-          <strong>{user.name}</strong>
-          <span>{user.role}</span>
-        </span>
-        <ChevronDownIcon />
-      </button>
-      <ul id={menuId} className="dash-user__menu" hidden={!open}>
-        {items.map((item) => (
-          <li key={item.label}>
-            {item.to ? (
-              <Link to={item.to} onClick={() => setOpen(false)}>
-                {item.label}
-              </Link>
-            ) : (
-              <button type="button" onClick={item.onClick}>
-                {item.label}
-              </button>
-            )}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
 
 /**
  * Kerangka dashboard (Provider & Pengelola): topbar, sidebar, dan konten utama.
@@ -89,16 +26,13 @@ export default function DashboardShell({
 }) {
   const mainRef = useRef(null);
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   const [loggingOut, setLoggingOut] = useState(false);
   useRouteFocus(mainRef);
 
   const handleLogout = async () => {
     setLoggingOut(true);
-    try {
-      await logout();
-    } catch {
-      // Sesi tetap dianggap berakhir di sisi klien walau server tidak merespons.
-    }
+    await signOut();
     navigate(PATHS.login, { replace: true });
   };
 
@@ -127,7 +61,23 @@ export default function DashboardShell({
           </a>
           <span className="dash-topbar__divider" aria-hidden="true" />
           <UserMenu
-            user={user}
+            className="dash-user"
+            buttonContent={
+              <>
+                <span
+                  className="dash-avatar"
+                  style={{ backgroundColor: user.color }}
+                  aria-hidden="true"
+                >
+                  {user.initials}
+                </span>
+                <span className="dash-user__text">
+                  <strong>{user.name}</strong>
+                  <span>{user.role}</span>
+                </span>
+                <ChevronDownIcon />
+              </>
+            }
             items={[...userMenuItems, { label: 'Keluar', onClick: handleLogout }]}
           />
         </div>

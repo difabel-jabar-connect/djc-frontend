@@ -11,9 +11,13 @@ export const PATHS = {
   booking: '/pesan/:id',
   login: '/login',
   forgotPassword: '/lupa-kata-sandi',
+  forgotPasswordSent: '/lupa-kata-sandi/cek-email',
+  resetPassword: '/reset-kata-sandi',
+  resetPasswordSuccess: '/reset-kata-sandi/berhasil',
   register: '/register',
   registerSuccess: '/register/berhasil',
   customerBookings: '/bookings',
+  bookingDetail: '/bookings/:code',
   providerDashboard: '/dashboard/provider',
   adminDashboard: '/admin',
 };
@@ -38,5 +42,16 @@ export function buildBookingPath(id, params = {}) {
   });
   const query = search.toString();
   const path = `/pesan/${encodeURIComponent(id)}`;
+  return query ? `${path}?${query}` : path;
+}
+
+/** URL detail pesanan pelanggan; `params` opsional (mis. `{ ulasan: 4 }`) jadi query. */
+export function buildBookingDetailPath(code, params = {}) {
+  const search = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value) search.set(key, value);
+  });
+  const query = search.toString();
+  const path = `/bookings/${encodeURIComponent(code)}`;
   return query ? `${path}?${query}` : path;
 }
