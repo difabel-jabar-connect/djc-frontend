@@ -1,5 +1,5 @@
 import RootLayout from '@/layouts/RootLayout';
-import AuthLayout from '@/layouts/AuthLayout';
+import StandaloneLayout from '@/layouts/StandaloneLayout';
 import HomePage from '@/pages/home/HomePage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import ServicesPage from '@/pages/services/ServicesPage';
@@ -21,10 +21,14 @@ import { PATHS } from './paths';
  * pada SP1-04 setelah Auth API backend (SP1-03) tersedia.
  */
 export const routes = [
-  // Halaman auth layar penuh (tanpa header & footer).
+  // Halaman layar penuh (tanpa header & footer situs): auth & dashboard.
   {
-    element: <AuthLayout />,
-    children: [{ path: PATHS.login, element: <LoginPage /> }],
+    element: <StandaloneLayout />,
+    children: [
+      { path: PATHS.login, element: <LoginPage /> },
+      { path: PATHS.providerDashboard, element: <ProviderDashboardPage /> },
+      { path: PATHS.adminDashboard, element: <AdminDashboardPage /> },
+    ],
   },
   {
     path: PATHS.home,
@@ -39,8 +43,6 @@ export const routes = [
       { path: PATHS.register, element: <RegisterPage /> },
       { path: PATHS.forgotPassword, element: <ForgotPasswordPage /> },
       { path: PATHS.customerBookings, element: <CustomerBookingsPage /> },
-      { path: PATHS.providerDashboard, element: <ProviderDashboardPage /> },
-      { path: PATHS.adminDashboard, element: <AdminDashboardPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

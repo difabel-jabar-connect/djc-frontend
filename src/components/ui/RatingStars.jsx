@@ -1,8 +1,8 @@
 import { StarFilledIcon, StarOutlineIcon } from './icons';
 
-/** Deretan bintang rating (bulat ke bawah), dengan teks alternatif "Rating 4 dari 5". */
+/** Deretan bintang rating (dibulatkan ke bintang terdekat), dengan teks alternatif "Rating 4 dari 5". */
 export default function RatingStars({ value, max = 5, size = 18 }) {
-  const filled = Math.floor(value);
+  const filled = Math.round(value);
   return (
     <span className="rating-stars" role="img" aria-label={`Rating ${value} dari ${max}`}>
       {Array.from({ length: max }, (_, i) =>

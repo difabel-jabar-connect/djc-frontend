@@ -394,3 +394,111 @@ export const GoogleMarkIcon = ({ size = 22, ...props }) => (
     />
   </svg>
 );
+
+export const BellIcon = (p) => (
+  <Svg {...p}>
+    <path d="M10.268 21a2 2 0 0 0 3.464 0" />
+    <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" />
+  </Svg>
+);
+
+export const DashboardIcon = (p) => (
+  <Svg {...p}>
+    <rect width="7" height="9" x="3" y="3" rx="1.5" />
+    <rect width="7" height="5" x="14" y="3" rx="1.5" />
+    <rect width="7" height="9" x="14" y="12" rx="1.5" />
+    <rect width="7" height="5" x="3" y="16" rx="1.5" />
+  </Svg>
+);
+
+export const BriefcaseIcon = (p) => (
+  <Svg {...p}>
+    <path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+    <rect width="20" height="14" x="2" y="6" rx="2" />
+  </Svg>
+);
+
+export const BagIcon = (p) => (
+  <Svg {...p}>
+    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+    <path d="M3 6h18" />
+    <path d="M16 10a4 4 0 0 1-8 0" />
+  </Svg>
+);
+
+export const MapIcon = (p) => (
+  <Svg {...p}>
+    <path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z" />
+    <path d="M8 2v16" />
+    <path d="M16 6v16" />
+  </Svg>
+);
+
+export const ReportIcon = (p) => (
+  <Svg {...p}>
+    <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+    <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+    <path d="M8 18v-2" />
+    <path d="M12 18v-5" />
+    <path d="M16 18v-3" />
+  </Svg>
+);
+
+export const SettingsIcon = (p) => (
+  <Svg {...p}>
+    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+    <circle cx="12" cy="12" r="3" />
+  </Svg>
+);
+
+export const LogOutIcon = (p) => (
+  <Svg {...p}>
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+    <path d="m16 17 5-5-5-5" />
+    <path d="M21 12H9" />
+  </Svg>
+);
+
+export const DownloadIcon = (p) => (
+  <Svg strokeWidth={2.25} {...p}>
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <path d="m7 10 5 5 5-5" />
+    <path d="M12 15V3" />
+  </Svg>
+);
+
+export const InboxIcon = (p) => (
+  <Svg {...p}>
+    <path d="M22 12h-6l-2 3h-4l-2-3H2" />
+    <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+  </Svg>
+);
+
+export const UserIcon = (p) => (
+  <Svg {...p}>
+    <circle cx="12" cy="8" r="5" />
+    <path d="M20 21a8 8 0 0 0-16 0" />
+  </Svg>
+);
+
+export const ArrowUpIcon = (p) => (
+  <Svg strokeWidth={2.75} {...p}>
+    <path d="m5 12 7-7 7 7" />
+    <path d="M12 19V5" />
+  </Svg>
+);
+
+export const AlertIcon = (p) => (
+  <Svg {...p}>
+    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
+    <path d="M12 9v4" />
+    <path d="M12 17h.01" />
+  </Svg>
+);
+
+export const ClockSmallIcon = (p) => (
+  <Svg {...p}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 7v5l3 2" />
+  </Svg>
+);

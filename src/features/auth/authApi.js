@@ -9,3 +9,8 @@ export async function login({ email, password, remember }) {
   const res = await api.post('/auth/login', { email, password, remember });
   return res?.data;
 }
+
+/** POST /auth/logout — backend menghapus cookie sesi. */
+export async function logout() {
+  await api.post('/auth/logout');
+}
