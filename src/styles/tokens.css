@@ -1,0 +1,73 @@
+/*
+ * Design tokens — diselaraskan dengan desain Figma "difabel-jabar-connect".
+ * Kombinasi warna teks/latar sudah memenuhi kontras WCAG AA (≥ 4.5:1).
+ */
+:root {
+  /* Warna merek */
+  --color-primary: #0b3c6e; /* navy — tombol & aksen utama, ~11:1 terhadap putih */
+  --color-primary-hover: #082f57;
+  --color-primary-contrast: #ffffff;
+  --color-primary-dark: #072a4d; /* latar footer */
+  --color-accent: #0e7c7c; /* teal — eyebrow & teks sorotan, ~5:1 */
+  --color-accent-strong: #14a3a3; /* garis/indikator aktif (bukan teks) */
+  --color-accent-soft: #e3f6f6; /* latar ikon & badge */
+  --color-accent-line: #9ed8d8;
+
+  /* Netral */
+  --color-bg: #ffffff;
+  --color-surface: #e8f3fa; /* latar section berwarna */
+  --color-text: #1f2937; /* ~15:1 */
+  --color-text-body: #4b5563; /* ~7.6:1 */
+  --color-text-muted: #6b7280; /* ~4.8:1 */
+  --color-text-on-dark: #cbd5e1;
+  --color-border: #e5e7eb; /* garis dekoratif kartu */
+  --color-border-strong: #cbd5e1;
+  --color-input-border: #6b7280; /* batas input, kontras ≥ 3:1 */
+
+  /* Status */
+  --color-success: #1e6b3a;
+  --color-success-bg: #e8f5ec;
+  --color-danger: #a4161a;
+  --color-danger-bg: #fdecec;
+  --color-star: #b7791f;
+
+  /* Fokus */
+  --color-focus: #ffbf47; /* ring fokus, kontras ≥ 3:1 terhadap latar */
+  --color-focus-outline: #1f2937;
+
+  /* Tipografi — NFR-A11Y-04: min 16px, line-height ≥ 1.5 */
+  --font-family:
+    'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+  --font-family-alt: 'Inter', var(--font-family);
+  --font-size-sm: 0.875rem; /* 14px — hanya label pendukung */
+  --font-size-base: 1rem;
+  --font-size-md: 1.125rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 2rem;
+  --font-size-display: clamp(2rem, 1.2rem + 2.6vw, 3rem);
+  --line-height-base: 1.6;
+
+  /* Spasi & bentuk */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 1rem;
+  --space-4: 1.5rem;
+  --space-5: 2.5rem;
+  --section-space: clamp(3.5rem, 2rem + 4.5vw, 6rem);
+  --radius-sm: 0.625rem;
+  --radius: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-pill: 999px;
+  --container-max: 75rem; /* 1200px */
+  --gutter: clamp(1rem, 0.5rem + 2vw, 1.5rem);
+  --header-height: 89px; /* tinggi header situs yang sticky */
+
+  /* Bayangan */
+  --shadow-sm: 0 1px 1.5px rgb(11 60 110 / 6%), 0 4px 6px rgb(11 60 110 / 6%);
+  --shadow-md: 0 4px 5px rgb(11 60 110 / 8%), 0 16px 20px rgb(11 60 110 / 10%);
+
+  /* Breakpoint (NFR-RESP-01) — dipakai sebagai acuan media query:
+     mobile ≤ 640px, tablet 641–1024px, desktop ≥ 1025px */
+}
