@@ -14,3 +14,17 @@ export async function login({ email, password, remember }) {
 export async function logout() {
   await api.post('/auth/logout');
 }
+
+/**
+ * POST /auth/register — `role`: 'customer' (Pengguna) atau 'provider' (Mitra, menunggu
+ * verifikasi pengelola). Backend mengirim email verifikasi.
+ */
+export async function register(payload) {
+  const res = await api.post('/auth/register', payload);
+  return res?.data;
+}
+
+/** POST /auth/verification/resend — kirim ulang email verifikasi. */
+export async function resendVerification(email) {
+  await api.post('/auth/verification/resend', { email });
+}

@@ -1,12 +1,10 @@
 import { useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
-import logo from '@/assets/icons/logo-footer.svg';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { login } from '@/features/auth/authApi';
 import { safeRedirectPath } from '@/features/auth/redirect';
 import { PATHS } from '@/routes/paths';
 import {
-  ArrowLeftIcon,
   EyeIcon,
   EyeOffIcon,
   GoogleMarkIcon,
@@ -16,7 +14,7 @@ import {
   MapPinIcon,
   ShieldCheckIcon,
 } from '@/components/ui/icons';
-import AuthBackdrop from './AuthBackdrop';
+import AuthIntro, { AuthPageFooter } from './AuthIntro';
 import './auth.css';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -83,42 +81,11 @@ export default function LoginPage() {
 
   return (
     <div className="auth-page">
-      <aside className="auth-intro" aria-label="Tentang Difabel Jabar Connect">
-        <AuthBackdrop />
-        <div className="auth-intro__content">
-          <Link
-            to={PATHS.home}
-            className="auth-brand"
-            aria-label="Difabel Jabar Connect, ke beranda"
-          >
-            <img src={logo} alt="" width="48" height="48" />
-            <span aria-hidden="true">
-              <span className="auth-brand__name">Difabel Jabar Connect</span>
-              <span className="auth-brand__tagline">
-                Talenta Difabel, untuk Jawa Barat yang Lebih Inklusif
-              </span>
-            </span>
-          </Link>
-          <div className="auth-intro__text">
-            <h1>Selamat Datang Kembali!</h1>
-            <p>
-              Masuk untuk menemukan layanan terpercaya atau mengelola layanan Anda bersama Difabel
-              Jabar Connect.
-            </p>
-          </div>
-          <ul className="auth-intro__list">
-            {HIGHLIGHTS.map(({ text, icon: Icon }) => (
-              <li key={text}>
-                <span className="auth-intro__icon" aria-hidden="true">
-                  <Icon />
-                </span>
-                {text}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <p className="auth-intro__motto">Kesempatan yang Setara, Manfaat untuk Semua</p>
-      </aside>
+      <AuthIntro
+        title="Selamat Datang Kembali!"
+        text="Masuk untuk menemukan layanan terpercaya atau mengelola layanan Anda bersama Difabel Jabar Connect."
+        highlights={HIGHLIGHTS}
+      />
 
       <main id="main-content" tabIndex={-1} className="auth-main">
         <form className="auth-card" aria-labelledby="form-title" noValidate onSubmit={handleSubmit}>
@@ -270,13 +237,7 @@ export default function LoginPage() {
           </div>
         </form>
 
-        <div className="auth-main__foot">
-          <Link to={PATHS.home} className="auth-back">
-            <ArrowLeftIcon size={18} />
-            Kembali ke Beranda
-          </Link>
-          <p>© {new Date().getFullYear()} Difabel Jabar Connect</p>
-        </div>
+        <AuthPageFooter />
       </main>
     </div>
   );
