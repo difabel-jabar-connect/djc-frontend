@@ -1,0 +1,454 @@
+/* ===== Cari Layanan (desain HTML difabel-jabar-connect-cari-layanan) ===== */
+
+/* ----- 2. Header halaman ----- */
+.search-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 48px 0 136px;
+  background: var(--color-surface);
+}
+
+.search-hero__art > * {
+  position: absolute;
+}
+
+.search-hero__blob {
+  top: -120px;
+  right: -60px;
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  background: #d6eaf6;
+}
+
+.search-hero__ring {
+  top: 150px;
+  right: 230px;
+  width: 140px;
+  height: 140px;
+  border: 2px dashed var(--color-accent-line);
+  border-radius: 50%;
+}
+
+.search-hero__tile {
+  top: 40px;
+  right: 150px;
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  background: var(--color-accent-soft);
+  transform: rotate(12deg);
+}
+
+.search-hero__glass {
+  top: 120px;
+  right: 120px;
+  color: #c3ddee;
+}
+
+.search-hero__dots {
+  top: 36px;
+  right: 400px;
+  color: #b6d4e8;
+}
+
+.search-hero__sparkle {
+  top: 92px;
+  right: 420px;
+  color: var(--color-accent-strong);
+}
+
+.search-hero__content {
+  position: relative;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.search-hero__title {
+  margin: 0;
+  font-size: clamp(2rem, 1.6rem + 1.2vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.4px;
+}
+
+.search-hero__lead {
+  margin: 0;
+  color: var(--color-text-body);
+  font-size: var(--font-size-md);
+  line-height: 30px;
+}
+
+/* ----- 3. Panel pencarian ----- */
+.search-panel {
+  position: relative;
+  z-index: 1;
+  margin-top: -96px;
+}
+
+.search-panel__form {
+  display: grid;
+  gap: 20px;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+  box-shadow:
+    0 4px 10px rgb(11 60 110 / 8%),
+    0 16px 40px rgb(11 60 110 / 10%);
+}
+
+.search-panel__query {
+  display: flex;
+  gap: 12px;
+}
+
+.search-panel__query .input-shell {
+  flex: 1;
+}
+
+.search-panel__submit {
+  gap: var(--space-2);
+  min-height: 60px;
+  padding-inline: 36px;
+  font-size: 1.0625rem;
+  font-weight: 700;
+}
+
+.search-panel__filters {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.search-panel__filter {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+  min-width: 0;
+}
+
+.search-panel__label {
+  font-weight: 600;
+  line-height: 21px;
+}
+
+.search-panel__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+
+.search-panel__active {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.search-panel__active svg {
+  flex: none;
+}
+
+.search-panel__active strong {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+/* ----- 4. Chip kategori ----- */
+.category-filter {
+  padding-top: 32px;
+}
+
+.category-filter__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding-inline: 18px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.filter-chip:hover {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+.filter-chip[aria-pressed='true'] {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.filter-chip img,
+.filter-chip svg {
+  flex: none;
+}
+
+/* ----- 5. Konten 2 kolom ----- */
+.search-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-5) var(--space-4);
+  padding-block: 40px var(--section-space);
+}
+
+.search-layout__aside {
+  display: grid;
+  gap: var(--space-4);
+}
+
+/* Hasil */
+.results {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.results__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.results__title {
+  margin: 0;
+  font-size: var(--font-size-md);
+  font-weight: 500;
+  line-height: 26px;
+}
+
+.results__title strong {
+  color: var(--color-primary);
+  font-weight: 800;
+}
+
+.results__sort {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.results__sort-select {
+  flex: none;
+  width: 164px;
+  font-weight: 600;
+}
+
+.results__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.results__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+}
+
+.results__range {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.results__range strong {
+  color: var(--color-text);
+}
+
+.results__empty {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-2);
+  padding: var(--space-5) var(--space-4);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-muted);
+}
+
+.results__empty p {
+  margin: 0;
+}
+
+.results__empty-title {
+  color: var(--color-text);
+  font-size: var(--font-size-md);
+  font-weight: 700;
+}
+
+/* Sidebar */
+.side-card {
+  display: grid;
+  gap: var(--space-3);
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+  box-shadow:
+    0 1px 3px rgb(11 60 110 / 6%),
+    0 4px 12px rgb(11 60 110 / 6%);
+}
+
+.side-card__head {
+  display: grid;
+  gap: 10px;
+}
+
+.side-card__title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  line-height: 28px;
+}
+
+.city-counts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.city-counts li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.city-counts__badge {
+  display: grid;
+  place-items: center;
+  min-width: 32px;
+  height: 28px;
+  padding-inline: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+  color: #ffffff;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+}
+
+.help-card {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.help-card__icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: var(--color-primary);
+  color: #ffffff;
+}
+
+.help-card__text {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.help-card__text p {
+  margin: 0;
+  color: var(--color-text-body);
+  line-height: 26px;
+}
+
+.help-card__cta {
+  gap: var(--space-2);
+  min-height: 48px;
+  background: var(--color-bg);
+  font-weight: 700;
+}
+
+/* ----- Responsif ----- */
+@media (max-width: 1180px) {
+  .search-panel__filters {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .search-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .search-layout__aside {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+
+@media (max-width: 900px) {
+  .search-hero__art {
+    display: none;
+  }
+
+  .results__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .search-layout__aside {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .search-hero {
+    padding-bottom: 120px;
+  }
+
+  .search-panel__form {
+    padding: var(--space-3);
+  }
+
+  .search-panel__query {
+    flex-wrap: wrap;
+  }
+
+  .search-panel__submit {
+    flex-basis: 100%;
+  }
+
+  .search-panel__filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .results__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 420px) {
+  .search-panel__filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

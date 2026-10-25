@@ -1,0 +1,665 @@
+/* ===== Profil Penyedia (desain HTML difabel-jabar-connect-profil-penyedia) ===== */
+
+.profile-breadcrumb {
+  padding-block: var(--space-4) var(--space-2);
+}
+
+/* ----- 3. Header profil ----- */
+.profile-top {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  align-items: stretch;
+  gap: var(--space-4);
+  padding-top: var(--space-3);
+}
+
+.profile-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+  box-shadow:
+    0 1px 3px rgb(11 60 110 / 6%),
+    0 4px 12px rgb(11 60 110 / 6%);
+}
+
+.profile-card__banner {
+  position: relative;
+  height: 200px;
+  background: linear-gradient(120deg, #e8f3fa 0%, #ddf2f2 100%);
+}
+
+.profile-card__alumni-badge {
+  position: absolute;
+  top: var(--space-4);
+  left: var(--space-4);
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--color-bg);
+  box-shadow: 0 1px 3px rgb(11 60 110 / 10%);
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+}
+
+.profile-card__alumni-badge svg {
+  color: #0c7272;
+}
+
+.profile-card__banner-art {
+  position: absolute;
+  right: var(--space-4);
+  bottom: 0;
+}
+
+.profile-card__banner-icon {
+  position: absolute;
+  right: 48px;
+  bottom: 32px;
+  display: grid;
+  place-items: center;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 60%);
+}
+
+.profile-card__banner-icon img {
+  width: 56px;
+  height: 56px;
+}
+
+.profile-card__avatar {
+  position: absolute;
+  bottom: -56px;
+  left: 32px;
+  display: grid;
+  place-items: center;
+  width: 112px;
+  height: 112px;
+  border: 6px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 8px 20px rgb(11 60 110 / 20%);
+  color: #ffffff;
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.profile-card__body {
+  display: grid;
+  gap: 20px;
+  padding: 72px 32px 32px;
+}
+
+.profile-card__identity {
+  display: grid;
+  gap: 10px;
+}
+
+.profile-card__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.profile-card__badges .pill {
+  justify-self: auto;
+}
+
+.profile-card__name {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  line-height: 40px;
+  letter-spacing: -0.3px;
+}
+
+.profile-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+  padding: 0;
+  color: var(--color-text-muted);
+  list-style: none;
+}
+
+.profile-card__meta li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.profile-card__meta strong {
+  color: var(--color-text);
+}
+
+.profile-card__note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) 20px;
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+.profile-card__note p {
+  margin: 0;
+}
+
+.profile-card__note-title {
+  font-weight: 700;
+}
+
+.profile-card__note-text {
+  color: var(--color-text-body);
+  line-height: 24px;
+}
+
+.profile-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.profile-summary {
+  display: grid;
+  align-content: start;
+  gap: 20px;
+  padding: 28px var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+  box-shadow:
+    0 1px 3px rgb(11 60 110 / 6%),
+    0 4px 12px rgb(11 60 110 / 6%);
+}
+
+.profile-summary .side-card__title,
+.profile-section__title {
+  font-weight: 600;
+}
+
+.profile-summary__list {
+  margin: 0;
+}
+
+.profile-summary__item {
+  display: flex;
+  gap: 14px;
+  padding-block: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.profile-summary__item:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.profile-summary__item dt {
+  color: var(--color-text-muted);
+}
+
+.profile-summary__item dd {
+  margin: 2px 0 0;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.profile-summary__item dd.profile-summary__price {
+  color: var(--color-primary);
+  font-size: var(--font-size-lg);
+  font-weight: 800;
+  line-height: 28px;
+}
+
+/* ----- 4. Tab navigasi bagian ----- */
+.section-tabs {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+  overflow-x: auto;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.section-tabs__link {
+  display: flex;
+  flex: none;
+  align-items: center;
+  min-height: 52px;
+  margin-bottom: -1px;
+  padding-inline: 20px;
+  border-bottom: 3px solid transparent;
+  color: var(--color-text-body);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.section-tabs__link:hover {
+  border-bottom-color: #b6d4e8;
+  background: #f7fbfe;
+  color: var(--color-primary);
+}
+
+.section-tabs__link[aria-current='true'] {
+  border-bottom-color: var(--color-primary);
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.section-tabs__count {
+  margin-left: var(--space-2);
+  padding: 1px 8px;
+  border-radius: var(--radius-pill);
+  background: #f3f4f6;
+  color: var(--color-text-body);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+/* ----- 5. Konten 2 kolom ----- */
+.profile-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 48px var(--space-4);
+  padding-block: var(--space-5) var(--section-space);
+}
+
+.profile-main {
+  display: grid;
+  gap: 48px;
+}
+
+.profile-section {
+  display: grid;
+  gap: var(--space-3);
+  scroll-margin-top: var(--space-4);
+}
+
+.profile-section__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.profile-section__title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  line-height: 28px;
+}
+
+.profile-section__text {
+  margin: 0;
+  line-height: 28px;
+}
+
+.profile-section__empty {
+  margin: 0;
+  padding: 20px;
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-muted);
+}
+
+.profile-quote {
+  display: flex;
+  gap: var(--space-3);
+  margin: 4px 0 0;
+  padding: 20px var(--space-4);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+.profile-quote__icon {
+  flex: none;
+  color: var(--color-accent-strong);
+}
+
+.profile-quote blockquote {
+  margin: 0;
+  font-size: var(--font-size-md);
+  font-style: italic;
+  font-weight: 500;
+  line-height: 30px;
+}
+
+.profile-quote figcaption {
+  margin-top: var(--space-2);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* Statistik */
+.profile-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.profile-stats__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.profile-stats__text {
+  display: grid;
+  color: var(--color-text-muted);
+}
+
+.profile-stats__text strong {
+  color: var(--color-primary);
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 36px;
+}
+
+/* Jadwal mingguan */
+.week-days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.week-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 6px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  cursor: pointer;
+}
+
+.week-day:hover:not(:disabled) {
+  border-color: #0c7272;
+}
+
+.week-day[aria-pressed='true'] {
+  padding: 13px 5px;
+  border: 2px solid var(--color-accent-strong);
+  background: var(--color-accent-soft);
+}
+
+.week-day:disabled {
+  border-style: dashed;
+  border-color: #d1d5db;
+  background: #f9fafb;
+  cursor: not-allowed;
+}
+
+.week-day__name {
+  font-weight: 700;
+}
+
+.week-day[aria-pressed='true'] .week-day__name {
+  color: var(--color-primary);
+  font-weight: 800;
+}
+
+.week-day:disabled .week-day__name {
+  color: var(--color-text-body);
+}
+
+.week-day__date {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.week-day[aria-pressed='true'] .week-day__date {
+  color: var(--color-text);
+}
+
+.week-day__status {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.week-day__status--open {
+  color: #15803d;
+}
+
+.week-day__status--open svg {
+  color: #16a34a;
+}
+
+.week-day__status--selected {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.week-day__status--closed {
+  color: #b91c1c;
+}
+
+.week-day__status--closed svg {
+  color: #dc2626;
+}
+
+/* Paket */
+.package-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+  box-shadow:
+    0 1px 3px rgb(11 60 110 / 6%),
+    0 4px 12px rgb(11 60 110 / 6%);
+}
+
+.package-card__art {
+  display: grid;
+  place-items: center;
+  height: 96px;
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+.package-card__head {
+  display: grid;
+  gap: 4px;
+}
+
+.package-card__title {
+  margin: 0;
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.package-card__price {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.package-card__price strong {
+  color: var(--color-primary);
+  font-size: var(--font-size-lg);
+  font-weight: 800;
+}
+
+.package-card__desc {
+  margin: 0;
+  color: var(--color-text-muted);
+  line-height: 24px;
+}
+
+.package-card__cta {
+  margin-top: auto;
+}
+
+/* Ulasan */
+.review-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.review-card__author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.review-card__author strong {
+  display: block;
+}
+
+.review-card__avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.review-card__when {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.review-card__text {
+  margin: 0;
+  line-height: 24px;
+}
+
+/* Sidebar */
+.profile-aside {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.profile-aside .side-card__title,
+.trust-card .side-card__title {
+  font-weight: 600;
+}
+
+.profile-aside .side-card {
+  scroll-margin-top: var(--space-4);
+}
+
+.area-map {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+}
+
+.area-map__labels {
+  fill: var(--color-text);
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.area-map__center {
+  fill: #ffffff;
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.trust-card {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.trust-card__list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.trust-card__list li {
+  display: flex;
+  gap: 14px;
+}
+
+.trust-card__list strong {
+  display: block;
+}
+
+.trust-card__text {
+  display: block;
+  color: var(--color-text-body);
+  line-height: 24px;
+}
+
+/* ----- Responsif ----- */
+@media (max-width: 1100px) {
+  .profile-top,
+  .profile-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .profile-aside {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+
+@media (max-width: 760px) {
+  .profile-card__banner-art,
+  .profile-card__banner-icon {
+    display: none;
+  }
+
+  .profile-card__body {
+    padding: 72px var(--space-4) var(--space-4);
+  }
+
+  .week-days {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .profile-aside {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 420px) {
+  .week-days {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .profile-card__actions .btn {
+    flex: 1 1 100%;
+  }
+}

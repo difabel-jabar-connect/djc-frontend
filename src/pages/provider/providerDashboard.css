@@ -1,0 +1,419 @@
+/* ===== Dashboard Penyedia ===== */
+
+.welcome {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: 184px;
+  overflow: hidden;
+  padding: 32px 36px;
+  border: 1px solid #d3e5f1;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(115deg, #ffffff 0%, #eaf5fb 45%, #d9f1f0 100%);
+}
+
+.welcome__text {
+  display: grid;
+  gap: var(--space-2);
+  max-width: 32.5rem;
+}
+
+.welcome__text h1 {
+  display: grid;
+  margin: 0;
+  color: var(--color-primary);
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  line-height: 40px;
+  letter-spacing: -0.3px;
+}
+
+.welcome__text h1 span {
+  color: var(--color-text-body);
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  line-height: 26px;
+  letter-spacing: 0;
+}
+
+.welcome__text p {
+  margin: 0;
+  color: var(--color-text-body);
+  line-height: 26px;
+}
+
+.welcome__aside {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.welcome__quote {
+  width: 230px;
+  margin: 0;
+  padding: 14px var(--space-3);
+  border: 1px solid rgb(11 60 110 / 10%);
+  border-radius: var(--radius);
+  background: rgb(255 255 255 / 75%);
+}
+
+.welcome__quote blockquote {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-style: italic;
+  font-weight: 500;
+  line-height: 22px;
+}
+
+.provider-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.provider-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-4);
+}
+
+.provider-grid--stretch {
+  align-items: stretch;
+}
+
+/* Pesanan */
+.orders-table td {
+  padding: 12px 8px;
+}
+
+.orders-table th {
+  padding: 10px 8px;
+}
+
+.orders-table__actions {
+  display: flex;
+  gap: 6px;
+}
+
+.orders-table__detail td {
+  padding: 4px 8px 16px;
+  background: #f7fbfe;
+}
+
+.orders-table__detail dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+}
+
+.orders-table__detail dt {
+  color: var(--color-text-muted);
+}
+
+.orders-table__detail dd {
+  margin: 2px 0 0;
+  font-weight: 600;
+}
+
+/* Jadwal */
+.week-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.week-nav p {
+  margin: 0;
+  font-weight: 700;
+}
+
+.week-strip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.week-strip__day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 0 6px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  cursor: pointer;
+}
+
+.week-strip__day:hover {
+  background: var(--color-surface);
+}
+
+.week-strip__day--today {
+  border-color: var(--color-accent-strong);
+}
+
+.week-strip__day[aria-pressed='true'] {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+}
+
+.week-strip__name {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.week-strip__date {
+  font-weight: 700;
+}
+
+.week-strip__day[aria-pressed='true'] .week-strip__name {
+  color: var(--color-text-on-dark);
+}
+
+.week-strip__day[aria-pressed='true'] .week-strip__date {
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.week-strip__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.week-strip__dot--on {
+  background: #0c7272;
+}
+
+.week-strip__day[aria-pressed='true'] .week-strip__dot--on {
+  background: #5fd4d4;
+}
+
+.week-legend {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.agenda__title {
+  margin: 4px 0 0;
+  font-size: var(--font-size-base);
+  font-weight: 700;
+}
+
+.agenda {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.agenda__item {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-left-width: 4px;
+  border-radius: var(--radius);
+}
+
+.agenda__item--success {
+  border-left-color: #16a34a;
+}
+
+.agenda__item--info {
+  border-left-color: #2563eb;
+}
+
+.agenda__item--neutral {
+  border-left-color: #9ca3af;
+}
+
+.icon-tile--soft-teal {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+}
+
+.agenda__text {
+  display: grid;
+  flex: 1;
+  gap: 2px;
+  min-width: 0;
+}
+
+.agenda__time {
+  color: var(--color-text-body);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+}
+
+.agenda__text .dash-muted {
+  font-size: var(--font-size-sm);
+}
+
+.agenda__item .dash-status {
+  align-self: flex-start;
+}
+
+.agenda__empty {
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius);
+  color: var(--color-text-muted);
+}
+
+/* Tren */
+.trend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 20px;
+}
+
+.trend__chart {
+  flex: 1 1 320px;
+  min-width: 0;
+}
+
+.trend__totals {
+  display: grid;
+  flex: 0 0 190px;
+  gap: 12px;
+}
+
+.trend__totals > div {
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: #f7fbfe;
+}
+
+.trend__totals span:first-child {
+  color: var(--color-text-body);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.trend__totals strong {
+  color: var(--color-primary);
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 36px;
+}
+
+.trend__totals strong.trend__money {
+  font-size: 1.375rem;
+  line-height: 32px;
+}
+
+/* Kelengkapan profil */
+.profile-progress__bar {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.profile-progress__meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-sm);
+}
+
+.profile-progress__meta span {
+  color: var(--color-text-body);
+}
+
+.profile-progress__meta strong {
+  color: var(--color-primary);
+  font-weight: 800;
+}
+
+.checklist {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.checklist li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+}
+
+.checklist__done {
+  flex: none;
+  color: #16a34a;
+}
+
+.checklist__todo {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border: 2px dashed #9ca3af;
+  border-radius: 50%;
+}
+
+.checklist__label {
+  flex: 1;
+  font-size: 0.9375rem;
+}
+
+.checklist__label .dash-muted {
+  display: inline;
+}
+
+.checklist__status {
+  color: #15803d;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+}
+
+@media (max-width: 1280px) {
+  .provider-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .provider-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .welcome__aside {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .welcome {
+    padding: var(--space-4);
+  }
+
+  .provider-stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .orders-table__detail dl {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

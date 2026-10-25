@@ -1,0 +1,1089 @@
+/* ===== Halaman auth (desain HTML difabel-jabar-connect-login) ===== */
+
+.auth-shell {
+  min-height: 100vh;
+}
+
+.auth-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  min-height: 100vh;
+  background: #f7fafc;
+}
+
+/* ----- Panel kiri ----- */
+/* Panel kiri setinggi layar & menempel saat digulir, agar ilustrasi dan teksnya
+   tidak bergeser/berubah skala ketika tinggi form berubah (mis. Pengguna ↔ Mitra). */
+.auth-intro {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 640px;
+  overflow: hidden;
+  padding: 80px;
+  background: linear-gradient(140deg, #0b3c6e 0%, #0b4a72 45%, #0c7272 100%);
+  color: #ffffff;
+}
+
+.auth-intro__backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.auth-intro__content {
+  position: relative;
+  display: grid;
+  gap: 28px;
+  max-width: 30rem;
+}
+
+.auth-brand {
+  display: flex;
+  align-items: center;
+  justify-self: start;
+  gap: 12px;
+  min-height: 44px;
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.auth-brand img {
+  flex: none;
+}
+
+.auth-brand > span {
+  display: grid;
+  line-height: 1.3;
+}
+
+.auth-brand__name {
+  font-size: var(--font-size-lg);
+  font-weight: 800;
+}
+
+.auth-brand__tagline {
+  color: rgb(255 255 255 / 85%);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.auth-intro a:focus-visible {
+  outline-color: #ffffff;
+}
+
+.auth-intro__text {
+  display: grid;
+  gap: 14px;
+}
+
+.auth-intro__text .auth-intro__title {
+  margin: 0;
+  font-size: clamp(1.75rem, 1.2rem + 1.5vw, 2.25rem);
+  font-weight: 700;
+  line-height: 1.28;
+  letter-spacing: -0.4px;
+}
+
+.auth-intro__text p:not(.auth-intro__title) {
+  max-width: 26rem; /* tidak tertimpa pin dekoratif di tengah ilustrasi */
+  margin: 0;
+  color: rgb(255 255 255 / 85%);
+  font-size: var(--font-size-md);
+  line-height: 30px;
+}
+
+.auth-intro__list {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.auth-intro__list li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-weight: 600;
+}
+
+.auth-intro__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgb(255 255 255 / 24%);
+  border-radius: 50%;
+  background: rgb(255 255 255 / 14%);
+}
+
+.auth-intro__motto {
+  position: absolute;
+  bottom: 40px;
+  left: 80px;
+  margin: 0;
+  color: rgb(255 255 255 / 85%);
+  font-size: 0.9375rem;
+  font-style: italic;
+  font-weight: 500;
+}
+
+/* ----- Panel kanan ----- */
+.auth-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: var(--space-5) var(--gutter);
+}
+
+.auth-main:focus {
+  outline: none;
+}
+
+.auth-card {
+  display: grid;
+  gap: 20px;
+  width: 100%;
+  max-width: 440px;
+  margin: 0;
+  padding: 40px;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  background: var(--color-bg);
+  box-shadow:
+    0 4px 10px rgb(11 60 110 / 6%),
+    0 16px 40px rgb(11 60 110 / 8%);
+}
+
+.auth-demo {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  max-width: 440px;
+  padding: 20px 24px;
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background: #f7fafc;
+}
+
+.auth-demo h2 {
+  margin: 0;
+  font-size: var(--font-size-base);
+}
+
+.auth-demo p {
+  margin: 0;
+  color: var(--color-text-body);
+  font-size: 0.9375rem;
+}
+
+.auth-demo ul {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.auth-demo .btn {
+  flex-direction: column;
+  gap: 0;
+  height: auto;
+  min-height: 56px;
+  padding: 6px 8px;
+  line-height: 1.3;
+}
+
+.auth-demo__name {
+  color: var(--color-text-body);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.auth-card__head {
+  display: grid;
+  gap: 6px;
+  text-align: center;
+}
+
+.auth-card__head h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 32px;
+}
+
+.auth-card__head p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.9375rem;
+  line-height: 22px;
+}
+
+.auth-alert {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius);
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.auth-label {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.auth-required {
+  color: #dc2626;
+}
+
+.auth-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 52px;
+  padding: 0 14px;
+  border: 1.5px solid var(--color-input-border);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+}
+
+.auth-input--action {
+  padding-right: 4px;
+}
+
+.auth-input:focus-within {
+  border-color: var(--color-accent-strong);
+  box-shadow:
+    0 0 0 2px var(--color-accent-strong),
+    0 0 0 6px rgb(20 163 163 / 20%);
+}
+
+.auth-input--invalid {
+  border-color: var(--color-danger);
+}
+
+.auth-input__icon {
+  flex: none;
+  color: var(--color-text-body);
+}
+
+.auth-input input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+}
+
+.auth-input input::placeholder {
+  color: var(--color-text-muted);
+  opacity: 1;
+}
+
+.auth-input input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.auth-input__toggle {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-body);
+  cursor: pointer;
+}
+
+.auth-input__toggle:hover {
+  background: var(--color-surface);
+}
+
+.auth-card__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: -6px;
+}
+
+.auth-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  font-size: 0.9375rem;
+  cursor: pointer;
+}
+
+.auth-check input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.auth-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: #0c7272;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-underline-offset: 3px;
+}
+
+.auth-link:hover {
+  color: var(--color-primary);
+}
+
+.auth-link--strong {
+  min-height: 0;
+  font-weight: 700;
+}
+
+.auth-submit {
+  min-height: 48px;
+  margin-top: -4px;
+}
+
+.auth-submit:disabled {
+  cursor: progress;
+  opacity: 0.8;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+.auth-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-google svg {
+  color: var(--color-text-body);
+}
+
+.auth-google:hover {
+  border-color: var(--color-primary);
+  background: #f7fafc;
+}
+
+.auth-info {
+  margin-top: -8px;
+  text-align: center;
+}
+
+.auth-card__foot {
+  display: grid;
+  justify-items: center;
+  color: var(--color-text-body);
+  font-size: 0.9375rem;
+  text-align: center;
+}
+
+.auth-card__foot p {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  margin: 0;
+}
+
+.auth-main__foot {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+}
+
+.auth-main__foot p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.auth-back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  color: var(--color-primary);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-underline-offset: 3px;
+}
+
+/* ----- Responsif ----- */
+@media (max-width: 1100px) {
+  .auth-intro {
+    padding: 56px;
+  }
+
+  .auth-intro__motto {
+    left: 56px;
+  }
+}
+
+@media (max-width: 900px) {
+  .auth-page {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .auth-intro {
+    position: relative;
+    height: auto;
+    min-height: 0;
+    padding: var(--space-4) var(--gutter) var(--space-5);
+  }
+
+  .auth-intro__content {
+    gap: var(--space-4);
+    max-width: none;
+  }
+
+  .auth-intro__list,
+  .auth-intro__backdrop {
+    display: none;
+  }
+
+  .auth-intro__motto {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: var(--space-4) 20px;
+    border-radius: var(--radius-lg);
+  }
+
+  .auth-intro__text p {
+    font-size: var(--font-size-base);
+    line-height: 26px;
+  }
+}
+
+/* ===== Daftar & Pendaftaran Berhasil ===== */
+.auth-card--wide {
+  max-width: 480px;
+  gap: var(--space-3);
+  padding: 36px 40px;
+}
+
+.auth-field {
+  gap: 6px;
+}
+
+.auth-field .auth-input {
+  height: 48px;
+}
+
+/* Pilihan peran (segmented control dari radio) */
+.role-switch {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.role-switch legend {
+  float: left;
+  width: 100%;
+  margin-bottom: var(--space-2);
+  padding: 0;
+}
+
+.role-switch__options {
+  display: grid;
+  clear: both;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border-radius: 14px;
+  background: #eef2f6;
+}
+
+.role-switch__option {
+  position: relative;
+  cursor: pointer;
+}
+
+.role-switch__option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.role-switch__option span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  color: #374151;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.role-switch__option input:checked + span {
+  background: var(--color-primary);
+  box-shadow: 0 1px 3px rgb(11 60 110 / 25%);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.role-switch__option input:focus-visible + span {
+  outline: 3px solid var(--color-focus-outline);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px var(--color-focus);
+}
+
+.role-switch__help {
+  display: flex;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--color-text-body);
+  font-size: var(--font-size-sm);
+  line-height: 20px;
+}
+
+.role-switch__help svg {
+  flex: none;
+  margin-top: 2px;
+  color: #0c7272;
+}
+
+/* Prefix +62 & select */
+.auth-input--prefixed {
+  overflow: hidden;
+  padding-left: 0;
+}
+
+.auth-input__prefix {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  padding: 0 12px 0 14px;
+  border-right: 1px solid #d1d5db;
+  background: #f3f4f6;
+  font-weight: 600;
+}
+
+.auth-input {
+  position: relative;
+}
+
+.auth-select {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 28px 0 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  appearance: none;
+}
+
+.auth-select:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.auth-select--placeholder {
+  color: var(--color-text-muted);
+}
+
+.auth-select option {
+  color: var(--color-text);
+}
+
+.auth-select__chevron {
+  position: absolute;
+  right: 14px;
+  color: var(--color-text);
+  pointer-events: none;
+}
+
+/* Kekuatan kata sandi */
+.strength {
+  display: grid;
+  gap: 6px;
+}
+
+.strength__bars {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.strength__bars span {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-border);
+}
+
+.strength__bars--weak .is-on {
+  background: #dc2626;
+}
+
+.strength__bars--medium .is-on {
+  background: #d97706;
+}
+
+.strength__bars--strong .is-on {
+  background: #16a34a;
+}
+
+.strength__text {
+  color: var(--color-text-body);
+  font-size: var(--font-size-sm);
+}
+
+/* Persetujuan & catatan */
+.auth-agree {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: 44px;
+  padding-top: 2px;
+  font-size: 0.9375rem;
+  line-height: 22px;
+}
+
+.auth-agree input {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 1px 0 0;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.auth-agree label {
+  cursor: pointer;
+}
+
+.auth-agree a {
+  color: #0c7272;
+  font-weight: 700;
+  text-underline-offset: 3px;
+}
+
+.auth-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px var(--space-3);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+.auth-notice .icon-tile {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+}
+
+.auth-notice p {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  line-height: 21px;
+}
+
+/* Pendaftaran berhasil */
+.auth-success {
+  justify-items: center;
+  gap: 22px;
+  padding: 40px;
+  text-align: center;
+}
+
+.auth-success__text {
+  display: grid;
+  gap: 10px;
+}
+
+.auth-success__text h1 {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 36px;
+}
+
+.auth-success__text p {
+  margin: 0;
+  color: var(--color-text-body);
+  line-height: 26px;
+}
+
+.auth-success__text strong {
+  color: var(--color-text);
+}
+
+.auth-pending {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  padding: 14px var(--space-3);
+  border: 1px solid #fde68a;
+  border-radius: var(--radius);
+  background: #fffbeb;
+  font-size: 0.9375rem;
+  line-height: 22px;
+  text-align: left;
+}
+
+.auth-pending__icon {
+  flex: none;
+  margin-top: 2px;
+  color: #b45309;
+}
+
+.auth-pending strong {
+  display: block;
+  color: #b45309;
+  font-size: var(--font-size-sm);
+}
+
+.auth-success .auth-submit {
+  justify-self: stretch;
+  gap: var(--space-2);
+}
+
+.auth-success__resend {
+  margin: 0;
+  color: var(--color-text-body);
+  font-size: 0.9375rem;
+}
+
+.auth-text-button {
+  min-height: 44px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: #0c7272;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+@media (max-width: 480px) {
+  .auth-card--wide,
+  .auth-success {
+    padding: var(--space-4) 20px;
+  }
+}
+
+/* ===== Lupa Kata Sandi (4 layar) ===== */
+.auth-card__head--center {
+  justify-items: center;
+  gap: 14px;
+}
+
+.auth-card__head h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 32px;
+}
+
+.auth-card__head--center p {
+  margin-top: -8px;
+  line-height: 23px;
+}
+
+.auth-card__icon {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-primary);
+}
+
+.auth-card--reset {
+  gap: 18px;
+  padding: 36px 40px;
+}
+
+.auth-card__foot--inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  margin: 0;
+}
+
+.field-error__row {
+  display: flex;
+  gap: 6px;
+  font-size: var(--font-size-sm);
+  line-height: 20px;
+}
+
+.field-error__row svg {
+  flex: none;
+}
+
+.field-error__row .auth-link {
+  min-height: 0;
+  color: var(--color-primary);
+  font-size: inherit;
+  text-decoration: underline;
+}
+
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spin {
+    animation: none;
+  }
+}
+
+/* Kekuatan & syarat kata sandi */
+.pw-check {
+  display: grid;
+  gap: 8px;
+}
+
+.strength__text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.strength__text--strong strong,
+.strength__text--strong svg {
+  color: #15803d;
+}
+
+.strength__text--medium strong,
+.strength__text--medium svg {
+  color: #b45309;
+}
+
+.strength__text--weak strong,
+.strength__text--weak svg {
+  color: #b91c1c;
+}
+
+.pw-check__list {
+  display: grid;
+  gap: 6px;
+  margin: 2px 0 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: #f7fafc;
+  font-size: var(--font-size-sm);
+  line-height: 20px;
+  list-style: none;
+}
+
+.pw-check__list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-body);
+}
+
+.pw-check__list li.is-met {
+  color: var(--color-text);
+}
+
+.pw-check__list svg {
+  flex: none;
+  color: var(--color-text-muted);
+}
+
+.pw-check__state {
+  margin-left: auto;
+  font-weight: 600;
+}
+
+.is-met .pw-check__state {
+  color: #15803d;
+}
+
+.pw-match {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: #15803d;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.auth-submit-hint {
+  margin: -8px 0 0;
+  color: var(--color-text-body);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+
+.auth-expired {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #fecaca;
+  border-left: 4px solid #dc2626;
+  border-radius: var(--radius);
+  background: #fef2f2;
+}
+
+.auth-expired__text {
+  display: flex;
+  gap: 10px;
+}
+
+.auth-expired__text svg {
+  flex: none;
+  margin-top: 1px;
+  color: #b91c1c;
+}
+
+.auth-expired__text span {
+  display: grid;
+  gap: 2px;
+  color: #7f1d1d;
+  font-size: var(--font-size-sm);
+  line-height: 20px;
+}
+
+.auth-expired__text strong {
+  color: #b91c1c;
+  font-size: 0.9375rem;
+}
+
+.auth-success__text--compact {
+  gap: 8px;
+}
+
+.auth-success__text--compact h1 {
+  color: var(--color-text);
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 32px;
+}
+
+.auth-success__text--compact p {
+  font-size: 0.9375rem;
+  line-height: 24px;
+}
+
+.auth-resend {
+  display: grid;
+  justify-items: center;
+}
+
+.auth-resend .auth-success__resend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 2px 4px;
+}
+
+.auth-text-button:disabled {
+  color: var(--color-text-muted);
+  text-decoration: none;
+  cursor: not-allowed;
+}
+
+.auth-countdown {
+  color: var(--color-text-muted);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.auth-resend__hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  line-height: 20px;
+}
+
+.auth-demo-note {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius);
+  background: #f7fafc;
+  color: var(--color-text-body);
+  font-size: var(--font-size-sm);
+}
+
+.auth-success__text--brand h1 {
+  color: var(--color-primary);
+}
+
+/* Sembunyikan tombol "lihat sandi" bawaan Edge — sudah ada tombol mata sendiri. */
+.auth-input input::-ms-reveal,
+.auth-input input::-ms-clear {
+  display: none;
+}
