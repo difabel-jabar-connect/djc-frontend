@@ -1,0 +1,9 @@
+dist
+coverage
+node_modules
+package-lock.json
+
+# File governance repo (dikelola terpisah)
+CONTRIBUTING.md
+.github/ISSUE_TEMPLATE
+.github/pull_request_template.md
