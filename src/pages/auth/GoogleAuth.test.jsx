@@ -22,16 +22,19 @@ function mockGoogle({ code = 'kode-google', popupError } = {}) {
   return initCodeClient;
 }
 
+/** fetch tiruan yang selalu membuat Response baru (body hanya bisa dibaca sekali). */
+const respond = (body, status) => vi.fn(async () => jsonResponse(body, status));
+
+/** Panggilan ke POST /auth/google saja (di mode dev ada juga cek GET /health). */
+const googleCalls = (fetchMock) =>
+  fetchMock.mock.calls.filter(([url]) => String(url).endsWith('/auth/google'));
+
 beforeEach(() => vi.stubEnv('VITE_GOOGLE_CLIENT_ID', 'client-id.apps.googleusercontent.com'));
 
 describe('Masuk dengan Google', () => {
   it('membuka popup Google, mengirim code ke backend, lalu masuk sesuai peran', async () => {
     const initCodeClient = mockGoogle();
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValue(
-        jsonResponse({ data: { user: { name: 'Budi Santoso', role: 'customer' } } }),
-      );
+    const fetchMock = respond({ data: { user: { name: 'Budi Santoso', role: 'customer' } } });
     vi.stubGlobal('fetch', fetchMock);
     const user = userEvent.setup();
     const { router } = renderAt('/login');
@@ -45,7 +48,7 @@ describe('Masuk dengan Google', () => {
         ux_mode: 'popup',
       }),
     );
-    const [url, init] = fetchMock.mock.calls[0];
+    const [url, init] = googleCalls(fetchMock)[0];
     expect(url).toBe('http://api.test/api/v1/auth/google');
     expect(init.credentials).toBe('include');
     expect(JSON.parse(init.body)).toEqual({ code: 'kode-google', intent: 'login' });
@@ -55,10 +58,7 @@ describe('Masuk dengan Google', () => {
 
   it('akun Google belum terdaftar (404) menawarkan daftar', async () => {
     mockGoogle();
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue(jsonResponse({ error: { code: 'NOT_FOUND', message: 'x' } }, 404)),
-    );
+    vi.stubGlobal('fetch', respond({ error: { code: 'NOT_FOUND', message: 'x' } }, 404));
     const user = userEvent.setup();
     renderAt('/login');
 
@@ -79,7 +79,7 @@ describe('Masuk dengan Google', () => {
 
     await user.click(screen.getByRole('button', { name: 'Masuk dengan Google' }));
     expect(await screen.findByRole('status')).toHaveTextContent(/jendela google ditutup/i);
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(googleCalls(fetchMock)).toHaveLength(0);
     expect(screen.getByRole('button', { name: 'Masuk dengan Google' })).toBeEnabled();
   });
 
@@ -90,6 +90,45 @@ describe('Masuk dengan Google', () => {
 
     await user.click(screen.getByRole('button', { name: 'Masuk dengan Google' }));
     expect(await screen.findByRole('alert')).toHaveTextContent(/VITE_GOOGLE_CLIENT_ID/);
+  });
+});
+
+describe('Mode development tanpa backend', () => {
+  it('backend mati: profil diambil langsung dari Google lalu masuk sebagai pelanggan', async () => {
+    const initTokenClient = vi.fn((config) => ({
+      requestAccessToken: () => config.callback({ access_token: 'token-google' }),
+    }));
+    vi.stubGlobal('google', { accounts: { oauth2: { initTokenClient, initCodeClient: vi.fn() } } });
+    const fetchMock = vi.fn((url) =>
+      String(url).includes('googleapis.com')
+        ? Promise.resolve(
+            jsonResponse({ sub: '123', name: 'Farhan Haiko', email: 'farhan@gmail.com' }),
+          )
+        : Promise.reject(new TypeError('Failed to fetch')),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    const user = userEvent.setup();
+    const { router } = renderAt('/login');
+
+    // Tunggu cek GET /health (gagal) selesai.
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    await user.click(screen.getByRole('button', { name: 'Masuk dengan Google' }));
+
+    expect(initTokenClient).toHaveBeenCalledWith(
+      expect.objectContaining({ scope: 'openid email profile' }),
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://www.googleapis.com/oauth2/v3/userinfo',
+      expect.objectContaining({ headers: { Authorization: 'Bearer token-google' } }),
+    );
+    expect(googleCalls(fetchMock)).toHaveLength(0);
+    await vi.waitFor(() => expect(router.state.location.pathname).toBe('/'));
+    expect(await screen.findByRole('heading', { level: 1, name: /halo, farhan!/i })).toBeVisible();
+    expect(JSON.parse(sessionStorage.getItem('djc.session'))).toMatchObject({
+      email: 'farhan@gmail.com',
+      role: 'customer',
+      initials: 'FH',
+    });
   });
 });
 
@@ -108,11 +147,7 @@ describe('Daftar dengan Google', () => {
 
   it('Pengguna: daftar lalu langsung masuk ke beranda', async () => {
     mockGoogle();
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValue(
-        jsonResponse({ data: { user: { name: 'Rina Amalia', role: 'customer' } } }, 201),
-      );
+    const fetchMock = respond({ data: { user: { name: 'Rina Amalia', role: 'customer' } } }, 201);
     vi.stubGlobal('fetch', fetchMock);
     const user = userEvent.setup();
     const { router } = renderAt('/register');
@@ -120,7 +155,7 @@ describe('Daftar dengan Google', () => {
     await user.click(screen.getByRole('checkbox', { name: /saya menyetujui/i }));
     await user.click(screen.getByRole('button', { name: 'Daftar dengan Google' }));
 
-    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({
+    expect(JSON.parse(googleCalls(fetchMock)[0][1].body)).toEqual({
       code: 'kode-google',
       intent: 'register',
       role: 'customer',
@@ -130,15 +165,13 @@ describe('Daftar dengan Google', () => {
 
   it('Mitra: kota & kategori wajib, lalu ke halaman berhasil (menunggu verifikasi)', async () => {
     mockGoogle();
-    const fetchMock = vi.fn().mockResolvedValue(
-      jsonResponse(
-        {
-          data: {
-            user: { name: 'Siti', email: 'siti.nurjanah@gmail.com', role: 'provider' },
-          },
+    const fetchMock = respond(
+      {
+        data: {
+          user: { name: 'Siti', email: 'siti.nurjanah@gmail.com', role: 'provider' },
         },
-        201,
-      ),
+      },
+      201,
     );
     vi.stubGlobal('fetch', fetchMock);
     const user = userEvent.setup();
@@ -147,7 +180,7 @@ describe('Daftar dengan Google', () => {
     await user.click(screen.getByRole('checkbox', { name: /saya menyetujui/i }));
     await user.click(screen.getByRole('button', { name: 'Daftar dengan Google' }));
     expect(screen.getByLabelText(/kota\/kabupaten domisili/i)).toHaveFocus();
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(googleCalls(fetchMock)).toHaveLength(0);
 
     const kota = screen.getByLabelText(/kota\/kabupaten domisili/i);
     await user.selectOptions(kota, kota.querySelectorAll('option')[1]);
@@ -155,7 +188,7 @@ describe('Daftar dengan Google', () => {
     await user.selectOptions(kategori, kategori.querySelectorAll('option')[1]);
     await user.click(screen.getByRole('button', { name: 'Daftar dengan Google' }));
 
-    const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    const body = JSON.parse(googleCalls(fetchMock)[0][1].body);
     expect(body).toMatchObject({ intent: 'register', role: 'provider' });
     expect(body.city).toBeTruthy();
     expect(body.category).toBeTruthy();
@@ -169,10 +202,7 @@ describe('Daftar dengan Google', () => {
 
   it('akun Google sudah terdaftar (409) mengarahkan ke Masuk', async () => {
     mockGoogle();
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue(jsonResponse({ error: { code: 'CONFLICT', message: 'x' } }, 409)),
-    );
+    vi.stubGlobal('fetch', respond({ error: { code: 'CONFLICT', message: 'x' } }, 409));
     const user = userEvent.setup();
     renderAt('/register');
 
