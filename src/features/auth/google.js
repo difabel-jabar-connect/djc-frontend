@@ -96,3 +96,42 @@ export async function requestGoogleAuthCode() {
     client.requestCode();
   });
 }
+
+const USERINFO_URL = 'https://www.googleapis.com/oauth2/v3/userinfo';
+
+/**
+ * KHUSUS DEVELOPMENT (backend belum berjalan): ambil profil Google langsung di browser
+ * lewat token client + endpoint userinfo. Tidak aman untuk produksi karena tidak ada
+ * verifikasi di server — di produksi selalu pakai requestGoogleAuthCode + backend.
+ */
+export async function requestGoogleProfile() {
+  const clientId = getGoogleClientId();
+  if (!clientId) {
+    throw new GoogleAuthError('not_configured', 'Masuk dengan Google belum dikonfigurasi.');
+  }
+  const google = await loadGoogleScript();
+
+  const accessToken = await new Promise((resolve, reject) => {
+    const client = google.accounts.oauth2.initTokenClient({
+      client_id: clientId,
+      scope: SCOPES,
+      callback: (response) => {
+        if (response?.access_token) resolve(response.access_token);
+        else reject(new GoogleAuthError('denied', 'Izin akses akun Google tidak diberikan.'));
+      },
+      error_callback: (error) => {
+        const type = error?.type === 'popup_failed_to_open' ? 'popup_blocked' : 'popup_closed';
+        reject(new GoogleAuthError(type, POPUP_ERRORS[error?.type] ?? POPUP_ERRORS.popup_closed));
+      },
+    });
+    client.requestAccessToken({ prompt: 'select_account' });
+  });
+
+  const response = await fetch(USERINFO_URL, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (!response.ok) {
+    throw new GoogleAuthError('denied', 'Gagal membaca profil Google. Silakan coba lagi.');
+  }
+  return response.json(); // { sub, name, given_name, email, email_verified, picture }
+}
