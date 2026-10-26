@@ -1,13 +1,24 @@
 import { api } from '@/lib/api/client';
 
 /**
- * POST /auth/login — sesi disimpan backend sebagai HttpOnly cookie
- * (klien API selalu memakai credentials: 'include'). Mengembalikan `data` respons.
- * Path endpoint mengikuti rancangan Auth API (SP1-03); sesuaikan bila kontrak berubah.
+ * POST /auth/login — sesi disimpan backend sebagai HttpOnly cookie `djc_token`
+ * (klien API selalu memakai credentials: 'include'). Mengembalikan `data` respons:
+ * `{ user, token }`; `token` tidak dipakai frontend.
  */
 export async function login({ email, password, remember }) {
   const res = await api.post('/auth/login', { email, password, remember });
   return res?.data;
+}
+
+/**
+ * GET /auth/me — pengguna yang sedang login (dari cookie sesi), untuk memulihkan sesi
+ * saat aplikasi dimuat. Mengembalikan profil pengguna (+ `provider_profile` untuk provider).
+ * 401 bila belum login atau sesi kedaluwarsa.
+ */
+export async function fetchCurrentUser() {
+  const res = await api.get('/auth/me');
+  const { user, provider_profile: providerProfile } = res?.data ?? {};
+  return providerProfile !== undefined ? { ...user, provider_profile: providerProfile } : user;
 }
 
 /** POST /auth/logout — backend menghapus cookie sesi. */
@@ -17,7 +28,8 @@ export async function logout() {
 
 /**
  * POST /auth/register — `role`: 'customer' (Pengguna) atau 'provider' (Mitra, menunggu
- * verifikasi pengelola). Backend mengirim email verifikasi.
+ * verifikasi pengelola; wajib `alumni_reg_no` dan `city`). Tidak langsung login.
+ * Field lain: `full_name`, `email`, `phone` (+62…), `password`.
  */
 export async function register(payload) {
   const res = await api.post('/auth/register', payload);

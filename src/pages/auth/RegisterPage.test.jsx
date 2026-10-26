@@ -26,10 +26,11 @@ describe('Halaman Daftar', () => {
     expect(screen.getByRole('button', { name: 'Daftar' })).toBeInTheDocument();
   });
 
-  it('beralih ke Mitra menampilkan kota, kategori, dan catatan verifikasi', async () => {
+  it('beralih ke Mitra menampilkan nomor alumni, kota, kategori, dan catatan verifikasi', async () => {
     const user = userEvent.setup();
     renderAt('/register');
     await user.click(screen.getByRole('radio', { name: /mitra penyedia layanan/i }));
+    expect(screen.getByLabelText(/nomor alumni uptd ppsghd/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/kota\/kabupaten domisili/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/kategori keahlian/i)).toBeInTheDocument();
     expect(screen.getByText(/khusus alumni uptd ppsghd/i)).toBeInTheDocument();
@@ -44,6 +45,7 @@ describe('Halaman Daftar', () => {
 
     await user.click(screen.getByRole('button', { name: 'Daftar sebagai Mitra' }));
     expect(screen.getByText('Nama lengkap wajib diisi.')).toBeInTheDocument();
+    expect(screen.getByText('Nomor alumni UPTD PPSGHD wajib diisi.')).toBeInTheDocument();
     expect(screen.getByText('Pilih kategori keahlian.')).toBeInTheDocument();
     expect(screen.getByText(/perlu menyetujui/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/nama lengkap/i)).toHaveFocus();
@@ -72,6 +74,7 @@ describe('Halaman Daftar', () => {
     const { router } = renderAt('/register?peran=mitra');
 
     await fillCommon(user);
+    await user.type(screen.getByLabelText(/nomor alumni uptd ppsghd/i), ' PPSGHD-2024-007 ');
     await user.selectOptions(screen.getByLabelText(/kota\/kabupaten domisili/i), 'Kota Depok');
     await user.selectOptions(screen.getByLabelText(/kategori keahlian/i), 'jahit');
     await user.click(screen.getByRole('button', { name: 'Daftar sebagai Mitra' }));
@@ -80,10 +83,11 @@ describe('Halaman Daftar', () => {
     expect(url).toBe('http://api.test/api/v1/auth/register');
     expect(JSON.parse(init.body)).toEqual({
       role: 'provider',
-      name: 'Rina Amalia',
+      full_name: 'Rina Amalia',
       email: 'rina.amalia@gmail.com',
       phone: '+6281234567890',
       password: 'Rahasia123!',
+      alumni_reg_no: 'PPSGHD-2024-007',
       city: 'Kota Depok',
       category: 'jahit',
     });
@@ -117,6 +121,38 @@ describe('Halaman Daftar', () => {
       await screen.findByRole('heading', { level: 1, name: 'Pendaftaran Berhasil!' }),
     ).toBeVisible();
     expect(screen.queryByText(/menunggu verifikasi pengelola/i)).not.toBeInTheDocument();
+  });
+});
+
+describe('Halaman Daftar — error validasi dari server', () => {
+  it('menampilkan pesan per field dari details lalu memfokuskan field pertama', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        jsonResponse(
+          {
+            error: {
+              code: 'VALIDATION_ERROR',
+              message: 'Data yang dikirim belum valid.',
+              details: [
+                { field: 'phone', message: 'Nomor HP harus berformat +62, mis. +6281234567890.' },
+                { field: 'full_name', message: 'Nama lengkap minimal 2 karakter.' },
+              ],
+            },
+          },
+          400,
+        ),
+      ),
+    );
+    const user = userEvent.setup();
+    renderAt('/register');
+    await fillCommon(user);
+    await user.click(screen.getByRole('button', { name: 'Daftar' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/periksa kembali isian/i);
+    expect(screen.getByText('Nama lengkap minimal 2 karakter.')).toBeInTheDocument();
+    expect(screen.getByText(/nomor hp harus berformat \+62/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/nama lengkap/i)).toHaveFocus();
   });
 });
 

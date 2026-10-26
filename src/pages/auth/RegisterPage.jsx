@@ -11,6 +11,7 @@ import {
   ChevronDownIcon,
   CircleCheckIcon,
   GoogleMarkIcon,
+  GraduationIcon,
   GridIcon,
   HeartIcon,
   InfoIcon,
@@ -49,7 +50,27 @@ const ROLES = {
   },
 };
 
-const FIELD_ORDER = ['nama', 'email', 'wa', 'kota', 'kategori', 'sandi', 'sandi2', 'setuju'];
+const FIELD_ORDER = [
+  'nama',
+  'email',
+  'wa',
+  'alumni',
+  'kota',
+  'kategori',
+  'sandi',
+  'sandi2',
+  'setuju',
+];
+
+/** Nama field di error validasi backend (`details[].field`) → id field di form ini. */
+const SERVER_FIELDS = {
+  full_name: 'nama',
+  email: 'email',
+  phone: 'wa',
+  alumni_reg_no: 'alumni',
+  city: 'kota',
+  password: 'sandi',
+};
 
 /** Hapus 0 / 62 / +62 di depan dan karakter non-angka. */
 const normalizePhone = (value) => value.replace(/\D/g, '').replace(/^(62|0)/, '');
@@ -64,6 +85,7 @@ function validate(form) {
   if (!form.phone) errors.wa = 'Nomor WhatsApp wajib diisi.';
   else if (!PHONE_PATTERN.test(normalizePhone(form.phone)))
     errors.wa = 'Nomor WhatsApp belum valid, contoh: 81234567890.';
+  if (mitra && !form.alumniNo.trim()) errors.alumni = 'Nomor alumni UPTD PPSGHD wajib diisi.';
   if (mitra && !form.city) errors.kota = 'Pilih kota/kabupaten domisili.';
   if (mitra && !form.category) errors.kategori = 'Pilih kategori keahlian.';
   if (!form.password) errors.sandi = 'Kata sandi wajib diisi.';
@@ -101,6 +123,7 @@ export default function RegisterPage() {
     name: '',
     email: '',
     phone: '',
+    alumniNo: '',
     city: '',
     category: '',
     password: '',
@@ -135,18 +158,36 @@ export default function RegisterPage() {
       const email = form.email.trim();
       await register({
         role: role.apiRole,
-        name: form.name.trim(),
+        full_name: form.name.trim(),
         email,
         phone: `+62${normalizePhone(form.phone)}`,
         password: form.password,
-        ...(isMitra && { city: form.city, category: form.category }),
+        ...(isMitra && {
+          alumni_reg_no: form.alumniNo.trim(),
+          city: form.city,
+          category: form.category,
+        }),
       });
       navigate(PATHS.registerSuccess, { state: { email, role: form.role } });
     } catch (error) {
+      // Error validasi dari server ditampilkan di field masing-masing.
+      const serverErrors = {};
+      for (const detail of error?.details ?? []) {
+        const id = SERVER_FIELDS[detail?.field];
+        if (id && !serverErrors[id]) serverErrors[id] = detail.message;
+      }
+      const firstServerError = FIELD_ORDER.find((key) => serverErrors[key]);
+      if (firstServerError) {
+        setErrors(serverErrors);
+        document.getElementById(firstServerError)?.focus();
+      }
+
       const message =
         error?.status === 409
           ? 'Email ini sudah terdaftar. Silakan masuk atau gunakan email lain.'
-          : error?.message || 'Terjadi kesalahan. Silakan coba lagi.';
+          : firstServerError
+            ? 'Data belum valid. Periksa kembali isian yang ditandai.'
+            : error?.message || 'Terjadi kesalahan. Silakan coba lagi.';
       setStatus({ state: 'error', message });
     }
   };
@@ -268,6 +309,28 @@ export default function RegisterPage() {
 
           {isMitra && (
             <>
+              <AuthField
+                id="alumni"
+                label="Nomor Alumni UPTD PPSGHD"
+                icon={GraduationIcon}
+                error={errors.alumni}
+              >
+                {({ describedBy, invalid }) => (
+                  <input
+                    id="alumni"
+                    type="text"
+                    autoComplete="off"
+                    required
+                    maxLength={50}
+                    placeholder="Contoh: PPSGHD-2024-001"
+                    value={form.alumniNo}
+                    onChange={update('alumniNo')}
+                    aria-invalid={invalid}
+                    aria-describedby={describedBy}
+                  />
+                )}
+              </AuthField>
+
               <AuthField
                 id="kota"
                 label="Kota/Kabupaten Domisili"
