@@ -60,6 +60,8 @@ export default function RegisterSuccessPage() {
   const { state } = useLocation();
   const email = state?.email ?? '';
   const isMitra = state?.role === 'mitra';
+  // Daftar dengan Google: email sudah terverifikasi Google, tidak perlu tautan verifikasi.
+  const viaGoogle = state?.via === 'google';
   const [resend, setResend] = useState({ state: 'idle', message: '' });
 
   const handleResend = async () => {
@@ -91,16 +93,29 @@ export default function RegisterSuccessPage() {
           <MailSentArt />
           <div className="auth-success__text">
             <h1 id="sukses-title">Pendaftaran Berhasil!</h1>
-            <p>
-              Kami telah mengirim tautan verifikasi ke email Anda.{' '}
-              {email ? (
-                <>
-                  Buka email <strong>{maskEmail(email)}</strong> untuk mengaktifkan akun.
-                </>
-              ) : (
-                'Buka email tersebut untuk mengaktifkan akun.'
-              )}
-            </p>
+            {viaGoogle ? (
+              <p>
+                Akun Anda sudah terhubung dengan Google
+                {email && (
+                  <>
+                    {' '}
+                    (<strong>{maskEmail(email)}</strong>)
+                  </>
+                )}
+                . Email sudah terverifikasi otomatis.
+              </p>
+            ) : (
+              <p>
+                Kami telah mengirim tautan verifikasi ke email Anda.{' '}
+                {email ? (
+                  <>
+                    Buka email <strong>{maskEmail(email)}</strong> untuk mengaktifkan akun.
+                  </>
+                ) : (
+                  'Buka email tersebut untuk mengaktifkan akun.'
+                )}
+              </p>
+            )}
           </div>
 
           {isMitra && (
@@ -118,7 +133,7 @@ export default function RegisterSuccessPage() {
             <ArrowRightIcon size={18} />
           </Link>
 
-          {email && (
+          {email && !viaGoogle && (
             <p className="auth-success__resend">
               Tidak menerima email?{' '}
               <button

@@ -41,3 +41,15 @@ export async function requestPasswordReset(email) {
 export async function resetPassword({ token, password }) {
   await api.post('/auth/password/reset', { token, password });
 }
+
+/**
+ * POST /auth/google — tukar authorization code Google dengan sesi (cookie HttpOnly).
+ * `intent`: 'login' | 'register'; untuk daftar, sertakan `role` (customer/provider) dan
+ * data tambahan Mitra (city, category). Backend menukar code dengan redirect_uri
+ * "postmessage", memverifikasi id_token, lalu mengembalikan `data.user`.
+ * Error yang ditangani UI: 404 akun belum terdaftar (login), 409 sudah terdaftar (daftar).
+ */
+export async function authenticateWithGoogle({ code, intent, ...extra }) {
+  const res = await api.post('/auth/google', { code, intent, ...extra });
+  return res?.data;
+}
