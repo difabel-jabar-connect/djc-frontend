@@ -28,7 +28,7 @@ describe('Beranda', () => {
     [
       /penyedia layanan unggulan/i,
       /peta sebaran layanan/i,
-      /mudah dalam 3 langkah/i,
+      /rute mudah menggunakan layanan/i,
       /ramah & aksesibel untuk semua/i,
     ].forEach((name) => {
       expect(screen.getByRole('heading', { level: 2, name })).toBeInTheDocument();
@@ -73,5 +73,20 @@ describe('Beranda', () => {
       'href',
       '/services?kategori=terapi',
     );
+  });
+
+  it('kartu langkah menyorot titik pada ilustrasi rute (hover/fokus & klik)', async () => {
+    const user = userEvent.setup();
+    await renderHome();
+    const steps = within(screen.getByRole('list', { name: 'Langkah menggunakan layanan' }));
+    const pesan = steps.getByRole('button', { name: /langkah 2 pesan layanan/i });
+    expect(pesan).toHaveAttribute('aria-controls', 'rute-peta');
+    expect(screen.getByRole('img', { name: /ilustrasi rute/i })).toBeInTheDocument();
+
+    await user.click(pesan);
+    expect(pesan).toHaveAttribute('aria-pressed', 'true');
+    expect(document.querySelector('.route-map__marker.is-active')).toHaveTextContent('02');
+    await user.click(pesan);
+    expect(pesan).toHaveAttribute('aria-pressed', 'false');
   });
 });

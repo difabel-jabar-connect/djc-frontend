@@ -687,3 +687,102 @@ export const SendIcon = (p) => (
     <path d="m21.854 2.147-10.94 10.939" />
   </Svg>
 );
+
+/* —— Ikon desain halaman Tentang —— */
+
+export const LayersIcon = (p) => (
+  <Svg {...p}>
+    <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" />
+    <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" />
+    <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" />
+  </Svg>
+);
+
+export const PersonIcon = (p) => (
+  <Svg {...p}>
+    <circle cx="12" cy="8" r="4" />
+    <path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1" />
+  </Svg>
+);
+
+export const LightbulbIcon = (p) => (
+  <Svg {...p}>
+    <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" />
+    <path d="M9 18h6" />
+    <path d="M10 22h4" />
+  </Svg>
+);
+
+/** Tanda kutip (garis). */
+export const QuoteOutlineIcon = (p) => (
+  <Svg {...p}>
+    <path d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z" />
+    <path d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z" />
+  </Svg>
+);
+
+export const PointerClickIcon = (p) => (
+  <Svg {...p}>
+    <path d="M14 4.1 12 6" />
+    <path d="m5.1 8-2.9-.8" />
+    <path d="m6 12-1.9 2" />
+    <path d="M7.2 2.2 8 5.1" />
+    <path d="M9.037 9.69a.498.498 0 0 1 .653-.653l11 4.5a.5.5 0 0 1-.074.949l-4.349 1.041a1 1 0 0 0-.74.739l-1.04 4.35a.5.5 0 0 1-.95.074z" />
+  </Svg>
+);
+
+/** Peta lipat (versi Lucide terbaru). */
+export const MapFoldIcon = (p) => (
+  <Svg {...p}>
+    <path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z" />
+    <path d="M15 5.764v15" />
+    <path d="M9 3.236v15" />
+  </Svg>
+);
+
+export const TypeIcon = (p) => (
+  <Svg {...p}>
+    <path d="M4 7V4h16v3" />
+    <path d="M9 20h6" />
+    <path d="M12 4v16" />
+  </Svg>
+);
+
+export const ContrastIcon = (p) => (
+  <Svg {...p}>
+    <circle cx="12" cy="12" r="10" />
+    <path d="M12 18a6 6 0 0 0 0-12v12z" />
+  </Svg>
+);
+
+export const CompassIcon = (p) => (
+  <Svg {...p}>
+    <path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z" />
+    <circle cx="12" cy="12" r="10" />
+  </Svg>
+);
+
+export const ImageIcon = (p) => (
+  <Svg {...p}>
+    <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+    <circle cx="9" cy="9" r="2" />
+    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+  </Svg>
+);
+
+export const KeyboardIcon = (p) => (
+  <Svg {...p}>
+    <path d="M10 8h.01M12 12h.01M14 8h.01M16 12h.01M18 8h.01M6 8h.01M8 12h.01" />
+    <path d="M7 16h10" />
+    <rect width="20" height="16" x="2" y="4" rx="2" />
+  </Svg>
+);
+
+export const DevicesIcon = (p) => (
+  <Svg {...p}>
+    <path d="M18 8V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h8" />
+    <path d="M10 19v-3.96 3.15" />
+    <path d="M7 19h5" />
+    <rect width="6" height="10" x="16" y="12" rx="2" />
+  </Svg>
+);
