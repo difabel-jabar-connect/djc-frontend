@@ -1,29 +1,40 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router';
+import Dialog from '@/components/ui/Dialog';
 import { RESPONSE_HOURS } from '@/features/booking/bookingDraft';
 import { formatBookingRange } from '@/features/booking/customerBookings';
 import { PATHS, buildBookingDetailPath } from '@/routes/paths';
-import { CheckIcon, ReceiptIcon } from '@/components/ui/icons';
+import { CheckIcon, ReceiptIcon, XIcon } from '@/components/ui/icons';
 import { StatusBadge } from '@/pages/customer/BookingParts';
 
-/** Langkah 5 — pesanan terkirim (status Menunggu). */
-export default function BookingSuccess({ booking, provider }) {
+function SuccessContent({ booking, provider, onClose }) {
   const titleRef = useRef(null);
 
+  // Setelah dialog terbuka (showModal memfokuskan tombol pertama), pindahkan fokus ke judul
+  // agar pembaca layar langsung membacakan "Pesanan Berhasil Dikirim!".
   useEffect(() => {
-    titleRef.current?.focus();
+    const frame = requestAnimationFrame(() => titleRef.current?.focus());
+    return () => cancelAnimationFrame(frame);
   }, []);
 
   return (
-    <section className="booking-success" aria-labelledby="sukses-title">
+    <div className="booking-success">
+      <button
+        type="button"
+        className="dialog__close booking-success__close"
+        aria-label="Tutup"
+        onClick={onClose}
+      >
+        <XIcon size={22} strokeWidth={2} />
+      </button>
       <span className="booking-success__badge" aria-hidden="true">
-        <CheckIcon size={58} strokeWidth={3} />
+        <CheckIcon size={40} strokeWidth={3} />
       </span>
       <div className="booking-success__text">
-        <h2 id="sukses-title" ref={titleRef} tabIndex={-1}>
+        <h2 id="booking-success-title" ref={titleRef} tabIndex={-1}>
           Pesanan Berhasil Dikirim!
         </h2>
-        <p>
+        <p id="booking-success-desc">
           Kami akan memberi tahu Anda saat penyedia merespons. Batas respons {RESPONSE_HOURS} jam.
         </p>
       </div>
@@ -53,7 +64,7 @@ export default function BookingSuccess({ booking, provider }) {
           </dd>
         </div>
         <div>
-          <dt>Jadwal</dt>
+          <dt>Tanggal &amp; jam</dt>
           <dd>{formatBookingRange(booking)} WIB</dd>
         </div>
       </dl>
@@ -66,6 +77,21 @@ export default function BookingSuccess({ booking, provider }) {
           Kembali ke Beranda
         </Link>
       </div>
-    </section>
+    </div>
+  );
+}
+
+/** Pop-up setelah pesanan terkirim (status Menunggu). Tutup → ke Pesanan Saya. */
+export default function BookingSuccessDialog({ booking, provider, onClose }) {
+  return (
+    <Dialog
+      open={Boolean(booking)}
+      onClose={onClose}
+      labelledBy="booking-success-title"
+      describedBy="booking-success-desc"
+      className="dialog--success"
+    >
+      {booking && <SuccessContent booking={booking} provider={provider} onClose={onClose} />}
+    </Dialog>
   );
 }

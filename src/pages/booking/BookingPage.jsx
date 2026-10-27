@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useAuth } from '@/context/useAuth';
 import { useCustomer } from '@/context/useCustomer';
@@ -31,7 +31,7 @@ import StepService from './StepService';
 import StepSchedule from './StepSchedule';
 import StepDetails from './StepDetails';
 import StepReview from './StepReview';
-import BookingSuccess from './BookingSuccess';
+import BookingSuccessDialog from './BookingSuccess';
 import { BookingAssurance, ErrorSummary, StepNav } from './StepParts';
 import './booking.css';
 import './bookingSteps.css';
@@ -57,12 +57,13 @@ function initialDraft(profile, user, searchParams, today) {
 }
 
 /**
- * Pesan Layanan (FR-CUST-06/07) — 4 langkah + halaman sukses (desain pesan-layanan-1…5).
+ * Pesan Layanan (FR-CUST-06/07) — 4 langkah, lalu pop-up sukses (desain pesan-layanan-1…5).
  * Langkah aktif ada di URL (?langkah=2) sehingga tombol Back browser berpindah langkah;
  * langkah yang prasyaratnya belum lengkap dikembalikan ke langkah pertama yang belum lengkap.
  */
 export default function BookingPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const profile = getProviderProfile(id);
   const { user } = useAuth();
@@ -72,24 +73,19 @@ export default function BookingPage() {
   const today = startOfDay(new Date());
   const [draft, setDraft] = useState(() => initialDraft(profile, user, searchParams, today));
   const [attempted, setAttempted] = useState(null);
+  const [createdCode, setCreatedCode] = useState(null);
   const errorRef = useRef(null);
   const previousStep = useRef(null);
 
   const context = { draft, profile, user, today };
-  const created =
-    searchParams.get('langkah') === 'selesai'
-      ? findBooking(bookings, searchParams.get('kode') ?? '')
-      : null;
+  // Pesanan yang baru terkirim → pop-up sukses di atas langkah 4.
+  const created = createdCode ? findBooking(bookings, createdCode) : null;
   const requested = Number(searchParams.get('langkah')) || 1;
-  const step = !profile
-    ? 0
-    : created
-      ? 5
-      : Math.max(1, Math.min(requested, 4, firstIncompleteStep(context)));
+  const step = !profile ? 0 : Math.max(1, Math.min(requested, 4, firstIncompleteStep(context)));
 
   useEffect(() => {
-    if (profile && step >= 1 && step <= 4) saveDraft(profile.id, draft);
-  }, [profile, draft, step]);
+    if (profile && !createdCode && step >= 1 && step <= 4) saveDraft(profile.id, draft);
+  }, [profile, draft, step, createdCode]);
 
   // Pindah langkah: kembali ke atas lalu fokus ke judul langkah (bukan saat halaman pertama dibuka).
   useEffect(() => {
@@ -151,14 +147,16 @@ export default function BookingPage() {
     // TODO(API): POST pesanan ke backend; sementara disimpan di data pesanan lokal.
     const code = createBooking(draftToBooking(context));
     clearDraft(profile.id);
-    setDraft(createDraft({ profile, user }));
-    setSearchParams({ langkah: 'selesai', kode: code }, { replace: true });
+    setCreatedCode(code);
   };
+
+  // Menutup pop-up (✕ / Escape) → ke Pesanan Saya, tempat pesanan baru sudah tercantum.
+  const closeSuccess = () => navigate(PATHS.customerBookings, { replace: true });
 
   const stepProps = { profile, pkg, user, draft, date, hours, address, total, update, errors };
   const steps = BOOKING_STEPS.map((label, index) => ({
     label,
-    done: step === 5 || index < step - 1,
+    done: Boolean(created) || index < step - 1,
   }));
 
   return (
@@ -174,77 +172,73 @@ export default function BookingPage() {
             <h1 id="page-title" className="search-hero__title">
               Pesan Layanan
             </h1>
-            <p className="search-hero__lead">{LEADS[step] ?? DEFAULT_LEAD}</p>
+            <p className="search-hero__lead">{LEADS[created ? 5 : step] ?? DEFAULT_LEAD}</p>
           </div>
           <BookingStepper steps={steps} />
         </div>
       </section>
 
-      {step === 5 ? (
-        <div className="container booking-done">
-          <BookingSuccess booking={created} provider={profile} />
-        </div>
-      ) : (
-        <div className={`container booking-layout${step === 4 ? ' booking-layout--single' : ''}`}>
-          <form
-            className="booking-form"
-            aria-labelledby="step-title"
-            noValidate
-            onSubmit={handleSubmit}
-          >
-            <ErrorSummary ref={errorRef} errors={errors} />
-            {step === 1 && <StepService {...stepProps} />}
-            {step === 2 && (
-              <StepSchedule {...stepProps} today={today} onChangeService={() => goTo(1)} />
-            )}
-            {step === 3 && <StepDetails {...stepProps} />}
-            {step === 4 && <StepReview {...stepProps} goTo={goTo} />}
-            {step === 1 ? (
-              <StepNav
-                back={
-                  <Link
-                    to={buildProviderPath(profile.id)}
-                    className="btn btn--outline step-nav__back"
-                  >
-                    <ArrowLeftIcon />
-                    Kembali ke Profil
-                  </Link>
-                }
-              />
-            ) : (
-              <StepNav
-                onBack={() => goTo(step - 1)}
-                next={
-                  step === 4 ? (
-                    <button type="submit" className="btn btn--primary btn--xl step-nav__send">
-                      <SendIcon />
-                      Kirim Pesanan
-                      <ArrowRightIcon />
-                    </button>
-                  ) : undefined
-                }
-              />
-            )}
-          </form>
+      <BookingSuccessDialog booking={created} provider={profile} onClose={closeSuccess} />
 
-          {step < 4 && (
-            <aside className="booking-aside" aria-label="Ringkasan dan informasi">
-              <OrderSummary
-                provider={profile}
-                pkg={pkg}
-                date={date}
-                start={draft.start}
-                hours={hours}
-                address={step >= 3 ? address : null}
-                note={draft.note}
-                total={total}
-                detailsReached={step >= 3}
-              />
-              <BookingAssurance />
-            </aside>
+      <div className={`container booking-layout${step === 4 ? ' booking-layout--single' : ''}`}>
+        <form
+          className="booking-form"
+          aria-labelledby="step-title"
+          noValidate
+          onSubmit={handleSubmit}
+        >
+          <ErrorSummary ref={errorRef} errors={errors} />
+          {step === 1 && <StepService {...stepProps} />}
+          {step === 2 && (
+            <StepSchedule {...stepProps} today={today} onChangeService={() => goTo(1)} />
           )}
-        </div>
-      )}
+          {step === 3 && <StepDetails {...stepProps} />}
+          {step === 4 && <StepReview {...stepProps} goTo={goTo} />}
+          {step === 1 ? (
+            <StepNav
+              back={
+                <Link
+                  to={buildProviderPath(profile.id)}
+                  className="btn btn--outline step-nav__back"
+                >
+                  <ArrowLeftIcon />
+                  Kembali ke Profil
+                </Link>
+              }
+            />
+          ) : (
+            <StepNav
+              onBack={() => goTo(step - 1)}
+              next={
+                step === 4 ? (
+                  <button type="submit" className="btn btn--primary btn--xl step-nav__send">
+                    <SendIcon />
+                    Kirim Pesanan
+                    <ArrowRightIcon />
+                  </button>
+                ) : undefined
+              }
+            />
+          )}
+        </form>
+
+        {step < 4 && (
+          <aside className="booking-aside" aria-label="Ringkasan dan informasi">
+            <OrderSummary
+              provider={profile}
+              pkg={pkg}
+              date={date}
+              start={draft.start}
+              hours={hours}
+              address={step >= 3 ? address : null}
+              note={draft.note}
+              total={total}
+              detailsReached={step >= 3}
+            />
+            <BookingAssurance />
+          </aside>
+        )}
+      </div>
     </>
   );
 }

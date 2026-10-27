@@ -99,18 +99,40 @@ describe('Pesan Layanan', () => {
     await user.click(screen.getByRole('checkbox', { name: /saya menyetujui/i }));
     await user.click(screen.getByRole('button', { name: /kirim pesanan/i }));
 
-    // Sukses
-    expect(
-      await screen.findByRole('heading', { level: 2, name: 'Pesanan Berhasil Dikirim!' }),
-    ).toHaveFocus();
-    expect(router.state.location.search).toBe('?langkah=selesai&kode=BK-0013');
-    expect(screen.getByText('BK-0013')).toBeInTheDocument();
-    expect(screen.getByText('Sel, 20 Okt 2026 · 09.00–11.00 WIB')).toBeInTheDocument();
+    // Sukses: pop-up di atas langkah 4
+    const dialog = await screen.findByRole('dialog', { name: 'Pesanan Berhasil Dikirim!' });
+    await vi.waitFor(() => expect(within(dialog).getByRole('heading', { level: 2 })).toHaveFocus());
+    expect(dialog).toHaveAccessibleDescription(/batas respons 24 jam/i);
+    expect(router.state.location.search).toBe('?langkah=4');
+    expect(stepper()).toHaveTextContent('Kirim PesananSelesai');
+    expect(within(dialog).getByText('BK-0013')).toBeInTheDocument();
+    expect(dialog).toHaveTextContent('Status: Menunggu');
+    expect(within(dialog).getByText('Sel, 20 Okt 2026 · 09.00–11.00 WIB')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('link', { name: /lihat detail pesanan/i }));
+    await user.click(within(dialog).getByRole('link', { name: /lihat detail pesanan/i }));
     expect(await screen.findByRole('heading', { level: 1, name: /BK-0013/ })).toBeVisible();
     expect(screen.getByLabelText('Status pesanan')).toHaveTextContent('Menunggu respons penyedia');
     expect(screen.getByText('“Ada kucing”')).toBeInTheDocument();
+  });
+
+  it('menutup pop-up sukses membuka Pesanan Saya dengan pesanan baru', async () => {
+    const user = userEvent.setup();
+    const { router } = renderAt('/pesan/rizki-maulana?tanggal=2026-10-21', customer);
+    await next(user);
+    await user.click(await screen.findByRole('button', { name: '10.00 WIB' }));
+    await next(user);
+    await next(user);
+    await user.click(await screen.findByRole('checkbox', { name: /saya menyetujui/i }));
+    await user.click(screen.getByRole('button', { name: /kirim pesanan/i }));
+
+    const dialog = await screen.findByRole('dialog', { name: 'Pesanan Berhasil Dikirim!' });
+    await user.click(within(dialog).getByRole('button', { name: 'Tutup' }));
+    await vi.waitFor(() => expect(router.state.location.pathname).toBe('/bookings'));
+    expect(
+      await screen.findByRole('link', {
+        name: /BK-0013.*menunggu/i,
+      }),
+    ).toBeInTheDocument();
   });
 
   it('Ubah di langkah 4 kembali ke langkah terkait', async () => {
