@@ -715,34 +715,33 @@ p.selection-note {
   text-underline-offset: 3px;
 }
 
-/* ----- Sukses ----- */
-.booking-done {
-  display: flex;
-  justify-content: center;
-  padding-block: 48px var(--section-space);
+/* ----- Sukses (pop-up) ----- */
+.dialog--success {
+  width: min(560px, calc(100vw - 2 * var(--gutter)));
 }
 
 .booking-success {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 22px;
-  width: min(640px, 100%);
-  padding: 44px 48px 36px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-bg);
-  box-shadow:
-    0 1px 3px rgb(11 60 110 / 6%),
-    0 4px 12px rgb(11 60 110 / 6%);
+  gap: 18px;
+  padding-top: 8px;
   text-align: center;
+}
+
+.booking-success__close {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  margin: 0;
 }
 
 .booking-success__badge {
   display: grid;
   place-items: center;
-  width: 112px;
-  height: 112px;
+  width: 80px;
+  height: 80px;
   border: 2px solid #16a34a;
   border-radius: 50%;
   background: #f0fdf4;
@@ -757,8 +756,8 @@ p.selection-note {
 
 .booking-success__text h2 {
   margin: 0;
-  font-size: 1.875rem;
-  line-height: 38px;
+  font-size: 1.625rem;
+  line-height: 34px;
 }
 
 .booking-success__text h2:focus {
@@ -862,10 +861,6 @@ p.selection-note {
 
   .step-nav .btn {
     flex: 1 1 100%;
-  }
-
-  .booking-success {
-    padding: var(--space-4) 20px;
   }
 
   .booking-success__details > div {
