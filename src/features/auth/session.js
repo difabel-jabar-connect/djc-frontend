@@ -11,8 +11,25 @@ export const DEMO_ACCOUNTS = {
     id: 'u-budi',
     name: 'Budi Santoso',
     email: 'budi.santoso@contoh.id',
+    phone: '+62 812-3456-7890',
     role: 'customer',
     city: 'Bandung',
+    // Alamat tersimpan (contoh). TODO(API): ambil dari profil pengguna.
+    addresses: [
+      {
+        id: 'rumah',
+        label: 'Rumah',
+        primary: true,
+        text: 'Jl. Cigadung Raya No. 12, Cibeunying Kaler, Bandung',
+        distanceKm: 3,
+      },
+      {
+        id: 'kantor',
+        label: 'Kantor',
+        text: 'Jl. Asia Afrika No. 88, Sumur Bandung, Bandung',
+        distanceKm: 4,
+      },
+    ],
   },
   provider: { id: 'deni-setiawan', name: 'Deni Setiawan', role: 'provider', city: 'Bekasi' },
   admin: { id: 'u-andi', name: 'Andi Pratama', role: 'admin', city: 'Bandung' },

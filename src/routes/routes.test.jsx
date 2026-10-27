@@ -31,7 +31,6 @@ describe('Routing dasar', () => {
     ['/tentang', /tentang kami/i],
     ['/provider/siti-nurjanah', /siti nurjanah/i],
     ['/provider/tidak-ada', /penyedia tidak ditemukan/i],
-    ['/pesan/rizki-maulana', /pemesanan layanan/i],
     ['/login', /selamat datang kembali/i],
     ['/lupa-kata-sandi', /lupa kata sandi/i],
     ['/lupa-kata-sandi/cek-email', /cek email anda/i],
@@ -40,6 +39,7 @@ describe('Routing dasar', () => {
     ['/register', /mulai terhubung bersama kami/i],
     // Halaman pelanggan: belum masuk → diarahkan ke halaman Masuk.
     ['/bookings', /selamat datang kembali/i],
+    ['/pesan/rizki-maulana', /selamat datang kembali/i],
     ['/dashboard/provider', /selamat datang/i],
     ['/admin', /dashboard monitoring program/i],
   ])('rute %s merender halaman placeholder', (path, heading) => {

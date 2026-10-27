@@ -1,0 +1,874 @@
+/* ===== Pesan Layanan — langkah 1–4 & sukses (desain pesan-layanan-2…5) ===== */
+
+.booking-layout--single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* ----- Judul langkah ----- */
+.step-heading {
+  display: grid;
+  gap: 4px;
+}
+
+.step-heading__eyebrow {
+  margin: 0;
+  color: #0c7272;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.step-heading__title {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 36px;
+}
+
+.step-heading__title:focus {
+  outline: none;
+}
+
+.step-heading__desc {
+  margin: 0;
+  color: var(--color-text-body);
+  line-height: 24px;
+}
+
+/* ----- Navigasi langkah ----- */
+.step-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.step-nav .btn {
+  min-height: 52px;
+  padding-inline: 20px;
+  font-weight: 700;
+}
+
+.step-nav .btn.btn--xl {
+  min-height: 60px;
+  padding-inline: 32px;
+  font-size: 1.0625rem;
+}
+
+.text-action {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: var(--color-primary);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.field-hint--icon {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+}
+
+.field-hint--icon svg {
+  flex: none;
+  margin-top: 2px;
+  color: #0c7272;
+}
+
+.booking-card__title--sm {
+  font-size: var(--font-size-md);
+  line-height: 26px;
+}
+
+fieldset.booking-card {
+  display: block;
+}
+
+.booking-card__legend {
+  float: left;
+  width: 100%;
+  margin-bottom: var(--space-3);
+}
+
+.booking-card__legend + * {
+  clear: both;
+}
+
+.booking-card__anchor:focus {
+  outline: none;
+}
+
+.booking-card--tinted {
+  border-color: #c9e3f2;
+  background: var(--color-surface);
+  box-shadow: none;
+}
+
+/* ----- Langkah 1 ----- */
+.option-card__estimate {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ----- Langkah 2: jadwal ----- */
+.selected-package {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: var(--space-3) 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+  box-shadow:
+    0 1px 3px rgb(11 60 110 / 6%),
+    0 4px 12px rgb(11 60 110 / 6%);
+}
+
+.selected-package p {
+  flex: 1;
+  margin: 0;
+  line-height: 24px;
+}
+
+.selected-package__price {
+  color: var(--color-primary);
+}
+
+.schedule-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: var(--space-4);
+}
+
+.time-slots--3 .time-slot {
+  min-height: 52px;
+}
+
+.time-slots:focus {
+  outline: none;
+}
+
+.duration-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 20px var(--space-4);
+}
+
+.duration-card .field-hint {
+  margin: 4px 0 0;
+}
+
+.duration-stepper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.duration-stepper__btn {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  color: var(--color-primary);
+  cursor: pointer;
+}
+
+.duration-stepper__btn:hover:not(:disabled) {
+  background: var(--color-surface);
+}
+
+.duration-stepper__btn:disabled {
+  border-color: #d1d5db;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.duration-stepper__value {
+  display: grid;
+  place-items: center;
+  min-width: 88px;
+  height: 48px;
+  padding: 0 12px;
+  border: 1.5px solid var(--color-input-border);
+  border-radius: var(--radius);
+  color: var(--color-primary);
+  font-size: var(--font-size-md);
+  font-weight: 800;
+}
+
+p.selection-note {
+  margin: 0;
+  padding: 14px var(--space-3);
+  border: 1px solid #c9e3f2;
+  line-height: 24px;
+}
+
+/* ----- Langkah 3: detail ----- */
+.customer-box {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: #f7fbfe;
+}
+
+.customer-box .booking-avatar {
+  background: var(--color-primary);
+}
+
+.customer-box__name {
+  margin: 0;
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.customer-box__contacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 24px;
+  margin: 6px 0 0;
+}
+
+.customer-box__contacts > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  overflow-wrap: anywhere;
+}
+
+.customer-box__contacts svg {
+  flex: none;
+  color: #0c7272;
+}
+
+.input-shell__prefix {
+  color: var(--color-text-body);
+  font-weight: 600;
+}
+
+.address-fieldset {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.address-fieldset legend {
+  margin-bottom: 12px;
+  padding: 0;
+}
+
+.address-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.address-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: 44px;
+  padding: 16px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 14px;
+  background: var(--color-bg);
+  cursor: pointer;
+}
+
+.address-option:hover {
+  border-color: var(--color-primary);
+}
+
+.address-option:has(input:checked) {
+  padding: 15px;
+  border: 2px solid var(--color-primary);
+  background: #f7fbfe;
+}
+
+.address-option:has(input:focus-visible) {
+  box-shadow:
+    0 0 0 2px #ffffff,
+    0 0 0 5px var(--color-primary);
+}
+
+.address-option input {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin: 2px 0 0;
+  accent-color: var(--color-primary);
+}
+
+.address-option__body {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.address-option__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.address-option__head svg {
+  color: #0c7272;
+}
+
+.address-option__text {
+  color: var(--color-text-body);
+  line-height: 24px;
+}
+
+.address-option__chosen {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+}
+
+.address-option--other {
+  align-items: center;
+  padding: 15px;
+  border: 1.5px dashed #9ca3af;
+}
+
+.address-option--other:has(input:checked) {
+  border-style: solid;
+}
+
+.address-option__add {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.address-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 8px;
+  border: 1px solid #9dc3e0;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+}
+
+.area-map {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+}
+
+.area-map__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px var(--space-3);
+  margin: 0;
+  color: var(--color-text-body);
+  font-size: var(--font-size-sm);
+}
+
+.area-map__legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.area-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 14px;
+  border: 1px solid #bbf7d0;
+  border-radius: var(--radius);
+  background: #f0fdf4;
+  color: #166534;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.area-status svg {
+  flex: none;
+}
+
+.area-status--outside {
+  border-color: #fcd34d;
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.payment-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.payment-info .icon-tile {
+  width: 48px;
+  height: 48px;
+}
+
+.payment-info p {
+  margin: 0;
+  line-height: 24px;
+}
+
+.payment-info__title {
+  margin-bottom: 6px !important;
+  color: var(--color-primary);
+  font-size: var(--font-size-md);
+  font-weight: 700;
+}
+
+.payment-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0 0 0 62px;
+  list-style: none;
+}
+
+.payment-chips li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid #c9e3f2;
+  border-radius: var(--radius-pill);
+  background: var(--color-bg);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.payment-chips svg {
+  color: #0c7272;
+}
+
+/* ----- Ringkasan & biaya ----- */
+.order-summary__package-icon {
+  flex: none;
+  color: var(--color-primary);
+}
+
+.order-summary__details > .order-summary__row--empty {
+  margin: -4px -10px;
+  padding: 8px 10px;
+  border: 1px dashed #d1d5db;
+  border-radius: var(--radius-sm);
+  background: #f9fafb;
+}
+
+.order-summary__row--empty .order-summary__icon {
+  color: #9ca3af;
+}
+
+.order-summary__row--empty dd {
+  color: var(--color-text-body);
+  font-weight: 400;
+}
+
+.order-summary__address-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-primary);
+}
+
+.order-summary .address-badge {
+  height: 22px;
+  border: 0;
+}
+
+.order-summary .muted {
+  font-weight: 400;
+}
+
+.cost-rows {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.order-summary .cost-rows {
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+
+.cost-rows > div,
+.cost-total > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.cost-rows > div > span:first-child {
+  color: var(--color-text-body);
+}
+
+.cost-rows > div > span:last-child {
+  font-weight: 600;
+  text-align: right;
+}
+
+.cost-total {
+  display: grid;
+  gap: 4px;
+  padding: var(--space-3);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+.cost-total span:first-child {
+  font-weight: 700;
+}
+
+.cost-total strong {
+  display: block;
+  color: var(--color-primary);
+  font-size: 1.625rem;
+  font-weight: 800;
+  line-height: 32px;
+}
+
+.cost-total__note {
+  color: var(--color-text-body);
+  font-size: var(--font-size-sm);
+}
+
+/* ----- Langkah 4: periksa & kirim ----- */
+.review-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  align-items: start;
+  gap: var(--space-4);
+}
+
+.review-card {
+  padding: 8px 28px;
+}
+
+.review-card dl {
+  margin: 0;
+}
+
+.review-row {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 20px;
+  padding: var(--space-3) 0;
+}
+
+.review-row + .review-row {
+  border-top: 1px solid #eef0f3;
+}
+
+.review-row dt {
+  color: #0c7272;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.review-row dd {
+  margin: 0;
+}
+
+.review-value {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-weight: 600;
+  line-height: 24px;
+  overflow-wrap: anywhere;
+}
+
+.review-value svg {
+  flex: none;
+  color: #0c7272;
+}
+
+.review-value .muted {
+  font-weight: 500;
+}
+
+.review-provider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.review-provider > span:last-child {
+  display: grid;
+  gap: 2px;
+}
+
+.review-provider__rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-text-body);
+  font-size: var(--font-size-sm);
+}
+
+.review-side {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.review-side .cost-total span:first-child {
+  font-size: 1.0625rem;
+}
+
+.review-side .cost-total strong {
+  font-size: 1.75rem;
+  line-height: 36px;
+}
+
+.response-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid #fcd34d;
+  border-radius: var(--radius-sm);
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 0.9375rem;
+  line-height: 22px;
+}
+
+.response-note svg {
+  flex: none;
+  margin-top: 2px;
+  color: #b45309;
+}
+
+.agree-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px var(--space-3);
+  border: 1.5px solid var(--color-primary);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  line-height: 24px;
+  cursor: pointer;
+}
+
+.agree-box--invalid {
+  border-color: #b91c1c;
+}
+
+.agree-box input {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  accent-color: var(--color-primary);
+}
+
+.agree-box a {
+  color: #0c7272;
+  font-weight: 700;
+  text-underline-offset: 3px;
+}
+
+/* ----- Sukses ----- */
+.booking-done {
+  display: flex;
+  justify-content: center;
+  padding-block: 48px var(--section-space);
+}
+
+.booking-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  width: min(640px, 100%);
+  padding: 44px 48px 36px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+  box-shadow:
+    0 1px 3px rgb(11 60 110 / 6%),
+    0 4px 12px rgb(11 60 110 / 6%);
+  text-align: center;
+}
+
+.booking-success__badge {
+  display: grid;
+  place-items: center;
+  width: 112px;
+  height: 112px;
+  border: 2px solid #16a34a;
+  border-radius: 50%;
+  background: #f0fdf4;
+  color: #15803d;
+  box-shadow: 0 0 0 10px #f7fef9;
+}
+
+.booking-success__text {
+  display: grid;
+  gap: 8px;
+}
+
+.booking-success__text h2 {
+  margin: 0;
+  font-size: 1.875rem;
+  line-height: 38px;
+}
+
+.booking-success__text h2:focus {
+  outline: none;
+}
+
+.booking-success__text p {
+  margin: 0;
+  color: var(--color-text-body);
+  line-height: 26px;
+}
+
+.booking-success__details {
+  width: 100%;
+  margin: 0;
+  padding: 4px 20px;
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  text-align: left;
+}
+
+.booking-success__details > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 12px 0;
+}
+
+.booking-success__details > div + div {
+  border-top: 1px solid #d3e5f1;
+}
+
+.booking-success__details dt {
+  color: var(--color-text-body);
+}
+
+.booking-success__details dd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px 10px;
+  margin: 0;
+  font-weight: 600;
+  text-align: right;
+}
+
+.booking-success__code {
+  color: var(--color-primary);
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-size: 1.0625rem;
+  font-weight: 800;
+}
+
+.booking-success__details .booking-avatar {
+  font-size: 0.75rem;
+}
+
+.booking-success__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  width: 100%;
+}
+
+.booking-success__actions .btn {
+  flex: 1 1 14rem;
+}
+
+@media (max-width: 900px) {
+  .schedule-grid,
+  .address-options,
+  .review-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .selected-package {
+    flex-wrap: wrap;
+  }
+
+  .payment-chips {
+    padding-left: 0;
+  }
+
+  .review-card {
+    padding: 4px var(--space-3);
+  }
+
+  .review-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 12px;
+  }
+
+  .review-row dd {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .step-nav .btn {
+    flex: 1 1 100%;
+  }
+
+  .booking-success {
+    padding: var(--space-4) 20px;
+  }
+
+  .booking-success__details > div {
+    flex-wrap: wrap;
+  }
+}

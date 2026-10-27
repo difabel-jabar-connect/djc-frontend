@@ -136,3 +136,28 @@ export function calculateServiceFee(pkg, hours) {
   if (!pkg) return 0;
   return pkg.priceUnit === 'jam' ? pkg.priceFrom * Math.max(hours, 1) : pkg.priceFrom;
 }
+
+/* —— Jadwal langkah 2 (desain Pesan Layanan): jam mulai + durasi —— */
+
+/** Jam tutup layanan; jam mulai terakhir = SERVICE_END_HOUR - 1. */
+export const SERVICE_END_HOUR = 17;
+export const MIN_DURATION = 1;
+export const MAX_DURATION = 4;
+
+/** Slot jam mulai yang ditawarkan (08.00–16.00, tanpa jeda istirahat 12.00). */
+export const START_SLOTS = TIME_SLOTS.filter((slot) => hourOf(slot) < SERVICE_END_HOUR);
+
+/** Durasi terpanjang dari jam mulai tanpa melewati jeda istirahat, slot penuh, atau jam tutup. */
+export function maxDurationFrom(start, full = []) {
+  if (!start) return MAX_DURATION;
+  const available = new Set(START_SLOTS.filter((slot) => !full.includes(slot)).map(hourOf));
+  let hours = 0;
+  while (hours < MAX_DURATION && available.has(hourOf(start) + hours)) hours += 1;
+  return Math.max(hours, MIN_DURATION);
+}
+
+/** "09.00–11.00" */
+export const formatHourRange = (start, hours) =>
+  `${pad(hourOf(start))}.00–${pad(hourOf(start) + hours)}.00`;
+
+export const startHourOf = hourOf;

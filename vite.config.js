@@ -25,6 +25,8 @@ export default defineConfig({
     env: {
       // Nilai khusus pengujian, bukan URL backend sungguhan.
       VITE_API_BASE_URL: 'http://api.test/api/v1',
+      // Abaikan Client ID Google dari .env.local; test Google mengatur sendiri lewat vi.stubEnv.
+      VITE_GOOGLE_CLIENT_ID: '',
     },
   },
 });

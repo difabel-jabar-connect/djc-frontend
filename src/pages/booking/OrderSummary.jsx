@@ -1,58 +1,86 @@
-import { useState } from 'react';
-import { Link } from 'react-router';
-import { PATHS } from '@/routes/paths';
 import { formatRating, formatRupiah } from '@/lib/format';
 import {
-  ArrowRightIcon,
+  BriefcaseIcon,
   CalendarIcon,
   ClockIcon,
-  FileTextIcon,
-  InfoIcon,
-  LockIcon,
   MapPinIcon,
-  PencilIcon,
+  NoteIcon,
   StarFilledIcon,
 } from '@/components/ui/icons';
-import { ADMIN_FEE, formatLongDate, formatSlotRange } from '@/features/booking/schedule';
+import { formatLongDate } from '@/features/booking/schedule';
+import { isHourly, priceLabel, timeLabel } from '@/features/booking/bookingDraft';
 
-/** Ringkasan pesanan (sidebar, sticky). Tombol submit terhubung ke form lewat atribut `form`. */
+/** Rincian biaya (sidebar & langkah 4). Pembayaran langsung ke penyedia, tanpa biaya admin. */
+export function CostBreakdown({ pkg, hours, total, children }) {
+  const hourly = isHourly(pkg);
+  return (
+    <>
+      <div className="cost-rows">
+        <div>
+          <span>Harga satuan</span>
+          <span>{priceLabel(pkg)}</span>
+        </div>
+        {hourly && (
+          <div>
+            <span>Durasi</span>
+            <span>{hours} jam</span>
+          </div>
+        )}
+      </div>
+      <div className="cost-total">
+        <div>
+          <span>Estimasi Total</span>
+          <strong>{formatRupiah(total)}</strong>
+        </div>
+        {children}
+      </div>
+    </>
+  );
+}
+
+/** Ringkasan pesanan (sidebar langkah 1–3). Baris yang belum diisi diberi gaya putus-putus. */
 export default function OrderSummary({
-  formId,
   provider,
   pkg,
   date,
-  slots,
+  start,
+  hours,
   address,
   note,
-  serviceFee,
+  total,
+  detailsReached,
 }) {
-  const [showFeeInfo, setShowFeeInfo] = useState(false);
-  const hours = slots.length;
-  const total = serviceFee + ADMIN_FEE;
-
+  const hourly = isHourly(pkg);
   const rows = [
-    { label: 'Tanggal', value: date ? formatLongDate(date) : null, icon: CalendarIcon },
-    { label: 'Waktu', value: hours ? formatSlotRange(slots) : null, icon: ClockIcon },
-    { label: 'Alamat', value: address.trim() || null, icon: MapPinIcon },
+    { label: 'Tanggal', icon: CalendarIcon, value: date ? formatLongDate(date) : null },
+    { label: 'Waktu', icon: ClockIcon, value: timeLabel(start, hours, hourly) || null },
+    {
+      label: 'Alamat',
+      icon: MapPinIcon,
+      value: address ? (
+        <>
+          <span className="order-summary__address-label">
+            {address.label}
+            {address.primary && <span className="address-badge">Utama</span>}
+          </span>
+          <br />
+          {address.text}
+        </>
+      ) : null,
+    },
     {
       label: 'Catatan',
-      value: note.trim() || null,
-      icon: FileTextIcon,
-      empty: 'Belum ada catatan',
+      icon: NoteIcon,
+      value:
+        note.trim() || (detailsReached ? <span className="muted">Tidak ada catatan</span> : null),
     },
   ];
 
   return (
     <section className="order-summary" aria-labelledby="ringkasan-title">
-      <div className="order-summary__head">
-        <h2 id="ringkasan-title" className="side-card__title">
-          Ringkasan Pesanan
-        </h2>
-        <a href={`#${formId}`} className="link-arrow link-arrow--offset">
-          <PencilIcon size={18} />
-          Ubah Pesanan
-        </a>
-      </div>
+      <h2 id="ringkasan-title" className="side-card__title">
+        Ringkasan Pesanan
+      </h2>
 
       <div className="order-summary__provider">
         <span
@@ -74,74 +102,31 @@ export default function OrderSummary({
 
       {pkg && (
         <div className="order-summary__package">
-          <span className="icon-tile icon-tile--soft" aria-hidden="true">
-            <img src={provider.categoryIcon} alt="" width="20" height="20" />
-          </span>
+          <BriefcaseIcon className="order-summary__package-icon" />
           <span>
             <strong>{pkg.title}</strong>
-            <span className="order-summary__muted">
-              {formatRupiah(pkg.priceFrom)}
-              {pkg.priceUnit ? `/${pkg.priceUnit}` : ''}
-            </span>
+            <span className="order-summary__muted">{priceLabel(pkg)}</span>
           </span>
         </div>
       )}
 
       <dl className="order-summary__details">
-        {rows.map(({ label, value, icon: Icon, empty = 'Belum dipilih' }) => (
-          <div key={label}>
+        {rows.map(({ label, icon: Icon, value }) => (
+          <div key={label} className={value ? undefined : 'order-summary__row--empty'}>
             <Icon size={20} className="order-summary__icon" />
             <div>
               <dt>{label}</dt>
-              <dd className={value ? undefined : 'order-summary__placeholder'}>
-                {value ?? (label === 'Alamat' ? 'Belum diisi' : empty)}
-              </dd>
+              <dd>{value ?? 'Belum diisi'}</dd>
             </div>
           </div>
         ))}
       </dl>
 
-      <div className="order-summary__fees">
-        <div>
-          <span>Biaya Layanan{pkg?.priceUnit === 'jam' && hours ? ` (${hours} jam)` : ''}</span>
-          <span>{formatRupiah(serviceFee)}</span>
-        </div>
-        <div>
-          <span className="order-summary__fee-label">
-            Biaya Admin
-            <button
-              type="button"
-              className="order-summary__info"
-              aria-label="Info biaya admin"
-              aria-expanded={showFeeInfo}
-              aria-controls="admin-fee-info"
-              onClick={() => setShowFeeInfo((open) => !open)}
-            >
-              <InfoIcon size={18} />
-            </button>
-          </span>
-          <span>{formatRupiah(ADMIN_FEE)}</span>
-        </div>
-        <p id="admin-fee-info" className="order-summary__fee-info" hidden={!showFeeInfo}>
-          Biaya pemeliharaan platform dan perlindungan transaksi.
-        </p>
-      </div>
-
-      <div className="order-summary__total">
-        <span>Total Harga</span>
-        <strong>{formatRupiah(total)}</strong>
-      </div>
-
-      <button type="submit" form={formId} className="btn btn--primary btn--lg btn--block">
-        <LockIcon />
-        Konfirmasi Pesanan
-        <ArrowRightIcon />
-      </button>
-      <p className="order-summary__terms">
-        Dengan melanjutkan, Anda menyetujui{' '}
-        <Link to={`${PATHS.about}#syarat`}>Syarat &amp; Ketentuan</Link> dan{' '}
-        <Link to={`${PATHS.about}#privasi`}>Kebijakan Privasi</Link> Difabel Jabar Connect.
-      </p>
+      {pkg && (
+        <CostBreakdown pkg={pkg} hours={hours} total={total}>
+          <span className="cost-total__note">Harga final disepakati dengan penyedia.</span>
+        </CostBreakdown>
+      )}
     </section>
   );
 }

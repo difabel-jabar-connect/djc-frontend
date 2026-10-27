@@ -778,7 +778,8 @@ html:has(.app-header) {
   background: var(--color-danger-bg);
 }
 
-.error-summary h2 {
+.error-summary h2,
+.error-summary h3 {
   margin: 0 0 var(--space-2);
   color: var(--color-danger);
   font-size: var(--font-size-md);
