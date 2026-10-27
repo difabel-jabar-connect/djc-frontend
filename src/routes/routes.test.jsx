@@ -28,7 +28,7 @@ describe('Routing dasar', () => {
   it.each([
     ['/services', /cari layanan/i],
     ['/map', /peta penyedia jasa/i],
-    ['/tentang', /tentang kami/i],
+    ['/tentang', /menghubungkan keterampilan/i],
     ['/provider/siti-nurjanah', /siti nurjanah/i],
     ['/provider/tidak-ada', /penyedia tidak ditemukan/i],
     ['/login', /selamat datang kembali/i],
@@ -57,7 +57,9 @@ describe('Routing dasar', () => {
     renderAt('/');
     const nav = screen.getByRole('navigation', { name: /navigasi utama/i });
     await user.click(within(nav).getByRole('link', { name: 'Tentang' }));
-    expect(screen.getByRole('heading', { level: 1, name: /tentang kami/i })).toBeVisible();
+    expect(
+      screen.getByRole('heading', { level: 1, name: /menghubungkan keterampilan/i }),
+    ).toBeVisible();
     expect(within(nav).getByRole('link', { name: 'Tentang' })).toHaveAttribute(
       'aria-current',
       'page',

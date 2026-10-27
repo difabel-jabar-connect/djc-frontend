@@ -5,7 +5,7 @@ import { useAuth } from '@/context/useAuth';
 import HeroSection from './HeroSection';
 import FeaturedProvidersSection from './FeaturedProvidersSection';
 import ServiceMapSection from './ServiceMapSection';
-import HowItWorksSection from './HowItWorksSection';
+import RouteMapSection from './RouteMapSection';
 import AccessibilitySection from './AccessibilitySection';
 import './home.css';
 import CustomerHome from './CustomerHome';
@@ -21,7 +21,7 @@ export default function HomePage() {
       <HeroSection />
       <FeaturedProvidersSection />
       <ServiceMapSection />
-      <HowItWorksSection />
+      <RouteMapSection />
       <AccessibilitySection />
 
       {/* Panel cek koneksi backend (SP1-01) hanya untuk development, tidak ada di desain. */}

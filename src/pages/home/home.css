@@ -543,62 +543,6 @@
 }
 
 /* ----- 5. Cara menggunakan ----- */
-.steps {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-4);
-  margin: 48px 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.steps__item {
-  padding: 32px;
-  border-radius: var(--radius-lg);
-  background: var(--color-bg);
-  box-shadow: var(--shadow-sm);
-}
-
-.steps__top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.steps__icon {
-  display: grid;
-  place-items: center;
-  width: 64px;
-  height: 64px;
-  border-radius: var(--radius-lg);
-  background: var(--color-accent-soft);
-}
-
-.steps__number {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: var(--color-primary);
-  color: #ffffff;
-  font-size: var(--font-size-md);
-  font-weight: 800;
-}
-
-.steps__title {
-  margin: 20px 0 0;
-  font-size: var(--font-size-lg);
-  font-weight: 700;
-  line-height: 28px;
-}
-
-.steps__desc {
-  margin: 10px 0 0;
-  color: var(--color-text-muted);
-  line-height: 26px;
-}
-
 /* ----- 6. Aksesibilitas ----- */
 .a11y {
   display: grid;
@@ -663,6 +607,283 @@
   padding-bottom: var(--space-5);
 }
 
+/* ----- 5. Cara menggunakan · peta rute ----- */
+.route {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+  align-items: stretch;
+  gap: var(--space-4);
+  margin-top: var(--space-5);
+}
+
+.route__steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.route__steps li {
+  display: flex;
+  flex: 1;
+}
+
+.route__card {
+  display: flex;
+  flex: 1;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: 20px 20px 20px 18px;
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+  box-shadow: var(--shadow-sm);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    box-shadow 0.15s,
+    border-color 0.15s;
+}
+
+.route__card.is-active,
+.route__card[aria-pressed='true'] {
+  border-left-color: var(--color-accent-strong);
+  box-shadow:
+    0 2px 6px rgb(11 60 110 / 8%),
+    0 10px 24px rgb(11 60 110 / 10%);
+}
+
+.route__card-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius);
+  background: var(--color-accent-soft);
+  color: #0c7272;
+}
+
+.route__card-text {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.route__card-step {
+  color: #0c7272;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+.route__card-title {
+  color: var(--color-primary);
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  line-height: 26px;
+}
+
+.route__card-desc {
+  color: var(--color-text-body);
+  line-height: 24px;
+}
+
+/* Ilustrasi: kanvas 792×440; posisi (--x, --y) & ukuran diskalakan dengan lebar kanvas. */
+.route-map {
+  --px: calc(100cqw / 792);
+  position: relative;
+  overflow: hidden;
+  align-self: center;
+  width: 100%;
+  aspect-ratio: 792 / 440;
+  border-radius: 20px;
+  background: var(--color-bg);
+  box-shadow: var(--shadow-sm);
+  container-type: inline-size;
+}
+
+.route-map > *:not(.route-map__bg),
+.route-map > span > span {
+  position: absolute;
+  left: calc(var(--x) / 792 * 100%);
+  top: calc(var(--y) / 440 * 100%);
+}
+
+.route-map > span:not([style]) {
+  position: static;
+}
+
+.route-map__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.route-map__start {
+  width: calc(18 * var(--px));
+  height: calc(18 * var(--px));
+  border: calc(3 * var(--px)) solid #ffffff;
+  border-radius: 50%;
+  background: var(--color-primary);
+  box-shadow: 0 0 0 calc(2 * var(--px)) var(--color-accent-strong);
+}
+
+.route-map__start-label,
+.route-map__done {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(6 * var(--px));
+  border-radius: var(--radius-pill);
+  font-size: calc(14 * var(--px));
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.route-map__start-label {
+  padding: calc(4 * var(--px)) calc(10 * var(--px));
+  background: var(--color-primary);
+  color: #ffffff;
+}
+
+.route-map__done {
+  padding: calc(8 * var(--px)) calc(12 * var(--px));
+  border-radius: calc(10 * var(--px));
+  background: #ffffff;
+  color: #0c7272;
+  box-shadow:
+    0 2px 6px rgb(11 60 110 / 8%),
+    0 8px 20px rgb(11 60 110 / 10%);
+}
+
+.route-map__done svg {
+  width: calc(16 * var(--px));
+  height: calc(16 * var(--px));
+}
+
+.route-map__card {
+  display: flex;
+  align-items: center;
+  gap: calc(10 * var(--px));
+  width: calc(196 * var(--px));
+  height: calc(52 * var(--px));
+  padding: 0 calc(14 * var(--px)) 0 calc(10 * var(--px));
+  border-radius: calc(10 * var(--px));
+  background: #ffffff;
+  box-shadow:
+    0 2px 6px rgb(11 60 110 / 8%),
+    0 8px 20px rgb(11 60 110 / 10%);
+  color: var(--color-text);
+  font-size: calc(15 * var(--px));
+  font-weight: 700;
+  white-space: nowrap;
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
+}
+
+.route-map__card::after {
+  content: '';
+  position: absolute;
+  left: calc(92 * var(--px));
+  width: calc(12 * var(--px));
+  height: calc(12 * var(--px));
+  border-radius: 2px;
+  background: #ffffff;
+  transform: rotate(45deg);
+}
+
+.route-map__card--bottom::after {
+  bottom: calc(-6 * var(--px));
+}
+
+.route-map__card--top::after {
+  top: calc(-6 * var(--px));
+}
+
+.route-map__card.is-active {
+  transform: translateY(calc(-4 * var(--px)));
+  box-shadow:
+    0 0 0 2px var(--color-accent-strong),
+    0 8px 20px rgb(11 60 110 / 16%);
+}
+
+.route-map__card-icon {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: calc(32 * var(--px));
+  height: calc(32 * var(--px));
+  border-radius: calc(8 * var(--px));
+  background: var(--color-accent-soft);
+  color: #0c7272;
+}
+
+.route-map__card-icon svg {
+  width: calc(18 * var(--px));
+  height: calc(18 * var(--px));
+}
+
+.route-map__marker {
+  display: grid;
+  place-items: center;
+  width: calc(44 * var(--px));
+  height: calc(44 * var(--px));
+  border: calc(3 * var(--px)) solid var(--color-accent-strong);
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 4px 10px rgb(11 60 110 / 20%);
+  color: var(--color-primary);
+  font-size: calc(16 * var(--px));
+  font-weight: 800;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    box-shadow 0.15s;
+}
+
+.route-map__marker.is-active {
+  background: var(--color-primary);
+  color: #ffffff;
+  box-shadow:
+    0 0 0 4px #ffffff,
+    0 6px 14px rgb(11 60 110 / 30%);
+}
+
+.route-map__finish {
+  width: calc(56 * var(--px));
+  height: calc(70 * var(--px));
+  filter: drop-shadow(0 6px 10px rgb(11 60 110 / 25%));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route__card,
+  .route-map__card,
+  .route-map__marker {
+    transition: none;
+  }
+}
+
+@media (max-width: 1024px) {
+  .route {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  /* Ilustrasi dekoratif terlalu kecil di layar sempit; langkah tetap lengkap di kartu. */
+  .route-map {
+    display: none;
+  }
+}
+
 /* ----- Responsif ----- */
 @media (max-width: 1180px) {
   .hero__inner {
@@ -686,12 +907,6 @@
   }
 }
 
-@media (max-width: 860px) {
-  .steps {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
 @media (max-width: 640px) {
   .featured__list {
     grid-template-columns: minmax(0, 1fr);
@@ -707,9 +922,5 @@
 
   .service-map__figure {
     padding: var(--space-3);
-  }
-
-  .steps__item {
-    padding: var(--space-4);
   }
 }
