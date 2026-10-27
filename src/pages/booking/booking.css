@@ -264,60 +264,7 @@
   color: #16a34a;
 }
 
-/* b. Paket */
-.booking-package {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 20px;
-}
-
-.booking-package__info {
-  display: grid;
-  flex: 1 1 16rem;
-  gap: 4px;
-  min-width: 0;
-}
-
-.booking-package__info p {
-  margin: 0;
-}
-
-.booking-package__title {
-  font-size: var(--font-size-md);
-  font-weight: 700;
-  line-height: 24px;
-}
-
-.booking-package__desc {
-  color: var(--color-text-muted);
-}
-
-.booking-package__meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-3);
-  margin-top: 4px !important;
-}
-
-.booking-package__meta strong {
-  color: var(--color-primary);
-  font-weight: 800;
-}
-
-.booking-package__meta strong span {
-  color: var(--color-text-muted);
-  font-weight: 600;
-}
-
-.booking-package__meta > span {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--color-text-body);
-}
-
+/* b. Pilihan paket */
 .package-options {
   display: grid;
   gap: 12px;
@@ -360,31 +307,6 @@
 }
 
 /* c. Jadwal */
-.booking-schedule {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 32px;
-}
-
-.booking-schedule__date {
-  display: grid;
-  flex: 0 1 360px;
-  gap: 12px;
-  min-width: 0;
-}
-
-.booking-schedule__time {
-  display: grid;
-  flex: 1 1 260px;
-  gap: 12px;
-  min-width: 0;
-}
-
-.booking-schedule__time .field-hint {
-  margin-top: -8px;
-}
-
 .calendar {
   padding: 12px;
   border: 1px solid var(--color-border);
@@ -579,132 +501,6 @@
   color: var(--color-primary);
 }
 
-/* d. Alamat + catatan */
-.booking-pair {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-4);
-}
-
-/* e. Pembayaran */
-.booking-payment legend {
-  float: left;
-  width: 100%;
-  margin-bottom: var(--space-3);
-}
-
-.payment-options {
-  display: grid;
-  clear: both;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-3);
-}
-
-.payment-option {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 19px;
-  border: 1px solid var(--color-border-strong);
-  border-radius: 14px;
-  background: var(--color-bg);
-  cursor: pointer;
-}
-
-.payment-option:hover {
-  border-color: var(--color-primary);
-}
-
-.payment-option:has(input:checked) {
-  padding: 18px;
-  border: 2px solid var(--color-primary);
-  background: #f7fbfe;
-}
-
-.payment-option:has(input:focus-visible) {
-  outline: 3px solid var(--color-focus-outline);
-  outline-offset: 2px;
-  box-shadow: 0 0 0 6px var(--color-focus);
-}
-
-.payment-option__top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.payment-option input {
-  width: 22px;
-  height: 22px;
-  margin: 0;
-  accent-color: var(--color-primary);
-}
-
-.payment-option strong {
-  display: block;
-}
-
-.payment-option__desc {
-  display: block;
-  color: var(--color-text-body);
-  font-size: var(--font-size-sm);
-  line-height: 20px;
-}
-
-.payment-option__chosen {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--color-primary);
-  font-size: var(--font-size-sm);
-  font-weight: 700;
-}
-
-/* Berhasil */
-.booking-success {
-  display: grid;
-  justify-items: start;
-  gap: var(--space-3);
-  padding: var(--space-5);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-bg);
-  box-shadow:
-    0 1px 3px rgb(11 60 110 / 6%),
-    0 4px 12px rgb(11 60 110 / 6%);
-}
-
-.booking-success:focus {
-  outline: none;
-}
-
-.booking-success__icon {
-  color: #16a34a;
-}
-
-.booking-success h2 {
-  margin: 0;
-}
-
-.booking-success p {
-  margin: 0;
-  color: var(--color-text-body);
-  line-height: 26px;
-}
-
-.booking-success__dev {
-  padding: var(--space-2) var(--space-3);
-  border: 1px dashed var(--color-text-muted);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-sm);
-}
-
-.booking-success__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
 /* ----- Sidebar ----- */
 .booking-aside {
   position: sticky;
@@ -723,18 +519,6 @@
   box-shadow:
     0 4px 10px rgb(11 60 110 / 8%),
     0 16px 40px rgb(11 60 110 / 10%);
-}
-
-.order-summary__head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-}
-
-.order-summary__head .side-card__title {
-  font-weight: 600;
 }
 
 .order-summary__provider,
@@ -807,85 +591,6 @@
   font-weight: 600;
   overflow-wrap: anywhere;
   white-space: pre-line;
-}
-
-.order-summary__details dd.order-summary__placeholder {
-  color: var(--color-text-muted);
-  font-weight: 400;
-}
-
-.order-summary__fees {
-  display: grid;
-  gap: var(--space-2);
-  padding-top: var(--space-3);
-  border-top: 1px solid var(--color-border);
-}
-
-.order-summary__fees > div {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.order-summary__fees > div > span:first-child {
-  color: var(--color-text-body);
-}
-
-.order-summary__fees > div > span:last-child {
-  font-weight: 600;
-}
-
-.order-summary__fee-label {
-  display: inline-flex;
-  align-items: center;
-}
-
-.order-summary__info {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  margin: -12px -8px;
-  border: 0;
-  background: transparent;
-  color: var(--color-text-body);
-  cursor: pointer;
-}
-
-.order-summary__fee-info {
-  margin: 0;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-}
-
-.order-summary__total {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-3);
-  border-radius: var(--radius);
-  background: var(--color-surface);
-  font-weight: 700;
-}
-
-.order-summary__total strong {
-  color: var(--color-primary);
-  font-size: 1.625rem;
-  font-weight: 800;
-  line-height: 32px;
-}
-
-.order-summary__terms {
-  margin: 0;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-  line-height: 22px;
-  text-align: center;
-}
-
-.order-summary__terms a {
-  color: #0c7272;
-  font-weight: 600;
 }
 
 .booking-note {
@@ -965,11 +670,6 @@
 
   .stepper__step + .stepper__step {
     flex: none;
-  }
-
-  .booking-pair,
-  .payment-options {
-    grid-template-columns: minmax(0, 1fr);
   }
 }
 

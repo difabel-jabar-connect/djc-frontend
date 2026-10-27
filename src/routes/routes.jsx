@@ -51,10 +51,10 @@ export const routes = [
       { path: PATHS.map, element: <MapPage /> },
       { path: PATHS.about, element: <AboutPage /> },
       { path: PATHS.providerDetail, element: <ProviderDetailPage /> },
-      { path: PATHS.booking, element: <BookingPage /> },
       {
         element: <RequireAuth allow="customer" />,
         children: [
+          { path: PATHS.booking, element: <BookingPage /> },
           { path: PATHS.customerBookings, element: <CustomerBookingsPage /> },
           { path: PATHS.bookingDetail, element: <BookingDetailPage /> },
         ],

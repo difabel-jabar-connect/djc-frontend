@@ -32,8 +32,8 @@ function BookingCard({ booking, linkId }) {
   const detailPath = buildBookingDetailPath(booking.code);
 
   return (
-    <li className="booking-card">
-      <div className="booking-card__top">
+    <li className="order-card">
+      <div className="order-card__top">
         <span className="booking-code">
           <span className="visually-hidden">Kode pesanan </span>
           {booking.code}
@@ -41,24 +41,24 @@ function BookingCard({ booking, linkId }) {
         <StatusBadge status={booking.status} />
       </div>
 
-      <div className="booking-card__who">
+      <div className="order-card__who">
         <ProviderAvatar provider={provider} />
         <div>
-          <h2 className="booking-card__title">
+          <h2 className="order-card__title">
             {/* Seluruh kartu bisa diklik lewat tautan judul (pseudo-elemen meregang). */}
-            <Link id={linkId} to={detailPath} className="booking-card__link">
+            <Link id={linkId} to={detailPath} className="order-card__link">
               {booking.service}
               <span className="visually-hidden">
                 , {booking.code}, status {statusLabel}
               </span>
             </Link>
           </h2>
-          <p className="booking-card__provider">{provider.name} · Penyedia</p>
+          <p className="order-card__provider">{provider.name} · Penyedia</p>
         </div>
       </div>
 
       {booking.status === 'menunggu' && booking.autoCancelHours && (
-        <p className="booking-card__note">
+        <p className="order-card__note">
           <ClockIcon />
           <span>
             Batal otomatis dalam <strong>{booking.autoCancelHours} jam</strong> jika tidak direspons
@@ -66,8 +66,8 @@ function BookingCard({ booking, linkId }) {
         </p>
       )}
 
-      <div className="booking-card__bottom">
-        <div className="booking-card__meta">
+      <div className="order-card__bottom">
+        <div className="order-card__meta">
           <span>
             <CalendarIcon size={18} />
             {formatBookingDate(booking)}
@@ -77,7 +77,7 @@ function BookingCard({ booking, linkId }) {
             Estimasi {formatRupiah(bookingTotal(booking))}
           </span>
         </div>
-        <div className="booking-card__actions">
+        <div className="order-card__actions">
           {booking.status === 'selesai' && !booking.reviewed && (
             <Link
               to={buildBookingDetailPath(booking.code, { ulasan: 'tulis' })}

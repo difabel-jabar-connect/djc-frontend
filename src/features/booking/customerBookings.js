@@ -259,3 +259,9 @@ export const formatBookingLong = (b) =>
 
 /** "19 Okt 2026, 11.40 WIB" (dari stempel `YYYY-MM-DDTHH:mm`) */
 export const formatStamp = (at) => `${formatDay(at)}, ${at.slice(11, 13)}.${at.slice(14, 16)} WIB`;
+
+/** Kode pesanan berikutnya: BK-0012 → BK-0013. TODO(API): kode dibuat backend. */
+export function nextBookingCode(bookings) {
+  const max = Math.max(0, ...bookings.map((b) => Number(b.code.replace(/\D/g, '')) || 0));
+  return `BK-${String(max + 1).padStart(4, '0')}`;
+}

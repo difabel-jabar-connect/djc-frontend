@@ -95,7 +95,7 @@ const PROFILE_DETAILS = {
     responseTime: 'Respons dalam 1 jam',
     joinedYear: 2023,
     highlights: ['Penyedia Terverifikasi', 'Respons Cepat', 'Rating Tinggi'],
-    workDays: [0, 1, 2, 3, 4, 5, 6],
+    workDays: [1, 2, 3, 4, 5, 6], // Minggu libur (desain Pesan Layanan · Jadwal)
     packages: [
       {
         id: 'kebersihan-rumah',
