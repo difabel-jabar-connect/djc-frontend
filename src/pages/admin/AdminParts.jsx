@@ -10,6 +10,9 @@ import {
   EyeIcon,
   EyeOffIcon,
   FlagIcon,
+  GlobeIcon,
+  LockIcon,
+  LogOutIcon,
   GiftIcon,
   HandIcon,
   HeartIcon,
@@ -311,6 +314,10 @@ const AUDIT_ICONS = {
   aktifkan_kategori: PowerIcon,
   hapus_kategori: TrashIcon,
   batal_otomatis: ClockIcon,
+  ubah_profil: UserIcon,
+  ubah_sandi: LockIcon,
+  keluarkan_sesi: LogOutIcon,
+  ubah_info_platform: GlobeIcon,
 };
 
 /** Ikon untuk jenis aksi Audit Log. */

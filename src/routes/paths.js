@@ -26,6 +26,11 @@ export const PATHS = {
   adminReviews: '/admin/ulasan',
   adminOrders: '/admin/pesanan',
   adminAudit: '/admin/audit',
+  adminSettings: '/admin/pengaturan',
+  adminSettingsSecurity: '/admin/pengaturan/keamanan',
+  adminSettingsNotifications: '/admin/pengaturan/notifikasi',
+  adminSettingsPlatform: '/admin/pengaturan/informasi',
+  adminSettingsRules: '/admin/pengaturan/aturan',
 };
 
 /** URL halaman admin beserta query (mis. `{ cari: 'Joko' }`); nilai kosong diabaikan. */

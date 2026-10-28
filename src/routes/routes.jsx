@@ -25,6 +25,12 @@ import CategoriesPage from '@/pages/admin/CategoriesPage';
 import ReviewsPage from '@/pages/admin/ReviewsPage';
 import OrdersPage from '@/pages/admin/OrdersPage';
 import AuditLogPage from '@/pages/admin/AuditLogPage';
+import SettingsLayout from '@/pages/admin/settings/SettingsLayout';
+import ProfileSettings from '@/pages/admin/settings/ProfileSettings';
+import SecuritySettings from '@/pages/admin/settings/SecuritySettings';
+import NotificationSettings from '@/pages/admin/settings/NotificationSettings';
+import PlatformInfoSettings from '@/pages/admin/settings/PlatformInfoSettings';
+import SystemRulesSettings from '@/pages/admin/settings/SystemRulesSettings';
 import RequireAuth from './RequireAuth';
 import { PATHS } from './paths';
 
@@ -57,6 +63,17 @@ export const routes = [
           { path: PATHS.adminReviews, element: <ReviewsPage /> },
           { path: PATHS.adminOrders, element: <OrdersPage /> },
           { path: PATHS.adminAudit, element: <AuditLogPage /> },
+          {
+            path: PATHS.adminSettings,
+            element: <SettingsLayout />,
+            children: [
+              { index: true, element: <ProfileSettings /> },
+              { path: PATHS.adminSettingsSecurity, element: <SecuritySettings /> },
+              { path: PATHS.adminSettingsNotifications, element: <NotificationSettings /> },
+              { path: PATHS.adminSettingsPlatform, element: <PlatformInfoSettings /> },
+              { path: PATHS.adminSettingsRules, element: <SystemRulesSettings /> },
+            ],
+          },
         ],
       },
     ],

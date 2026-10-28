@@ -1,7 +1,6 @@
 import { useId, useState } from 'react';
 import Drawer from '@/components/ui/Drawer';
 import {
-  AlertCircleIcon,
   BriefcaseIcon,
   ChevronDownIcon,
   HistoryIcon,
@@ -25,6 +24,7 @@ import {
   validateAccount,
 } from '@/features/admin/accountForm';
 import { REASON_MAX } from '@/features/admin/adminFormat';
+import { FieldError, Required, TextField } from './FormFields';
 
 const TYPE_ICONS = { pengguna: UserIcon, pengelola: ShieldIcon };
 
@@ -42,62 +42,6 @@ const ACCESS_OPTIONS = [
       'Berikan kata sandi langsung, misalnya saat mendaftarkan user secara tatap muka. Kata sandi dibuat otomatis setelah akun dibuat.',
   },
 ];
-
-function Required() {
-  return (
-    <>
-      <span className="form-required" aria-hidden="true">
-        {' '}
-        *
-      </span>
-      <span className="visually-hidden"> (wajib)</span>
-    </>
-  );
-}
-
-function FieldError({ id, children }) {
-  if (!children) return null;
-  return (
-    <p id={id} className="ad-field-error">
-      <AlertCircleIcon size={16} strokeWidth={2.25} />
-      {children}
-    </p>
-  );
-}
-
-/** Input berikon (desain Tambah Akun). `prefix` = teks di depan nilai, mis. "+62". */
-function TextField({ id, label, icon: Icon, prefix, help, error, required = true, ...inputProps }) {
-  const describedBy = [error && `${id}-error`, help && `${id}-help`].filter(Boolean).join(' ');
-  return (
-    <div className="ad-field">
-      <label htmlFor={id} className="form-label">
-        {label}
-        {required && <Required />}
-      </label>
-      <div className={`ad-input${error ? ' ad-input--invalid' : ''}`}>
-        <Icon size={20} />
-        {prefix && (
-          <span className="ad-input__prefix" aria-hidden="true">
-            {prefix}
-          </span>
-        )}
-        <input
-          id={id}
-          required={required}
-          aria-invalid={Boolean(error)}
-          aria-describedby={describedBy || undefined}
-          {...inputProps}
-        />
-      </div>
-      <FieldError id={`${id}-error`}>{error}</FieldError>
-      {help && (
-        <p id={`${id}-help`} className="ad-hint">
-          {help}
-        </p>
-      )}
-    </div>
-  );
-}
 
 function AccountForm({ formId, initialType, takenEmails, onSubmit, ids }) {
   const [form, setForm] = useState(() => emptyAccountForm(initialType));
