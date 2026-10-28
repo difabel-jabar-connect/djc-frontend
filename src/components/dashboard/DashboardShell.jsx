@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link, NavLink, useNavigate } from 'react-router';
 import logo from '@/assets/icons/logo.svg';
 import { useRouteFocus } from '@/hooks/useRouteFocus';
 import { useAuth } from '@/context/useAuth';
@@ -8,10 +8,38 @@ import UserMenu from '@/components/ui/UserMenu';
 import { BellIcon, ChevronDownIcon, LogOutIcon } from '@/components/ui/icons';
 import './dashboard.css';
 
+/** Lonceng notifikasi: `to` = rute SPA, `href` = anchor di halaman. */
+function NotificationButton({ count, to, href }) {
+  const props = {
+    className: 'dash-icon-button',
+    'aria-label': `Notifikasi, ${count} belum dibaca`,
+  };
+  const content = (
+    <>
+      <BellIcon size={22} />
+      {count > 0 && (
+        <span className="dash-icon-button__badge" aria-hidden="true">
+          {count}
+        </span>
+      )}
+    </>
+  );
+  return to ? (
+    <Link to={to} {...props}>
+      {content}
+    </Link>
+  ) : (
+    <a href={href} {...props}>
+      {content}
+    </a>
+  );
+}
+
 /**
  * Kerangka dashboard (Provider & Pengelola): topbar, sidebar, dan konten utama.
- * Item sidebar: `href` = lompat ke bagian di halaman, `to` = halaman lain,
- * tanpa keduanya = fitur belum tersedia (ditandai "Segera").
+ * Item sidebar: `href` = lompat ke bagian di halaman, `to` = halaman lain (NavLink,
+ * `aria-current="page"` otomatis; `end` = cocok persis), tanpa keduanya = fitur belum
+ * tersedia (ditandai "Segera"). Notifikasi: `to` (rute SPA) atau `href` (anchor).
  */
 export default function DashboardShell({
   subtitle,
@@ -47,18 +75,7 @@ export default function DashboardShell({
           </span>
         </Link>
         <div className="dash-topbar__actions">
-          <a
-            href={notifications.href}
-            className="dash-icon-button"
-            aria-label={`Notifikasi, ${notifications.count} belum dibaca`}
-          >
-            <BellIcon size={22} />
-            {notifications.count > 0 && (
-              <span className="dash-icon-button__badge" aria-hidden="true">
-                {notifications.count}
-              </span>
-            )}
-          </a>
+          <NotificationButton {...notifications} />
           <span className="dash-topbar__divider" aria-hidden="true" />
           <UserMenu
             className="dash-user"
@@ -87,7 +104,7 @@ export default function DashboardShell({
         <nav className="dash-side" aria-label={navLabel}>
           <ul className="dash-side__list">
             {navItems.map(
-              ({ label, icon: Icon, href, to, current, badge, badgeTone, badgeLabel }) => {
+              ({ label, icon: Icon, href, to, end, current, badge, badgeTone, badgeLabel }) => {
                 const content = (
                   <>
                     <Icon size={22} />
@@ -106,9 +123,9 @@ export default function DashboardShell({
                 return (
                   <li key={label}>
                     {to ? (
-                      <Link to={to} className="dash-side__item" aria-label={ariaLabel}>
+                      <NavLink to={to} end={end} className="dash-side__item" aria-label={ariaLabel}>
                         {content}
-                      </Link>
+                      </NavLink>
                     ) : href ? (
                       <a
                         href={href}

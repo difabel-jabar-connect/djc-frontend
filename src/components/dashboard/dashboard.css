@@ -331,6 +331,7 @@ a.dash-side__item:hover {
 /* ----- Konten ----- */
 .dash-main {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   flex: 1;
   align-content: start;
   gap: var(--space-4);
@@ -575,6 +576,7 @@ a.dash-side__item:hover {
 
 /* Tabel */
 .dash-table-wrap {
+  position: relative;
   overflow-x: auto;
 }
 
@@ -818,6 +820,7 @@ a.dash-side__item:hover {
   }
 
   .dash-side {
+    position: relative;
     width: auto;
     padding: var(--space-2) var(--gutter);
     border-right: 0;

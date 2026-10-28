@@ -1,548 +1,451 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
-import logoFooter from '@/assets/icons/logo-footer.svg';
-import DashboardShell from '@/components/dashboard/DashboardShell';
-import { BarChart, DonutProgress, LineChart } from '@/components/dashboard/charts';
-import { PanelHead, StatCard, StatusBadge, Trend } from '@/components/dashboard/DashboardWidgets';
+import { StatCard, Trend } from '@/components/dashboard/DashboardWidgets';
 import {
-  AlertIcon,
-  BagIcon,
+  ArrowRightIcon,
   BriefcaseIcon,
   CalendarIcon,
-  CheckIcon,
-  ClockSmallIcon,
-  DashboardIcon,
-  DownloadIcon,
-  GraduationIcon,
-  MapIcon,
-  MapPinIcon,
-  MinusIcon,
-  PlusIcon,
-  QuoteIcon,
-  ReportIcon,
-  SettingsIcon,
+  ClipboardListIcon,
+  ClockIcon,
+  FlagIcon,
+  ShapesIcon,
   ShieldCheckIcon,
-  XIcon,
+  UsersIcon,
 } from '@/components/ui/icons';
+import { useAdmin } from '@/context/useAdmin';
+import { AUDIT_ACTIONS, ORDER_TREND, PLATFORM_STATS } from '@/features/admin/adminData';
 import {
-  ADMIN_USER,
-  ALUMNI_PER_MONTH,
-  LATEST_ALUMNI,
-  LATEST_SERVICES,
-  MONTHS,
-  ORDERS_PER_MONTH,
-  PERIOD,
-  PROGRAM_STATS,
-  SERVICE_MAP_CITIES,
-  TARGET,
-  VERIFICATION,
-} from '@/features/dashboard/adminDashboardData';
-import { getCategory } from '@/features/search/catalog';
-import { JABAR_BORDERS, JABAR_OUTLINE } from '@/features/map/jabarOutline';
-import { downloadCsv } from '@/lib/csv';
+  formatDate,
+  formatDateTime,
+  formatDayMonth,
+  formatWaiting,
+  daysSince,
+  hoursSince,
+} from '@/features/admin/adminFormat';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
-import { PATHS } from '@/routes/paths';
-import './adminDashboard.css';
+import { PATHS, buildAdminPath } from '@/routes/paths';
+import { AuditActionIcon, Badge, CategoryIcon, FilterSelect, PersonCell } from './AdminParts';
 
-const number = new Intl.NumberFormat('id-ID');
-const fmt = (value) => number.format(value);
-const lastIndex = (series) => series.reduce((acc, value, i) => (value == null ? acc : i), -1);
-/** Label sumbu X: tiap 2 bulan (Jan, Mar, Mei, …). */
-const EVERY_OTHER_MONTH = MONTHS.map((month, i) => (i % 2 === 0 ? month : ''));
+const fmt = (value) => value.toLocaleString('id-ID');
+const DAY = 24 * 60 * 60 * 1000;
 
-const NAV_ITEMS = [
-  { label: 'Ringkasan', icon: DashboardIcon, href: '#ringkasan', current: true },
-  { label: 'Data Alumni', icon: GraduationIcon, href: '#alumni' },
-  { label: 'Data Layanan', icon: BriefcaseIcon, href: '#layanan' },
-  { label: 'Pesanan', icon: BagIcon, href: '#aktivitas-pesanan' },
-  { label: 'Wilayah', icon: MapIcon, href: '#wilayah' },
-  {
-    label: 'Verifikasi',
-    icon: ShieldCheckIcon,
-    href: '#verifikasi',
-    badge: VERIFICATION.pending,
-    badgeTone: 'warning',
-    badgeLabel: 'menunggu',
-  },
-  { label: 'Laporan', icon: ReportIcon, href: '#capaian' },
-  { label: 'Pengaturan', icon: SettingsIcon },
-];
-
-const STATUS = {
-  aktif: { tone: 'success', label: 'Aktif', icon: CheckIcon },
-  verifikasi: { tone: 'warning', label: 'Verifikasi', icon: ClockSmallIcon },
-};
-
-function SidebarArt() {
+function WelcomeArt() {
   return (
-    <svg width="196" height="76" viewBox="0 0 196 76" aria-hidden="true" focusable="false">
-      <circle cx="40" cy="24" r="12" fill="#fff" />
-      <path d="M0 76 C30 48 60 56 90 40 C120 24 160 34 196 18 V76 Z" fill="#c9e3f2" />
-      <path
-        d="M0 76 C40 60 80 66 120 52 C150 42 176 46 196 40 V76 Z"
-        fill="#14a3a3"
-        opacity="0.35"
-      />
-      <g
-        fill="none"
+    <svg
+      className="ad-welcome__art"
+      width="210"
+      height="140"
+      viewBox="0 0 210 140"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <circle cx="110" cy="70" r="62" fill="#fff" opacity="0.7" />
+      <rect
+        x="96"
+        y="40"
+        width="96"
+        height="72"
+        rx="12"
+        fill="#fff"
         stroke="#0b3c6e"
-        strokeWidth="2.25"
-        strokeLinejoin="round"
-        strokeLinecap="round"
-      >
-        <path d="M112 76 V48 L126 40 L140 48 V76" />
-        <path d="M122 76 V64 H130 V76" />
-        <path d="M146 76 V36 H160 V76" />
-        <path d="M150 44 H156 M150 52 H156 M150 60 H156" />
-        <path d="M166 76 V54 H184 V76" />
-      </g>
-      <path d="M0 75 H196" stroke="#0b3c6e" strokeWidth="2" />
+        strokeWidth="3"
+      />
       <path
-        d="M78 14 L79.5 18.5 L84 20 L79.5 21.5 L78 26 L76.5 21.5 L72 20 L76.5 18.5 Z"
+        d="M108 96 L126 80 L140 88 L176 58"
+        fill="none"
+        stroke="#14a3a3"
+        strokeWidth="4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <rect x="108" y="100" width="10" height="6" rx="2" fill="#c9e3f2" />
+      <rect x="124" y="96" width="10" height="10" rx="2" fill="#c9e3f2" />
+      <rect x="140" y="92" width="10" height="14" rx="2" fill="#c9e3f2" />
+      <path
+        d="M60 26 C72 34 84 36 96 36 V68 C96 92 80 106 60 114 C40 106 24 92 24 68 V36 C36 36 48 34 60 26 Z"
+        fill="#0b3c6e"
+      />
+      <path
+        d="m46 70 10 10 20-20"
+        fill="none"
+        stroke="#fff"
+        strokeWidth="6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M186 18 L189 26 L197 28 L190 33 L192 41 L186 37 L180 41 L182 33 L175 28 L183 26 Z"
         fill="#14a3a3"
       />
+      <circle cx="196" cy="120" r="5" fill="#b6d4e8" />
     </svg>
   );
 }
 
-function ServiceMap() {
-  const [zoom, setZoom] = useState(1);
-  const cities = SERVICE_MAP_CITIES.map((c) => c.city);
+/** Grafik area pesanan harian (SVG tanpa library) + teks alternatif lengkap. */
+function TrendChart({ values, end }) {
+  const width = 440;
+  const height = 250;
+  const [left, right, top, bottom] = [44, 424, 20, 200];
+  const peak = Math.max(...values);
+  // Puncak sumbu Y = kelipatan 4 berikutnya di atas nilai tertinggi (10 → 12).
+  const maxTick = (Math.floor(peak / 4) + 1) * 4;
+  const ticks = Array.from({ length: maxTick / 4 + 1 }, (_, i) => i * 4);
+  const dateAt = (i) => new Date(new Date(end).getTime() - (values.length - 1 - i) * DAY);
+  const x = (i) => left + (i * (right - left)) / Math.max(1, values.length - 1);
+  const y = (v) => bottom - (v / maxTick) * (bottom - top);
+  const line = values
+    .map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)} ${y(v).toFixed(1)}`)
+    .join(' ');
+  const peakIndex = values.indexOf(peak);
+  const total = values.reduce((sum, v) => sum + v, 0);
+  const average = Math.round(total / values.length);
+  const middle = Math.floor((values.length - 1) / 2);
+
   return (
-    <div className="mini-map dash-map">
-      <div className="mini-map__viewport">
-        <svg
-          className="mini-map__svg"
-          viewBox="0 0 640 490"
-          role="img"
-          aria-label={`Peta Jawa Barat dengan titik layanan di ${cities.slice(0, -1).join(', ')}, dan ${cities.at(-1)}`}
-          style={{ transform: `scale(${zoom})` }}
-        >
-          <path
-            d={JABAR_OUTLINE}
-            transform="translate(6 10)"
-            fill="#c9e3f2"
-            stroke="#c9e3f2"
-            strokeWidth="10"
-            strokeLinejoin="round"
-          />
-          <path
-            d={JABAR_OUTLINE}
-            fill="#fff"
-            stroke="#fff"
-            strokeWidth="10"
-            strokeLinejoin="round"
-          />
-          <g
-            fill="none"
-            stroke="#b6d4e8"
-            strokeWidth="3"
-            strokeDasharray="9 10"
-            strokeLinecap="round"
-          >
-            {JABAR_BORDERS.map((d) => (
-              <path key={d} d={d} />
-            ))}
+    <figure className="ad-trend__figure">
+      <svg
+        className="chart"
+        viewBox={`0 0 ${width} ${height}`}
+        role="img"
+        aria-label={`Pesanan harian ${formatDate(dateAt(0))} sampai ${formatDate(dateAt(values.length - 1))}, rata-rata ${average} pesanan per hari, tertinggi ${peak} pesanan pada ${formatDayMonth(dateAt(peakIndex))}`}
+      >
+        <defs>
+          <linearGradient id="ad-trend-fill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#0b3c6e" stopOpacity="0.16" />
+            <stop offset="1" stopColor="#0b3c6e" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        {ticks.map((tick, i) => (
+          <g key={tick}>
+            <line
+              x1={left}
+              x2={right}
+              y1={y(tick)}
+              y2={y(tick)}
+              stroke={i === 0 ? '#cbd5e1' : '#eef0f3'}
+              strokeWidth={i === 0 ? 1.5 : 1}
+            />
+            <text x={left - 12} y={y(tick) + 5} textAnchor="end">
+              {tick}
+            </text>
           </g>
-          <g stroke="#fff" strokeWidth="5">
-            {SERVICE_MAP_CITIES.map(({ city, x, y, primary }) => (
-              <g key={city} transform={`translate(${x} ${y})`}>
-                <path
-                  d="M0 0 C-3 -9 -20 -20 -20 -38 A20 20 0 1 1 20 -38 C20 -20 3 -9 0 0 Z"
-                  fill={primary ? '#0c7272' : '#14a3a3'}
-                />
-                <circle cx="0" cy="-38" r="7" fill="#fff" stroke="none" />
-              </g>
-            ))}
-          </g>
-        </svg>
-      </div>
-      <div className="mini-map__zoom">
-        <button
-          type="button"
-          aria-label="Perbesar peta"
-          onClick={() => setZoom((z) => Math.min(2, z + 0.25))}
-          disabled={zoom >= 2}
-        >
-          <PlusIcon />
-        </button>
-        <button
-          type="button"
-          aria-label="Perkecil peta"
-          onClick={() => setZoom((z) => Math.max(1, z - 0.25))}
-          disabled={zoom <= 1}
-        >
-          <MinusIcon />
-        </button>
-      </div>
-    </div>
+        ))}
+        <path d={`${line} L${right} ${bottom} L${left} ${bottom} Z`} fill="url(#ad-trend-fill)" />
+        <path
+          d={line}
+          fill="none"
+          stroke="#0b3c6e"
+          strokeWidth="2.5"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
+        <circle
+          cx={x(peakIndex)}
+          cy={y(peak)}
+          r="6"
+          fill="#14a3a3"
+          stroke="#fff"
+          strokeWidth="2.5"
+        />
+        <text x={x(peakIndex)} y={y(peak) - 12} textAnchor="middle" fontWeight="700" fill="#0b3c6e">
+          {peak}
+        </text>
+        <text x={left} y="226" textAnchor="start">
+          {formatDayMonth(dateAt(0))}
+        </text>
+        <text x={x(middle)} y="226" textAnchor="middle">
+          {formatDayMonth(dateAt(middle))}
+        </text>
+        <text x={right} y="226" textAnchor="end">
+          {formatDayMonth(dateAt(values.length - 1))}
+        </text>
+      </svg>
+      <figcaption>
+        Total {values.length} hari: <strong>{fmt(total)} pesanan</strong>, tertinggi {peak} pesanan
+        pada {formatDayMonth(dateAt(peakIndex))}.
+      </figcaption>
+    </figure>
   );
 }
 
-function downloadReport() {
-  const rows = [
-    ['Laporan Program Difabel Jabar Connect', PERIOD.label],
-    [],
-    ['Indikator', 'Nilai', 'Perubahan dari bulan lalu'],
-    ['Alumni aktif', PROGRAM_STATS.alumni.value, PROGRAM_STATS.alumni.trend],
-    ['Layanan aktif', PROGRAM_STATS.services.value, PROGRAM_STATS.services.trend],
-    ['Total pesanan', PROGRAM_STATS.orders.value, PROGRAM_STATS.orders.trend],
-    ['Kota terjangkau', PROGRAM_STATS.cities.value, PROGRAM_STATS.cities.trend],
-    [],
-    ['Bulan', 'Alumni aktif', 'Pesanan'],
-    ...MONTHS.map((month, i) => [month, ALUMNI_PER_MONTH[i] ?? '', ORDERS_PER_MONTH[i] ?? '']),
-    [],
-    ['Verifikasi', 'Jumlah'],
-    ['Menunggu verifikasi', VERIFICATION.pending],
-    ['Perlu perbaikan data', VERIFICATION.needsFix],
-    ['Terverifikasi', VERIFICATION.verified],
-    ['Ditolak', VERIFICATION.rejected],
-  ];
-  downloadCsv(`laporan-program-${PERIOD.year}.csv`, rows);
+const RANGE_OPTIONS = [
+  { value: '30', label: '30 Hari Terakhir' },
+  { value: '14', label: '14 Hari Terakhir' },
+  { value: '7', label: '7 Hari Terakhir' },
+];
+
+function activitySentence(entry) {
+  const [before, after] = AUDIT_ACTIONS[entry.action].verb.split('{t}');
+  return (
+    <>
+      <strong>{entry.actor.name}</strong> {before}
+      <strong>{entry.target.label}</strong>
+      {after}
+    </>
+  );
 }
 
-/** Dashboard Monitoring Program untuk Pengelola UPTD PPSGHD (FR-ADM-*). Data contoh. */
+/** Dashboard Admin UPTD PPSGHD (desain Admin Dashboard). */
 export default function AdminDashboardPage() {
-  useDocumentTitle('Dashboard Pengelola');
-  const alumniLast = lastIndex(ALUMNI_PER_MONTH);
-  const ordersLast = lastIndex(ORDERS_PER_MONTH);
-  const ordersPrev = ORDERS_PER_MONTH[ordersLast - 1];
-  const ordersGrowth = Math.round(((ORDERS_PER_MONTH[ordersLast] - ordersPrev) / ordersPrev) * 100);
-  const percent = Math.round((TARGET.achieved / TARGET.goal) * 100);
-  const pendingMonths = `${MONTHS[alumniLast + 1]}–${MONTHS.at(-1)}`;
+  useDocumentTitle('Dashboard Admin');
+  const { actor, verifications, reviews, categories, orders, audit } = useAdmin();
+  const [range, setRange] = useState('30');
 
-  const verificationRows = [
+  const pending = verifications
+    .filter((v) => v.status === 'menunggu')
+    .sort((a, b) => new Date(a.registeredAt) - new Date(b.registeredAt));
+  const reported = reviews.filter((r) => r.status === 'dilaporkan').length;
+  const emptyCategories = categories.filter((c) => c.services === 0).length;
+  const lateOrders = orders.filter(
+    (o) => o.status === 'menunggu' && hoursSince(o.createdAt) > 20,
+  ).length;
+  const categoryOf = (id) => categories.find((c) => c.id === id);
+
+  const actionItems = [
     {
-      label: 'Menunggu Verifikasi',
-      value: VERIFICATION.pending,
+      label: 'Penyedia menunggu verifikasi',
+      count: pending.length,
+      to: PATHS.adminVerification,
+      icon: ShieldCheckIcon,
       tone: 'warning',
-      icon: ClockSmallIcon,
     },
     {
-      label: 'Perlu Perbaikan Data',
-      value: VERIFICATION.needsFix,
-      tone: 'orange',
-      icon: AlertIcon,
+      label: 'Ulasan dilaporkan',
+      count: reported,
+      to: buildAdminPath(PATHS.adminReviews, { tab: 'dilaporkan' }),
+      icon: FlagIcon,
+      tone: 'danger',
     },
-    { label: 'Terverifikasi', value: VERIFICATION.verified, tone: 'success', icon: CheckIcon },
-    { label: 'Ditolak', value: VERIFICATION.rejected, tone: 'danger', icon: XIcon },
+    {
+      label: 'Kategori tanpa layanan',
+      count: emptyCategories,
+      to: PATHS.adminCategories,
+      icon: ShapesIcon,
+      tone: 'neutral',
+    },
+    {
+      label: 'Pesanan Menunggu > 20 jam',
+      count: lateOrders,
+      to: buildAdminPath(PATHS.adminOrders, { status: 'menunggu' }),
+      icon: ClockIcon,
+      tone: 'warning',
+    },
   ];
 
   return (
-    <DashboardShell
-      subtitle="Panel Pengelola UPTD PPSGHD"
-      navLabel="Menu pengelola"
-      navItems={NAV_ITEMS}
-      user={ADMIN_USER}
-      notifications={{ count: 5, href: '#verifikasi' }}
-      sidebarNote={{ text: 'Kesempatan yang Setara, Manfaat untuk Semua', art: <SidebarArt /> }}
-      footer={
-        <footer className="dash-footer">
-          <div className="dash-footer__brand">
-            <img src={logoFooter} alt="" width="36" height="36" />
-            <span>
-              <strong>Difabel Jabar Connect</strong>
-              <span>Talenta Difabel, untuk Jawa Barat yang Lebih Inklusif</span>
-            </span>
-          </div>
-          <nav aria-label="Tautan footer" className="dash-footer__links">
-            <Link to={PATHS.about}>UPTD PPSGHD Jawa Barat</Link>
-            <Link to={`${PATHS.about}#kontak`}>Bantuan</Link>
-            <Link to={`${PATHS.about}#privasi`}>Kebijakan Privasi</Link>
-            <Link to={`${PATHS.about}#syarat`}>Syarat &amp; Ketentuan</Link>
-          </nav>
-          <p>© {PERIOD.year} Difabel Jabar Connect</p>
-        </footer>
-      }
-    >
-      <div id="ringkasan" className="dash-header">
-        <div>
-          <p className="dash-header__eyebrow">Selamat datang, {ADMIN_USER.firstName}</p>
-          <h1 className="dash-header__title">Dashboard Monitoring Program</h1>
-          <p className="dash-header__lead">
-            Pantau perkembangan layanan, alumni, dan dampak program Difabel Jabar Connect.
+    <>
+      <section className="ad-welcome" aria-labelledby="welcome-title">
+        <div className="ad-welcome__text">
+          <h1 id="welcome-title" className="ad-welcome__title">
+            <span>Selamat Datang,</span> {actor.name}
+          </h1>
+          <p>
+            Ada <strong>{pending.length} penyedia</strong> menunggu verifikasi dan{' '}
+            <strong>{reported} ulasan</strong> dilaporkan.
           </p>
         </div>
-        <div className="dash-header__actions">
-          <p className="dash-period">
-            <CalendarIcon className="dash-period__icon" />
-            <span className="visually-hidden">Periode data: </span>
-            {PERIOD.label}
-          </p>
-          <button
-            type="button"
-            className="btn btn--outline dash-header__button"
-            onClick={downloadReport}
-          >
-            <DownloadIcon />
-            Unduh Laporan
-          </button>
+        <div className="ad-welcome__side">
+          <WelcomeArt />
+          <figure className="ad-welcome__quote">
+            <blockquote>“Setiap verifikasi membuka satu pintu kesempatan.”</blockquote>
+          </figure>
         </div>
-      </div>
-
-      <section aria-label="Ringkasan program" className="admin-stats">
-        <StatCard
-          label="Alumni Aktif"
-          icon={GraduationIcon}
-          value={fmt(PROGRAM_STATS.alumni.value)}
-        >
-          <Trend value={PROGRAM_STATS.alumni.trend} />
-        </StatCard>
-        <StatCard
-          label="Layanan Aktif"
-          icon={BriefcaseIcon}
-          tone="teal"
-          value={fmt(PROGRAM_STATS.services.value)}
-        >
-          <Trend value={PROGRAM_STATS.services.trend} />
-        </StatCard>
-        <StatCard
-          label="Total Pesanan"
-          icon={BagIcon}
-          tone="amber"
-          value={fmt(PROGRAM_STATS.orders.value)}
-        >
-          <Trend value={PROGRAM_STATS.orders.trend} />
-        </StatCard>
-        <StatCard
-          label="Kota Terjangkau"
-          icon={MapPinIcon}
-          tone="green"
-          value={fmt(PROGRAM_STATS.cities.value)}
-        >
-          <Trend value={PROGRAM_STATS.cities.trend} />
-        </StatCard>
-        <figure className="admin-quote">
-          <QuoteIcon size={26} className="admin-quote__icon" />
-          <blockquote>
-            Setiap angka di sini adalah alumni yang berdaya. Data membantu kita membuka lebih banyak
-            kesempatan.
-          </blockquote>
-        </figure>
       </section>
 
-      <div className="admin-charts">
-        <section id="wilayah" className="dash-card dash-panel" aria-labelledby="peta-title">
-          <PanelHead id="peta-title" title="Sebaran Layanan di Jawa Barat">
-            <Link to={PATHS.map} className="dash-panel__link">
-              Lihat Detail →
+      <section aria-label="Ringkasan platform" className="ad-stats">
+        <StatCard
+          label="Menunggu Verifikasi"
+          icon={ShieldCheckIcon}
+          tone="amber"
+          value={fmt(pending.length)}
+        >
+          <Link to={PATHS.adminVerification} className="dash-panel__link ad-stat-link">
+            Tinjau sekarang
+            <ArrowRightIcon size={16} />
+          </Link>
+        </StatCard>
+        <StatCard
+          label="Penyedia Aktif"
+          icon={BriefcaseIcon}
+          tone="teal"
+          value={fmt(PLATFORM_STATS.providers.value)}
+        >
+          <Trend value={PLATFORM_STATS.providers.trend} />
+        </StatCard>
+        <StatCard
+          label="Pengguna Terdaftar"
+          icon={UsersIcon}
+          value={fmt(PLATFORM_STATS.users.value)}
+        >
+          <Trend value={PLATFORM_STATS.users.trend} />
+        </StatCard>
+        <StatCard
+          label="Pesanan Bulan Ini"
+          icon={ClipboardListIcon}
+          tone="green"
+          value={fmt(PLATFORM_STATS.ordersThisMonth.value)}
+        >
+          <Trend value={PLATFORM_STATS.ordersThisMonth.trend} />
+        </StatCard>
+      </section>
+
+      <div className="ad-dash-grid">
+        <section className="dash-card dash-panel" aria-labelledby="antrean-title">
+          <div className="dash-panel__head">
+            <h2 id="antrean-title" className="dash-panel__title">
+              Antrean Verifikasi
+              <Badge tone="warning">{pending.length} menunggu</Badge>
+            </h2>
+            <Link to={PATHS.adminVerification} className="dash-panel__link">
+              Lihat Semua
+              <ArrowRightIcon size={18} />
             </Link>
-          </PanelHead>
-          <ServiceMap />
-          <span className="pill">
-            <MapPinIcon size={16} />
-            {fmt(PROGRAM_STATS.services.value)} Penyedia Layanan di Seluruh Jawa Barat
-          </span>
-          <p className="dash-panel__note">{SERVICE_MAP_CITIES.map((c) => c.city).join(' · ')}</p>
+          </div>
+          {pending.length ? (
+            <div className="dash-table-wrap">
+              <table className="dash-table ad-table">
+                <caption className="visually-hidden">
+                  Antrean verifikasi penyedia, terlama di atas
+                </caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Penyedia</th>
+                    <th scope="col">Keahlian</th>
+                    <th scope="col">Tanggal Daftar</th>
+                    <th scope="col">Lama Menunggu</th>
+                    <th scope="col">
+                      <span className="visually-hidden">Aksi</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pending.slice(0, 5).map((item) => {
+                    const category = categoryOf(item.category);
+                    const long = daysSince(item.registeredAt) >= 5;
+                    return (
+                      <tr key={item.id}>
+                        <td>
+                          <PersonCell person={item} secondary={item.city} />
+                        </td>
+                        <td>
+                          <span className="ad-skill">
+                            <CategoryIcon icon={category?.icon} size={18} />
+                            {category?.name}
+                          </span>
+                        </td>
+                        <td className="ad-nowrap">{formatDate(item.registeredAt)}</td>
+                        <td>
+                          {long ? (
+                            <Badge tone="warning">{formatWaiting(item.registeredAt)}</Badge>
+                          ) : (
+                            <span className="ad-strong">{formatWaiting(item.registeredAt)}</span>
+                          )}
+                        </td>
+                        <td>
+                          <Link
+                            to={buildAdminPath(PATHS.adminVerification, { tinjau: item.id })}
+                            className="btn btn--primary ad-btn-sm"
+                            aria-label={`Tinjau pendaftaran ${item.name}`}
+                          >
+                            Tinjau
+                          </Link>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="ad-panel-empty">Tidak ada penyedia yang menunggu verifikasi.</p>
+          )}
         </section>
 
-        <section
-          id="alumni-chart"
-          className="dash-card dash-panel"
-          aria-labelledby="alumni-chart-title"
-        >
-          <PanelHead id="alumni-chart-title" title="Pertumbuhan Profil Alumni Aktif" />
-          <p className="dash-panel__figure">
-            <strong>{fmt(ALUMNI_PER_MONTH[alumniLast])}</strong> alumni aktif per{' '}
-            {MONTHS[alumniLast]} {PERIOD.year}
-          </p>
-          <figure className="dash-chart">
-            <LineChart
-              data={ALUMNI_PER_MONTH}
-              min={1000}
-              max={2500}
-              ticks={[1000, 1500, 2000, 2500]}
-              tickFormat={(v) =>
-                v % 1000 ? `${String(v / 1000).replace('.', ',')}rb` : `${v / 1000}rb`
-              }
-              labels={EVERY_OTHER_MONTH}
-              ariaLabel={`Alumni aktif per bulan ${PERIOD.year}: ${MONTHS.slice(0, alumniLast + 1)
-                .map((m, i) => `${m} ${fmt(ALUMNI_PER_MONTH[i])}`)
-                .join(', ')}`}
-              callout={{
-                title: `${MONTHS[alumniLast]} ${PERIOD.year}`,
-                value: `${fmt(ALUMNI_PER_MONTH[alumniLast])} alumni aktif`,
-                width: 134,
-              }}
-            />
-            <figcaption>
-              Naik dari {fmt(ALUMNI_PER_MONTH[0])} ({MONTHS[0]}) menjadi{' '}
-              {fmt(ALUMNI_PER_MONTH[alumniLast])} ({MONTHS[alumniLast]}). {pendingMonths} belum ada
-              data.
-            </figcaption>
-          </figure>
-        </section>
-
-        <section
-          id="aktivitas-pesanan"
-          className="dash-card dash-panel"
-          aria-labelledby="pesanan-chart-title"
-        >
-          <PanelHead id="pesanan-chart-title" title="Aktivitas Pesanan Layanan" />
-          <p className="dash-panel__figure">
-            <strong>{fmt(PROGRAM_STATS.orders.value)}</strong> pesanan {MONTHS[0]}–
-            {MONTHS[ordersLast]} {PERIOD.year}
-          </p>
-          <figure className="dash-chart">
-            <BarChart
-              data={ORDERS_PER_MONTH}
-              max={200}
-              ticks={[0, 50, 100, 150, 200]}
-              labels={EVERY_OTHER_MONTH}
-              ariaLabel={`Pesanan per bulan ${PERIOD.year}: ${MONTHS.slice(0, ordersLast + 1)
-                .map((m, i) => `${m} ${ORDERS_PER_MONTH[i]}`)
-                .join(', ')}`}
-              callout={{
-                title: `${MONTHS[ordersLast]} ${PERIOD.year}`,
-                value: `${ORDERS_PER_MONTH[ordersLast]} pesanan`,
-                width: 112,
-              }}
-            />
-            <figcaption>
-              Tertinggi {MONTHS[ordersLast]}: {ORDERS_PER_MONTH[ordersLast]} pesanan, naik{' '}
-              {ordersGrowth}% dari {MONTHS[ordersLast - 1]} ({ordersPrev}). {pendingMonths} belum
-              ada data.
-            </figcaption>
-          </figure>
+        <section className="dash-card dash-panel" aria-labelledby="aktivitas-title">
+          <div className="dash-panel__head">
+            <h2 id="aktivitas-title" className="dash-panel__title">
+              Aktivitas Terbaru
+            </h2>
+            <Link to={PATHS.adminAudit} className="dash-panel__link">
+              Lihat Audit Log
+              <ArrowRightIcon size={18} />
+            </Link>
+          </div>
+          <ol className="ad-activity">
+            {audit.slice(0, 4).map((entry) => (
+              <li key={entry.id}>
+                <span
+                  className={`ad-activity__icon tone-${AUDIT_ACTIONS[entry.action].tone}`}
+                  aria-hidden="true"
+                >
+                  <AuditActionIcon action={entry.action} size={20} strokeWidth={2.25} />
+                </span>
+                <div>
+                  <p>{activitySentence(entry)}</p>
+                  <time dateTime={entry.at}>{formatDateTime(entry.at)}</time>
+                </div>
+              </li>
+            ))}
+          </ol>
         </section>
       </div>
 
-      <div className="admin-tables">
-        <section
-          id="alumni"
-          className="dash-card dash-panel dash-panel--table"
-          aria-labelledby="alumni-title"
-        >
-          <PanelHead id="alumni-title" title="Alumni Terbaru" />
-          <div className="dash-table-wrap">
-            <table className="dash-table">
-              <thead>
-                <tr>
-                  <th scope="col">Nama · Domisili</th>
-                  <th scope="col">Keahlian</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">Tgl Daftar</th>
-                </tr>
-              </thead>
-              <tbody>
-                {LATEST_ALUMNI.map((alumni) => {
-                  const status = STATUS[alumni.status];
-                  return (
-                    <tr key={alumni.name}>
-                      <td>
-                        <span className="dash-person">
-                          <span
-                            className="dash-avatar dash-avatar--sm"
-                            style={{ backgroundColor: alumni.color }}
-                            aria-hidden="true"
-                          >
-                            {alumni.initials}
-                          </span>
-                          <span>
-                            <strong>{alumni.name}</strong>
-                            <span className="dash-muted">{alumni.city}</span>
-                          </span>
-                        </span>
-                      </td>
-                      <td>{alumni.skill}</td>
-                      <td>
-                        <StatusBadge tone={status.tone} icon={status.icon}>
-                          {status.label}
-                        </StatusBadge>
-                      </td>
-                      <td className="dash-muted">{alumni.joined}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+      <div className="ad-dash-grid ad-dash-grid--stretch">
+        <section className="dash-card dash-panel" aria-labelledby="tren-title">
+          <div className="dash-panel__head">
+            <h2 id="tren-title" className="dash-panel__title">
+              Tren Pesanan
+            </h2>
+            <FilterSelect
+              label="Rentang waktu"
+              hideLabel
+              icon={CalendarIcon}
+              value={range}
+              onChange={setRange}
+              options={RANGE_OPTIONS}
+            />
           </div>
-        </section>
-
-        <section
-          id="layanan"
-          className="dash-card dash-panel dash-panel--table"
-          aria-labelledby="layanan-title"
-        >
-          <PanelHead id="layanan-title" title="Layanan Terbaru" />
-          <div className="dash-table-wrap">
-            <table className="dash-table">
-              <thead>
-                <tr>
-                  <th scope="col">Layanan · Kategori</th>
-                  <th scope="col">Penyedia</th>
-                  <th scope="col">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {LATEST_SERVICES.map((service) => {
-                  const status = STATUS[service.status];
-                  return (
-                    <tr key={service.title}>
-                      <td>
-                        <span className="dash-person">
-                          <span className="dash-service-icon" aria-hidden="true">
-                            <img
-                              src={getCategory(service.slug)?.icon}
-                              alt=""
-                              width="18"
-                              height="18"
-                            />
-                          </span>
-                          <span>
-                            <strong>{service.title}</strong>
-                            <span className="dash-muted">{service.category}</span>
-                          </span>
-                        </span>
-                      </td>
-                      <td>{service.provider}</td>
-                      <td>
-                        <StatusBadge tone={status.tone} icon={status.icon}>
-                          {status.label}
-                        </StatusBadge>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <div className="admin-side">
-          <section id="verifikasi" className="dash-card dash-panel" aria-labelledby="verif-title">
-            <PanelHead id="verif-title" title="Verifikasi Profil & Validasi Data" />
-            <ul className="verif-list">
-              {verificationRows.map(({ label, value, tone, icon: Icon }) => (
-                <li key={label}>
-                  <span className={`verif-list__icon verif-list__icon--${tone}`} aria-hidden="true">
-                    <Icon size={18} />
-                  </span>
-                  <span className="verif-list__label">{label}</span>
-                  <strong className={`verif-list__value verif-list__value--${tone}`}>
-                    {fmt(value)}
-                  </strong>
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          <section id="capaian" className="dash-card dash-panel" aria-labelledby="capaian-title">
-            <PanelHead id="capaian-title" title="Capaian Program" />
-            <div className="target">
-              <DonutProgress percent={percent} label={`Capaian ${percent} persen dari target`} />
-              <div className="target__text">
-                <span>{TARGET.label}</span>
-                <strong>{fmt(TARGET.goal)} alumni aktif</strong>
-                <span>Tercapai {fmt(TARGET.achieved)}</span>
+          <div className="ad-trend">
+            <TrendChart values={ORDER_TREND.values.slice(-Number(range))} end={ORDER_TREND.end} />
+            <div className="ad-trend__side">
+              <div className="ad-mini-stat">
+                <span>Pesanan Selesai</span>
+                <strong>{fmt(ORDER_TREND.completed.value)}</strong>
+                <Trend value={ORDER_TREND.completed.trend} note="30 hari terakhir" />
+              </div>
+              <div className="ad-mini-stat">
+                <span>Pesanan Dibatalkan</span>
+                <strong>{fmt(ORDER_TREND.cancelled)}</strong>
+                <span className="ad-mini-stat__note">2% dari total, 30 hari terakhir</span>
               </div>
             </div>
-            <p className="target__note">
-              “Tinggal {fmt(TARGET.goal - TARGET.achieved)} alumni lagi menuju target tahun ini.”
-            </p>
-          </section>
-        </div>
+          </div>
+        </section>
+
+        <section id="perlu-tindakan" className="dash-card dash-panel" aria-labelledby="perlu-title">
+          <div className="dash-panel__head">
+            <h2 id="perlu-title" className="dash-panel__title">
+              Perlu Tindakan
+            </h2>
+          </div>
+          <ul className="ad-todo">
+            {actionItems.map(({ label, count, to, icon: Icon, tone }) => (
+              <li key={label}>
+                <span className={`ad-todo__icon tone-${tone}`} aria-hidden="true">
+                  <Icon size={20} strokeWidth={2.25} />
+                </span>
+                <span className="ad-todo__label">{label}</span>
+                <span className="ad-todo__count">{count}</span>
+                <Link to={to} className="ad-todo__link" aria-label={`Buka: ${label}, ${count}`}>
+                  Buka
+                  <ArrowRightIcon size={16} />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
       </div>
-    </DashboardShell>
+    </>
   );
 }

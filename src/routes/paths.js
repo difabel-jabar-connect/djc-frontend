@@ -20,7 +20,23 @@ export const PATHS = {
   bookingDetail: '/bookings/:code',
   providerDashboard: '/dashboard/provider',
   adminDashboard: '/admin',
+  adminVerification: '/admin/verifikasi',
+  adminUsers: '/admin/user',
+  adminCategories: '/admin/kategori',
+  adminReviews: '/admin/ulasan',
+  adminOrders: '/admin/pesanan',
+  adminAudit: '/admin/audit',
 };
+
+/** URL halaman admin beserta query (mis. `{ cari: 'Joko' }`); nilai kosong diabaikan. */
+export function buildAdminPath(path, params = {}) {
+  const search = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value) search.set(key, value);
+  });
+  const query = search.toString();
+  return query ? `${path}?${query}` : path;
+}
 
 /** Bangun URL halaman pencarian beserta query (q, lokasi, kategori). Nilai kosong diabaikan. */
 export function buildServicesPath(params = {}) {
