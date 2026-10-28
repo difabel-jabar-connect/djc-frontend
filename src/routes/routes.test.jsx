@@ -41,7 +41,13 @@ describe('Routing dasar', () => {
     ['/bookings', /selamat datang kembali/i],
     ['/pesan/rizki-maulana', /selamat datang kembali/i],
     ['/dashboard/provider', /selamat datang/i],
-    ['/admin', /dashboard monitoring program/i],
+    ['/admin', /selamat datang/i],
+    ['/admin/verifikasi', /verifikasi penyedia/i],
+    ['/admin/user', /kelola user/i],
+    ['/admin/kategori', /kategori layanan/i],
+    ['/admin/ulasan', /moderasi ulasan/i],
+    ['/admin/pesanan', /monitoring pesanan/i],
+    ['/admin/audit', /audit log/i],
   ])('rute %s merender halaman placeholder', (path, heading) => {
     renderAt(path);
     expect(screen.getByRole('heading', { level: 1, name: heading })).toBeInTheDocument();

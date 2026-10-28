@@ -17,7 +17,14 @@ import RegisterSuccessPage from '@/pages/auth/RegisterSuccessPage';
 import CustomerBookingsPage from '@/pages/customer/CustomerBookingsPage';
 import BookingDetailPage from '@/pages/customer/BookingDetailPage';
 import ProviderDashboardPage from '@/pages/provider/ProviderDashboardPage';
+import AdminLayout from '@/pages/admin/AdminLayout';
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
+import VerificationPage from '@/pages/admin/VerificationPage';
+import UsersPage from '@/pages/admin/UsersPage';
+import CategoriesPage from '@/pages/admin/CategoriesPage';
+import ReviewsPage from '@/pages/admin/ReviewsPage';
+import OrdersPage from '@/pages/admin/OrdersPage';
+import AuditLogPage from '@/pages/admin/AuditLogPage';
 import RequireAuth from './RequireAuth';
 import { PATHS } from './paths';
 
@@ -39,7 +46,19 @@ export const routes = [
       { path: PATHS.resetPassword, element: <ResetPasswordPage /> },
       { path: PATHS.resetPasswordSuccess, element: <ResetPasswordSuccessPage /> },
       { path: PATHS.providerDashboard, element: <ProviderDashboardPage /> },
-      { path: PATHS.adminDashboard, element: <AdminDashboardPage /> },
+      {
+        path: PATHS.adminDashboard,
+        element: <AdminLayout />,
+        children: [
+          { index: true, element: <AdminDashboardPage /> },
+          { path: PATHS.adminVerification, element: <VerificationPage /> },
+          { path: PATHS.adminUsers, element: <UsersPage /> },
+          { path: PATHS.adminCategories, element: <CategoriesPage /> },
+          { path: PATHS.adminReviews, element: <ReviewsPage /> },
+          { path: PATHS.adminOrders, element: <OrdersPage /> },
+          { path: PATHS.adminAudit, element: <AuditLogPage /> },
+        ],
+      },
     ],
   },
   {

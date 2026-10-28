@@ -134,7 +134,13 @@ Semua rute di bawah ini masih **halaman placeholder** dan siap diganti setelah h
 | `/login`, `/register` | Autentikasi                  | SP1-04                 |
 | `/bookings`           | Pesanan customer             | FR-CUST-08             |
 | `/dashboard/provider` | Dasbor provider              | FR-PROV-*              |
-| `/admin`              | Dasbor admin                 | FR-ADM-*               |
+| `/admin`              | Dashboard admin              | FR-ADM-*               |
+| `/admin/verifikasi`   | Verifikasi penyedia          | FR-ADM-*               |
+| `/admin/user`         | Kelola user & tambah akun    | FR-ADM-*               |
+| `/admin/kategori`     | Kategori layanan             | FR-ADM-*               |
+| `/admin/ulasan`       | Moderasi ulasan              | FR-ADM-*               |
+| `/admin/pesanan`      | Monitoring pesanan (baca)    | FR-ADM-*               |
+| `/admin/audit`        | Audit log (baca)             | FR-ADM-*               |
 | `*`                   | 404                          | —                      |
 
 Proteksi rute berdasarkan peran (customer/provider/admin) ditambahkan di **SP1-04** setelah Auth API (SP1-03) siap.
