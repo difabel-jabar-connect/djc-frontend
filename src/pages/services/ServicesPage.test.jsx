@@ -7,14 +7,16 @@ const cardNames = () =>
   screen.getAllByRole('heading', { level: 3 }).map((heading) => heading.textContent);
 
 describe('Halaman Cari Layanan', () => {
-  it('menampilkan seluruh penyedia beserta sidebar', () => {
+  it('menampilkan seluruh penyedia beserta sidebar dan peta SIG', async () => {
     renderAt('/services');
     expect(screen.getByRole('heading', { level: 1, name: 'Cari Layanan' })).toBeInTheDocument();
-    expect(resultCount()).toHaveTextContent('Ditemukan 7 penyedia layanan');
-    expect(
-      screen.getByRole('img', { name: /peta jumlah penyedia: bandung 32/i }),
-    ).toBeInTheDocument();
+    expect(resultCount()).toHaveTextContent('Ditemukan 19 penyedia layanan');
     expect(screen.getByText(/filter aktif:/i)).toHaveTextContent('tidak ada');
+    expect(
+      await screen.findByRole('region', { name: /peta sig penyedia layanan di jawa barat/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('19 penyedia di peta')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Tampilkan peta' })).toBeInTheDocument();
   });
 
   it('membaca filter dari URL (tautan chip kategori di Beranda)', () => {
@@ -30,11 +32,19 @@ describe('Halaman Cari Layanan', () => {
     const { router } = renderAt('/services');
 
     await user.click(screen.getByRole('button', { name: 'Kuliner' }));
-    expect(cardNames()).toEqual(['Lina Kurnia', 'Rina Agustina']);
+    expect(cardNames()).toEqual([
+      'Lina Kurnia',
+      'Rina Agustina',
+      'Hana Safitri',
+      'Eka Pratiwi',
+      'Asep Sunandar',
+    ]);
     expect(router.state.location.search).toBe('?kategori=kuliner');
 
     await user.click(screen.getByRole('button', { name: 'Semua' }));
     await user.selectOptions(screen.getByLabelText('Harga'), 'gt100');
+    expect(resultCount()).toHaveTextContent('Ditemukan 1 penyedia layanan');
+    await user.click(screen.getByRole('button', { name: 'Jahit' }));
     expect(resultCount()).toHaveTextContent('Ditemukan 0 penyedia layanan');
     expect(screen.getByText(/belum ada layanan yang cocok/i)).toBeInTheDocument();
   });
@@ -53,7 +63,7 @@ describe('Halaman Cari Layanan', () => {
     expect(router.state.location.search).toBe('?q=bandung&urut=harga');
 
     await user.click(within(search).getByRole('button', { name: 'Reset Filter' }));
-    expect(resultCount()).toHaveTextContent('Ditemukan 7 penyedia layanan');
+    expect(resultCount()).toHaveTextContent('Ditemukan 19 penyedia layanan');
     expect(within(search).getByLabelText(/kata kunci/i)).toHaveValue('');
     expect(router.state.location.search).toBe('?urut=harga');
   });

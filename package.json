@@ -20,6 +20,7 @@
     "check": "npm run lint && npm run format:check && npm run test && npm run build"
   },
   "dependencies": {
+    "leaflet": "^1.9.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router": "^7.18.4"
