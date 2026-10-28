@@ -19,6 +19,12 @@ import {
   SAMPLE_PLATFORM_INFO,
   SAMPLE_SESSIONS,
 } from '@/features/admin/settingsData';
+import {
+  SAMPLE_ALUMNI,
+  SAMPLE_REPORTS,
+  SAMPLE_REVISIONS,
+  SAMPLE_SERVICES,
+} from '@/features/pengelola/pengelolaData';
 import { AdminContext } from './useAdmin';
 
 /** Jeda tiruan "Memproses..." agar tombol tidak terkirim dua kali (0 saat test). */
@@ -51,7 +57,10 @@ function withSelf(users, actor) {
 }
 
 const initialData = (actor) => ({
-  verifications: SAMPLE_VERIFICATIONS,
+  verifications: [...SAMPLE_VERIFICATIONS, ...SAMPLE_REVISIONS],
+  alumni: SAMPLE_ALUMNI,
+  services: SAMPLE_SERVICES,
+  reports: SAMPLE_REPORTS,
   users: withSelf(SAMPLE_USERS, actor),
   sessions: SAMPLE_SESSIONS,
   notificationPrefs: SAMPLE_NOTIFICATION_PREFS,
@@ -223,7 +232,16 @@ export function AdminProvider({ actor, initialState, children }) {
               : prev.users;
           return { ...prev, verifications, users };
         },
-        { action, target: { type: 'verifikasi', label: item.name }, reason: note, change },
+        {
+          action,
+          target: { type: 'verifikasi', label: item.name },
+          reason: note,
+          // Dari tab "Perlu Perbaikan" status awalnya bukan Menunggu.
+          change:
+            item.status === 'perbaikan'
+              ? { ...change, before: 'Perlu Perbaikan', beforeTone: 'orange' }
+              : change,
+        },
       );
     };
 
@@ -556,12 +574,13 @@ export function AdminProvider({ actor, initialState, children }) {
       ...actions,
       ...settingsActions,
       actor: me,
+      commit,
       run,
       toast,
       notify,
       dismissToast,
     }),
-    [data, actions, settingsActions, me, run, toast, notify, dismissToast],
+    [data, actions, settingsActions, me, commit, run, toast, notify, dismissToast],
   );
 
   return <AdminContext.Provider value={value}>{children}</AdminContext.Provider>;

@@ -32,6 +32,8 @@ import { usePagedList } from './usePagedList';
 import VerificationDrawer from './VerificationDrawer';
 
 const PAGE_SIZE = 8;
+/** Tab admin (status "perbaikan" dikelola di Panel Pengelola). */
+const ADMIN_TABS = ['menunggu', 'disetujui', 'ditolak'];
 const SORT_OPTIONS = [
   { value: 'terlama', label: 'Terlama menunggu' },
   { value: 'terbaru', label: 'Terbaru' },
@@ -43,7 +45,7 @@ const SORTERS = {
   kelengkapan: (a, b) => completeness(b) - completeness(a),
 };
 
-function Completeness({ item }) {
+export function Completeness({ item }) {
   const done = completeness(item);
   const total = CHECKLIST_ITEMS.length;
   const level = done === total ? 'full' : done >= 4 ? 'mid' : 'low';
@@ -75,7 +77,7 @@ export default function VerificationPage() {
   const { verifications, categories, approveProvider, rejectProvider, run, notify } = useAdmin();
   const [params, setParams] = useSearchParams();
   const [tab, setTab] = useState(() =>
-    params.get('tab') in VERIFICATION_STATUS ? params.get('tab') : 'menunggu',
+    ADMIN_TABS.includes(params.get('tab')) ? params.get('tab') : 'menunggu',
   );
   const [query, setQuery] = useState(params.get('cari') ?? '');
   const [category, setCategory] = useState('');
@@ -88,10 +90,7 @@ export default function VerificationPage() {
   const categoryOf = (id) => categories.find((c) => c.id === id);
 
   const counts = Object.fromEntries(
-    Object.keys(VERIFICATION_STATUS).map((key) => [
-      key,
-      verifications.filter((v) => v.status === key).length,
-    ]),
+    ADMIN_TABS.map((key) => [key, verifications.filter((v) => v.status === key).length]),
   );
   const cityOptions = useMemo(
     () => [...new Set(verifications.map((v) => v.city))].sort(),
@@ -163,11 +162,13 @@ export default function VerificationPage() {
           panelId="verifikasi-panel"
           value={tab}
           onChange={withReset(setTab)}
-          tabs={Object.entries(VERIFICATION_STATUS).map(([value, meta]) => ({
-            value,
-            label: meta.short,
-            count: counts[value],
-          }))}
+          tabs={ADMIN_TABS.map((value) => [value, VERIFICATION_STATUS[value]]).map(
+            ([value, meta]) => ({
+              value,
+              label: meta.short,
+              count: counts[value],
+            }),
+          )}
         />
         <div
           id="verifikasi-panel"

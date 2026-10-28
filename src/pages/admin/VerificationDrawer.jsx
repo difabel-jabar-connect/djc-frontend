@@ -62,7 +62,17 @@ function LocationArt() {
 }
 
 /** Drawer "Tinjau" pendaftaran penyedia (desain Verifikasi · Drawer Tinjau). */
-export default function VerificationDrawer({ item, category, onClose, onApprove, onReject }) {
+/**
+ * `onRequestRevision` (opsional, Panel Pengelola) menambah tombol "Minta Perbaikan".
+ */
+export default function VerificationDrawer({
+  item,
+  category,
+  onClose,
+  onApprove,
+  onReject,
+  onRequestRevision,
+}) {
   const id = useId();
   const [previewNote, setPreviewNote] = useState(false);
   const open = Boolean(item);
@@ -102,6 +112,21 @@ export default function VerificationDrawer({ item, category, onClose, onApprove,
           </div>
 
           <div className="drawer__body">
+            {item.status === 'perbaikan' && item.revision && (
+              <div className="ad-callout tone-orange" role="note">
+                <AlertCircleIcon size={20} strokeWidth={2.25} />
+                <span>
+                  <strong>Perbaikan diminta oleh {item.revision.by}</strong> ·{' '}
+                  {formatDateTime(item.revision.requestedAt)}
+                  <br />
+                  Bagian: {item.revision.sections.join(', ')} · {item.revision.note}
+                  <br />
+                  {item.revision.resubmitted
+                    ? 'Alumni sudah mengirim ulang data. Silakan tinjau kembali.'
+                    : 'Alumni belum memperbarui data.'}
+                </span>
+              </div>
+            )}
             {item.decision && (
               <div className={`ad-callout tone-${status.tone}`} role="note">
                 {item.status === 'disetujui' ? (
@@ -237,12 +262,22 @@ export default function VerificationDrawer({ item, category, onClose, onApprove,
           </div>
 
           <div className="drawer__foot">
-            {item.status === 'menunggu' ? (
+            {item.status === 'menunggu' || item.status === 'perbaikan' ? (
               <>
                 <button type="button" className="btn btn--danger btn--md" onClick={onReject}>
                   <XCircleIcon size={18} strokeWidth={2.25} />
                   Tolak
                 </button>
+                {onRequestRevision && (
+                  <button
+                    type="button"
+                    className="btn btn--md pg-btn-orange-outline"
+                    onClick={onRequestRevision}
+                  >
+                    <AlertCircleIcon size={18} strokeWidth={2.25} />
+                    Minta Perbaikan
+                  </button>
+                )}
                 <button type="button" className="btn btn--success btn--md" onClick={onApprove}>
                   <CheckCircleIcon size={18} strokeWidth={2.25} />
                   Setujui

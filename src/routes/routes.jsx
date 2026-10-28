@@ -31,6 +31,16 @@ import SecuritySettings from '@/pages/admin/settings/SecuritySettings';
 import NotificationSettings from '@/pages/admin/settings/NotificationSettings';
 import PlatformInfoSettings from '@/pages/admin/settings/PlatformInfoSettings';
 import SystemRulesSettings from '@/pages/admin/settings/SystemRulesSettings';
+import PengelolaLayout from '@/pages/pengelola/PengelolaLayout';
+import OverviewPage from '@/pages/pengelola/OverviewPage';
+import AlumniPage from '@/pages/pengelola/AlumniPage';
+import AlumniDetailPage from '@/pages/pengelola/AlumniDetailPage';
+import PengelolaServicesPage from '@/pages/pengelola/ServicesPage';
+import PengelolaOrdersPage from '@/pages/pengelola/PengelolaOrdersPage';
+import RegionsPage from '@/pages/pengelola/RegionsPage';
+import PengelolaVerificationPage from '@/pages/pengelola/PengelolaVerificationPage';
+import ReportsPage from '@/pages/pengelola/ReportsPage';
+import { ServiceTabs } from '@/pages/pengelola/PengelolaParts';
 import RequireAuth from './RequireAuth';
 import { PATHS } from './paths';
 
@@ -72,6 +82,41 @@ export const routes = [
               { path: PATHS.adminSettingsNotifications, element: <NotificationSettings /> },
               { path: PATHS.adminSettingsPlatform, element: <PlatformInfoSettings /> },
               { path: PATHS.adminSettingsRules, element: <SystemRulesSettings /> },
+            ],
+          },
+        ],
+      },
+      {
+        path: PATHS.pengelola,
+        element: <PengelolaLayout />,
+        children: [
+          { index: true, element: <OverviewPage /> },
+          { path: PATHS.pengelolaAlumni, element: <AlumniPage /> },
+          { path: PATHS.pengelolaAlumniDetail, element: <AlumniDetailPage /> },
+          { path: PATHS.pengelolaServices, element: <PengelolaServicesPage /> },
+          {
+            path: PATHS.pengelolaCategories,
+            element: (
+              <CategoriesPage
+                title="Data Layanan"
+                lead="Pantau layanan yang ditawarkan alumni dan kelola kategorinya."
+                tabs={<ServiceTabs />}
+              />
+            ),
+          },
+          { path: PATHS.pengelolaOrders, element: <PengelolaOrdersPage /> },
+          { path: PATHS.pengelolaRegions, element: <RegionsPage /> },
+          { path: PATHS.pengelolaVerification, element: <PengelolaVerificationPage /> },
+          { path: PATHS.pengelolaReports, element: <ReportsPage /> },
+          {
+            path: PATHS.pengelolaSettings,
+            element: <SettingsLayout />,
+            children: [
+              { index: true, element: <ProfileSettings /> },
+              { path: PATHS.pengelolaSettingsSecurity, element: <SecuritySettings /> },
+              { path: PATHS.pengelolaSettingsNotifications, element: <NotificationSettings /> },
+              { path: PATHS.pengelolaSettingsPlatform, element: <PlatformInfoSettings /> },
+              { path: PATHS.pengelolaSettingsRules, element: <SystemRulesSettings /> },
             ],
           },
         ],

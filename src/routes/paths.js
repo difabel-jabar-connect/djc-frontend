@@ -31,7 +31,23 @@ export const PATHS = {
   adminSettingsNotifications: '/admin/pengaturan/notifikasi',
   adminSettingsPlatform: '/admin/pengaturan/informasi',
   adminSettingsRules: '/admin/pengaturan/aturan',
+  pengelola: '/pengelola',
+  pengelolaAlumni: '/pengelola/alumni',
+  pengelolaAlumniDetail: '/pengelola/alumni/:id',
+  pengelolaServices: '/pengelola/layanan',
+  pengelolaCategories: '/pengelola/layanan/kategori',
+  pengelolaOrders: '/pengelola/pesanan',
+  pengelolaRegions: '/pengelola/wilayah',
+  pengelolaVerification: '/pengelola/verifikasi',
+  pengelolaReports: '/pengelola/laporan',
+  pengelolaSettings: '/pengelola/pengaturan',
+  pengelolaSettingsSecurity: '/pengelola/pengaturan/keamanan',
+  pengelolaSettingsNotifications: '/pengelola/pengaturan/notifikasi',
+  pengelolaSettingsPlatform: '/pengelola/pengaturan/informasi',
+  pengelolaSettingsRules: '/pengelola/pengaturan/aturan',
 };
+
+export const buildAlumniPath = (id) => `/pengelola/alumni/${encodeURIComponent(id)}`;
 
 /** URL halaman admin beserta query (mis. `{ cari: 'Joko' }`); nilai kosong diabaikan. */
 export function buildAdminPath(path, params = {}) {

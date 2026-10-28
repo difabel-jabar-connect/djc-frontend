@@ -1,6 +1,7 @@
 import { useId, useRef } from 'react';
 import Pagination from '@/components/ui/Pagination';
 import {
+  AlertIcon,
   BanIcon,
   BriefcaseIcon,
   CalendarIcon,
@@ -9,6 +10,7 @@ import {
   ClockIcon,
   EyeIcon,
   EyeOffIcon,
+  FileTextIcon,
   FlagIcon,
   GlobeIcon,
   LockIcon,
@@ -318,6 +320,10 @@ const AUDIT_ICONS = {
   ubah_sandi: LockIcon,
   keluarkan_sesi: LogOutIcon,
   ubah_info_platform: GlobeIcon,
+  minta_perbaikan: AlertIcon,
+  sembunyikan_layanan: EyeOffIcon,
+  tampilkan_layanan: EyeIcon,
+  buat_laporan: FileTextIcon,
 };
 
 /** Ikon untuk jenis aksi Audit Log. */
