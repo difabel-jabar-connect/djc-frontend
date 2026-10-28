@@ -14,15 +14,48 @@ import {
   regionShort,
 } from '@/features/admin/accountForm';
 import { avatarColor, initialsOf } from '@/features/admin/adminFormat';
+import {
+  SAMPLE_NOTIFICATION_PREFS,
+  SAMPLE_PLATFORM_INFO,
+  SAMPLE_SESSIONS,
+} from '@/features/admin/settingsData';
 import { AdminContext } from './useAdmin';
 
 /** Jeda tiruan "Memproses..." agar tombol tidak terkirim dua kali (0 saat test). */
 const LATENCY = import.meta.env.MODE === 'test' ? 0 : 600;
 const TOAST_MS = 6000;
 
-const initialData = () => ({
+/** Pastikan akun admin yang masuk ada di daftar user (sumber data Profil Saya). */
+function withSelf(users, actor) {
+  if (users.some((u) => u.id === actor.id)) return users;
+  return [
+    {
+      id: actor.id,
+      name: actor.name,
+      initials: actor.initials,
+      color: actor.color,
+      email: actor.email ?? '',
+      phone: '',
+      role: 'pengelola',
+      position: actor.roleLabel ?? '',
+      city: 'Bandung',
+      region: 'Kota Bandung',
+      status: 'aktif',
+      joinedAt: new Date().toISOString(),
+      lastActiveAt: null,
+      suspension: null,
+      invite: null,
+    },
+    ...users,
+  ];
+}
+
+const initialData = (actor) => ({
   verifications: SAMPLE_VERIFICATIONS,
-  users: SAMPLE_USERS,
+  users: withSelf(SAMPLE_USERS, actor),
+  sessions: SAMPLE_SESSIONS,
+  notificationPrefs: SAMPLE_NOTIFICATION_PREFS,
+  platformInfo: SAMPLE_PLATFORM_INFO,
   categories: SAMPLE_CATEGORIES,
   reviews: SAMPLE_REVIEWS,
   orders: SAMPLE_ORDERS,
@@ -97,7 +130,7 @@ const REVIEW_TONE = { dilaporkan: 'warning', ditampilkan: 'success', disembunyik
  * TODO(API): ganti setiap aksi dengan panggilan endpoint admin.
  */
 export function AdminProvider({ actor, initialState, children }) {
-  const [data, setData] = useState(() => ({ ...initialData(), ...initialState }));
+  const [data, setData] = useState(() => ({ ...initialData(actor), ...initialState }));
   const [toast, setToast] = useState(null);
   const toastTimer = useRef(null);
 
@@ -121,13 +154,15 @@ export function AdminProvider({ actor, initialState, children }) {
       setData((prev) => {
         const next = update(prev, now);
         if (!entry) return next;
+        // Aktor = profil terbaru (nama/warna bisa diubah di Pengaturan · Profil Saya).
+        const self = prev.users.find((u) => u.id === actor.id) ?? actor;
         return {
           ...next,
           audit: [
             {
               id: nextLogId(prev.audit, now),
               at: now.toISOString(),
-              actor: { name: actor.name, initials: actor.initials, color: actor.color },
+              actor: { name: self.name, initials: self.initials, color: self.color },
               change: null,
               ...entry,
             },
@@ -136,7 +171,15 @@ export function AdminProvider({ actor, initialState, children }) {
         };
       });
     },
-    [actor.name, actor.initials, actor.color],
+    [actor],
+  );
+
+  /** Profil admin yang masuk (dari daftar user, agar perubahan Profil Saya ikut tampil). */
+  const self = data.users.find((u) => u.id === actor.id);
+  const me = useMemo(
+    () =>
+      self ? { ...actor, name: self.name, initials: self.initials, color: self.color } : actor,
+    [actor, self],
   );
 
   /** Jalankan aksi setelah jeda tiruan (status "Memproses..." di dialog). */
@@ -152,7 +195,7 @@ export function AdminProvider({ actor, initialState, children }) {
         (prev, now) => {
           const verifications = prev.verifications.map((v) =>
             v.id === id
-              ? { ...v, status, decision: { by: actor.name, at: now.toISOString(), note } }
+              ? { ...v, status, decision: { by: me.name, at: now.toISOString(), note } }
               : v,
           );
           // Penyedia yang disetujui langsung muncul di Kelola User.
@@ -195,7 +238,7 @@ export function AdminProvider({ actor, initialState, children }) {
               ? {
                   ...u,
                   status,
-                  suspension: suspend ? { reason, by: actor.name, at: now.toISOString() } : null,
+                  suspension: suspend ? { reason, by: me.name, at: now.toISOString() } : null,
                 }
               : u,
           ),
@@ -220,7 +263,7 @@ export function AdminProvider({ actor, initialState, children }) {
                   ...r,
                   status,
                   report: status === 'disembunyikan' ? r.report : null,
-                  moderation: { by: actor.name, at: now.toISOString(), reason },
+                  moderation: { by: me.name, at: now.toISOString(), reason },
                 }
               : r,
           ),
@@ -403,11 +446,122 @@ export function AdminProvider({ actor, initialState, children }) {
         });
       },
     };
-  }, [data, commit, actor.name]);
+  }, [data, commit, me]);
+
+  const settingsActions = useMemo(() => {
+    const selfTarget = { type: 'user', label: me.name };
+    return {
+      /** Simpan Profil Saya; `changes` = daftar nama field yang berubah. */
+      updateProfile: (values, changes) =>
+        commit(
+          (prev) => ({
+            ...prev,
+            users: prev.users.map((u) =>
+              u.id === actor.id
+                ? {
+                    ...u,
+                    name: values.name.trim(),
+                    initials: initialsOf(values.name),
+                    color: values.color,
+                    phone: formatPhone(values.phone),
+                    position: values.position.trim(),
+                    region: values.region,
+                    city: regionShort(values.region),
+                  }
+                : u,
+            ),
+          }),
+          {
+            action: 'ubah_profil',
+            target: { ...selfTarget, label: values.name.trim() },
+            reason: `Memperbarui ${changes.join(', ')}.`,
+          },
+        ),
+
+      /** Ubah kata sandi: sesi di perangkat lain ikut dikeluarkan. */
+      changePassword: () =>
+        commit((prev) => ({ ...prev, sessions: prev.sessions.filter((x) => x.current) }), {
+          action: 'ubah_sandi',
+          target: selfTarget,
+          reason: 'Kata sandi diperbarui; sesi di perangkat lain dikeluarkan.',
+        }),
+
+      /** Keluarkan satu sesi (`id`) atau semua sesi lain (tanpa `id`). */
+      revokeSessions: (id) => {
+        const targets = data.sessions.filter((x) => !x.current && (!id || x.id === id));
+        commit(
+          (prev) => ({
+            ...prev,
+            sessions: prev.sessions.filter((x) => !targets.some((t) => t.id === x.id)),
+          }),
+          {
+            action: 'keluarkan_sesi',
+            target: {
+              type: 'sesi',
+              label: id ? targets[0].device : `${targets.length} perangkat lain`,
+            },
+            reason: id
+              ? `Sesi ${targets[0].city} dikeluarkan.`
+              : 'Keluar dari semua perangkat lain.',
+          },
+        );
+      },
+
+      /** Preferensi notifikasi pribadi (tanpa Audit Log). */
+      setNotificationPref: (id, channel, value) =>
+        commit((prev) => ({
+          ...prev,
+          notificationPrefs: prev.notificationPrefs.map((pref) =>
+            pref.id === id ? { ...pref, [channel]: value } : pref,
+          ),
+        })),
+
+      /** Simpan Informasi Platform; `changes` dari diffPlatformInfo. */
+      updatePlatformInfo: (values, changes, reason) => {
+        const single = changes.length === 1 && changes[0].before != null ? changes[0] : null;
+        const sections = [...new Set(changes.map((c) => c.section))];
+        commit(
+          (prev) => ({
+            ...prev,
+            platformInfo: {
+              ...values,
+              name: values.name.trim(),
+              tagline: values.tagline.trim(),
+              description: values.description.trim(),
+              email: values.email.trim(),
+              hours: values.hours.trim(),
+              address: values.address.trim(),
+            },
+          }),
+          {
+            action: 'ubah_info_platform',
+            target: { type: 'pengaturan', label: sections.join(', ') },
+            reason,
+            change: single && {
+              field: single.label,
+              before: single.before || '–',
+              beforeTone: 'neutral',
+              after: single.after || '–',
+              afterTone: 'info',
+            },
+          },
+        );
+      },
+    };
+  }, [data.sessions, commit, me, actor.id]);
 
   const value = useMemo(
-    () => ({ ...data, ...actions, actor, run, toast, notify, dismissToast }),
-    [data, actions, actor, run, toast, notify, dismissToast],
+    () => ({
+      ...data,
+      ...actions,
+      ...settingsActions,
+      actor: me,
+      run,
+      toast,
+      notify,
+      dismissToast,
+    }),
+    [data, actions, settingsActions, me, run, toast, notify, dismissToast],
   );
 
   return <AdminContext.Provider value={value}>{children}</AdminContext.Provider>;

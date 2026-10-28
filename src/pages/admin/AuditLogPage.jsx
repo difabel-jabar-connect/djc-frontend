@@ -48,6 +48,10 @@ function targetHref(entry) {
       return buildAdminPath(PATHS.adminReviews, { cari: label });
     case 'pesanan':
       return buildAdminPath(PATHS.adminOrders, { cari: label });
+    case 'sesi':
+      return PATHS.adminSettingsSecurity;
+    case 'pengaturan':
+      return PATHS.adminSettingsPlatform;
     default:
       return PATHS.adminCategories;
   }

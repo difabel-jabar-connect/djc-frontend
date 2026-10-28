@@ -95,7 +95,7 @@ function AdminShell() {
     },
     { label: 'Monitoring Pesanan', icon: ClipboardListIcon, to: PATHS.adminOrders },
     { label: 'Audit Log', icon: HistoryIcon, to: PATHS.adminAudit },
-    { label: 'Pengaturan', icon: SettingsIcon },
+    { label: 'Pengaturan', icon: SettingsIcon, to: PATHS.adminSettings },
   ];
 
   return (
@@ -109,6 +109,10 @@ function AdminShell() {
         color: actor.color,
         role: actor.roleLabel,
       }}
+      userMenuItems={[
+        { label: 'Profil Saya', to: PATHS.adminSettings },
+        { label: 'Keamanan', to: PATHS.adminSettingsSecurity },
+      ]}
       notifications={{ count: pending + reported, to: PATHS.adminDashboard }}
       sidebarNote={{
         text: 'Bersama Mewujudkan Jawa Barat yang Lebih Inklusif',

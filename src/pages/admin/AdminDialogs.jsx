@@ -63,6 +63,7 @@ function ReasonForm({
   title,
   description,
   subject,
+  summary,
   quickReasons = [],
   required,
   label,
@@ -125,6 +126,7 @@ function ReasonForm({
       </div>
 
       {subject && <SubjectCard subject={subject} />}
+      {summary}
 
       {quickReasons.length > 0 && (
         <div role="group" aria-label="Alasan cepat" className="ad-chips">

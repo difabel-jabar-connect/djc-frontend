@@ -67,9 +67,9 @@ describe('Dashboard Admin', () => {
     expect(
       within(nav).getByRole('link', { name: 'Verifikasi Penyedia, 10 menunggu' }),
     ).toBeInTheDocument();
-    expect(within(nav).getByText('Pengaturan').closest('[aria-disabled]')).toHaveAttribute(
-      'aria-disabled',
-      'true',
+    expect(within(nav).getByRole('link', { name: 'Pengaturan' })).toHaveAttribute(
+      'href',
+      '/admin/pengaturan',
     );
 
     await user.click(within(nav).getByRole('link', { name: 'Kelola User' }));

@@ -940,3 +940,26 @@ export const ChartLineIcon = (p) => (
     <path d="m19 9-5 5-4-4-3 3" />
   </Svg>
 );
+
+/* —— Ikon desain Pengaturan Admin —— */
+
+export const GlobeIcon = (p) => (
+  <Svg {...p}>
+    <circle cx="12" cy="12" r="10" />
+    <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+    <path d="M2 12h20" />
+  </Svg>
+);
+
+export const SlidersIcon = (p) => (
+  <Svg {...p}>
+    <path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4" />
+  </Svg>
+);
+
+export const LaptopIcon = (p) => (
+  <Svg {...p}>
+    <path d="M18 5a2 2 0 0 1 2 2v8.526a2 2 0 0 0 .212.897l1.068 2.127a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45l1.068-2.127A2 2 0 0 0 4 15.526V7a2 2 0 0 1 2-2z" />
+    <path d="M20.054 15.987H3.946" />
+  </Svg>
+);
