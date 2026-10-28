@@ -7,6 +7,14 @@
   --badge-text: #0b3c6e;
 }
 
+/* Oranye "Perlu Perbaikan Data" (desain Pengelola). */
+.tone-orange {
+  --badge-bg: #fff7ed;
+  --badge-border: #ea580c;
+  --badge-text: #c2410c;
+  --banner-border: #fed7aa;
+}
+
 .tone-indigo {
   --badge-bg: #eef2ff;
   --badge-border: #4f46e5;
@@ -190,6 +198,13 @@
 .ad-readonly--sm {
   padding: 2px 10px;
   font-size: 0.8125rem;
+}
+
+.ad-page-head__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
 }
 
 /* ----- Badge, avatar, orang ----- */

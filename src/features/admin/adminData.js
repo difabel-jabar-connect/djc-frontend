@@ -136,6 +136,7 @@ export const VERIFICATION_STATUS = {
   menunggu: { label: 'Menunggu Verifikasi', short: 'Menunggu', tone: 'warning' },
   disetujui: { label: 'Disetujui', short: 'Disetujui', tone: 'success' },
   ditolak: { label: 'Ditolak', short: 'Ditolak', tone: 'danger' },
+  perbaikan: { label: 'Perlu Perbaikan Data', short: 'Perlu Perbaikan', tone: 'orange' },
 };
 
 /** Alasan cepat saat menolak pendaftaran. */
@@ -1102,6 +1103,22 @@ export const AUDIT_ACTIONS = {
     tone: 'info',
     verb: 'mengubah informasi platform {t}',
   },
+  minta_perbaikan: {
+    label: 'Minta Perbaikan',
+    tone: 'orange',
+    verb: 'meminta {t} memperbaiki data',
+  },
+  sembunyikan_layanan: {
+    label: 'Sembunyikan Layanan',
+    tone: 'neutral',
+    verb: 'menyembunyikan layanan {t}',
+  },
+  tampilkan_layanan: {
+    label: 'Tampilkan Layanan',
+    tone: 'success',
+    verb: 'menampilkan kembali layanan {t}',
+  },
+  buat_laporan: { label: 'Buat Laporan', tone: 'info', verb: 'membuat laporan {t}' },
   batal_otomatis: {
     label: 'Batal Otomatis',
     tone: 'warning',

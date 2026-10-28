@@ -52,6 +52,12 @@ function targetHref(entry) {
       return PATHS.adminSettingsSecurity;
     case 'pengaturan':
       return PATHS.adminSettingsPlatform;
+    case 'alumni':
+      return buildAdminPath(PATHS.pengelolaAlumni, { cari: label });
+    case 'layanan':
+      return buildAdminPath(PATHS.pengelolaServices, { cari: label });
+    case 'laporan':
+      return PATHS.pengelolaReports;
     default:
       return PATHS.adminCategories;
   }

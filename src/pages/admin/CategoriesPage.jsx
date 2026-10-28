@@ -7,9 +7,17 @@ import { ConfirmDialog, ReasonDialog } from './AdminDialogs';
 import { Badge, CategoryIcon, PageHeader } from './AdminParts';
 import CategoryDialog from './CategoryDialog';
 
-/** Kategori Layanan (desain Kategori + Modal Tambah + dialog Hapus/Nonaktifkan). */
-export default function CategoriesPage() {
-  useDocumentTitle('Kategori Layanan');
+/**
+ * Kategori Layanan (desain Kategori + Modal Tambah + dialog Hapus/Nonaktifkan).
+ * Panel Pengelola memakai ulang halaman ini sebagai tab "Kategori Layanan" di Data Layanan
+ * (`title`, `lead`, `tabs`).
+ */
+export default function CategoriesPage({
+  title = 'Kategori Layanan',
+  lead = 'Atur kategori yang tampil di pencarian dan Beranda.',
+  tabs = null,
+}) {
+  useDocumentTitle(tabs ? `${title} · Kategori` : title);
   const { categories, saveCategory, toggleCategory, deleteCategory, run, notify } = useAdmin();
   const headingRef = useRef(null);
   const [editing, setEditing] = useState(null); // { category } — category null = tambah
@@ -31,11 +39,7 @@ export default function CategoriesPage() {
 
   return (
     <>
-      <PageHeader
-        headingRef={headingRef}
-        title="Kategori Layanan"
-        lead="Atur kategori yang tampil di pencarian dan Beranda."
-      >
+      <PageHeader headingRef={headingRef} title={title} lead={lead}>
         <button
           type="button"
           className="btn btn--primary btn--md"
@@ -46,6 +50,8 @@ export default function CategoriesPage() {
           Tambah Kategori
         </button>
       </PageHeader>
+
+      {tabs}
 
       <section className="dash-card dash-panel ad-list-card" aria-label="Daftar kategori">
         <p className="ad-info">
