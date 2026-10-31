@@ -1,6 +1,8 @@
 import { SAMPLE_PROVIDERS } from '@/features/providers/sampleProviders';
 import { filterProviders, paginate, readCriteria } from './searchProviders';
 
+// Tujuh penyedia pertama = data dasar untuk memeriksa urutan & kombinasi filter secara pasti.
+const BASE = SAMPLE_PROVIDERS.slice(0, 7);
 const criteria = (overrides = {}) => ({ ...readCriteria(new URLSearchParams()), ...overrides });
 const names = (list) => list.map((p) => p.name);
 
@@ -26,28 +28,26 @@ describe('filterProviders', () => {
   });
 
   it('menggabungkan filter kategori, lokasi, rating, harga, dan hari', () => {
-    expect(
-      names(filterProviders(SAMPLE_PROVIDERS, criteria({ lokasi: 'Bandung', rating: '4.5' }))),
-    ).toEqual(['Rizki Maulana', 'Agus Setiawan', 'Rina Agustina']);
-    expect(names(filterProviders(SAMPLE_PROVIDERS, criteria({ harga: 'lt50' })))).toEqual([
+    expect(names(filterProviders(BASE, criteria({ lokasi: 'Bandung', rating: '4.5' })))).toEqual([
+      'Rizki Maulana',
+      'Agus Setiawan',
+      'Rina Agustina',
+    ]);
+    expect(names(filterProviders(BASE, criteria({ harga: 'lt50' })))).toEqual([
       'Lina Kurnia',
       'Siti Nurjanah',
       'Rina Agustina',
     ]);
     expect(
-      names(
-        filterProviders(SAMPLE_PROVIDERS, criteria({ hari: 'akhir-pekan', kategori: 'terapi' })),
-      ),
+      names(filterProviders(BASE, criteria({ hari: 'akhir-pekan', kategori: 'terapi' }))),
     ).toEqual(['Fahri Hidayat']);
   });
 
   it('mengurutkan berdasarkan rating dan harga', () => {
-    expect(filterProviders(SAMPLE_PROVIDERS, criteria({ urut: 'rating' }))[0].name).toBe(
-      'Lina Kurnia',
-    );
-    expect(
-      filterProviders(SAMPLE_PROVIDERS, criteria({ urut: 'harga' })).map((p) => p.priceFrom),
-    ).toEqual([25000, 25000, 30000, 50000, 60000, 75000, 100000]);
+    expect(filterProviders(BASE, criteria({ urut: 'rating' }))[0].name).toBe('Lina Kurnia');
+    expect(filterProviders(BASE, criteria({ urut: 'harga' })).map((p) => p.priceFrom)).toEqual([
+      25000, 25000, 30000, 50000, 60000, 75000, 100000,
+    ]);
   });
 });
 

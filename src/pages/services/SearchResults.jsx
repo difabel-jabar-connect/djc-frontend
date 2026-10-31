@@ -1,15 +1,53 @@
+import { useEffect, useRef } from 'react';
 import ServiceCard from '@/components/ui/ServiceCard';
 import Pagination from '@/components/ui/Pagination';
 import { ChevronDownIcon, SortIcon } from '@/components/ui/icons';
 import { SORT_OPTIONS } from '@/features/search/catalog';
 
 /** KIRI: jumlah hasil, urutan, kartu layanan, dan paginasi. */
-export default function SearchResults({ result, sort, onSortChange, buildPageHref, onReset }) {
+export default function SearchResults({
+  result,
+  sort,
+  onSortChange,
+  buildPageHref,
+  onReset,
+  hoveredId,
+  onHover = () => {},
+  areaActive = false,
+}) {
+  const gridRef = useRef(null);
+  const hoverRef = useRef(onHover);
+  hoverRef.current = onHover;
+
+  // Sorot pin peta saat kartu disentuh penunjuk atau mendapat fokus keyboard.
+  useEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return undefined;
+    const enter = (event) => {
+      const id = event.target.closest?.('[data-provider]')?.dataset.provider ?? null;
+      hoverRef.current(id);
+    };
+    const leave = (event) => {
+      if (!grid.contains(event.relatedTarget)) hoverRef.current(null);
+    };
+    grid.addEventListener('pointerover', enter);
+    grid.addEventListener('focusin', enter);
+    grid.addEventListener('pointerleave', leave);
+    grid.addEventListener('focusout', leave);
+    return () => {
+      grid.removeEventListener('pointerover', enter);
+      grid.removeEventListener('focusin', enter);
+      grid.removeEventListener('pointerleave', leave);
+      grid.removeEventListener('focusout', leave);
+    };
+  }, [result.total]);
+
   return (
     <section className="results" aria-labelledby="hasil-title">
       <div className="results__head">
         <h2 id="hasil-title" className="results__title" aria-live="polite">
           Ditemukan <strong>{result.total}</strong> penyedia layanan
+          {areaActive && <span className="results__area"> di area peta</span>}
         </h2>
         <div className="results__sort">
           <label htmlFor="urut" className="search-panel__label">
@@ -36,9 +74,13 @@ export default function SearchResults({ result, sort, onSortChange, buildPageHre
 
       {result.total > 0 ? (
         <>
-          <ul className="results__grid">
+          <ul ref={gridRef} className="results__grid">
             {result.items.map((provider) => (
-              <li key={provider.id}>
+              <li
+                key={provider.id}
+                data-provider={provider.id}
+                className={hoveredId === provider.id ? 'is-hover' : undefined}
+              >
                 <ServiceCard provider={provider} />
               </li>
             ))}
