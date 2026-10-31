@@ -58,16 +58,29 @@ Buka `http://localhost:5173`. Beranda menampilkan panel **Status koneksi API** y
 
 Didefinisikan di `.env.example`. File `.env`/`.env.local` **tidak di-commit** (sudah di `.gitignore`).
 
-| Variabel            | Wajib | Contoh                         | Keterangan                                       |
-| ------------------- | ----- | ------------------------------ | ------------------------------------------------ |
-| `VITE_API_BASE_URL` | Ya    | `http://localhost:5000/api/v1` | Base URL REST API backend, termasuk prefix versi |
-| `VITE_APP_NAME`     | Tidak | `Difabel Jabar Connect`        | Nama aplikasi di UI dan judul tab                |
+| Variabel                | Wajib | Contoh                                | Keterangan                                                                |
+| ----------------------- | ----- | ------------------------------------- | ------------------------------------------------------------------------- |
+| `VITE_API_BASE_URL`     | Ya    | `http://localhost:5000/api/v1`        | Base URL REST API backend, termasuk prefix versi                          |
+| `VITE_APP_NAME`         | Tidak | `Difabel Jabar Connect`               | Nama aplikasi di UI dan judul tab                                         |
+| `VITE_GOOGLE_CLIENT_ID` | Tidak | `1234-abc.apps.googleusercontent.com` | OAuth Client ID (Web) untuk Masuk/Daftar dengan Google; kosong = nonaktif |
 
 Aturan:
 
 - **URL backend tidak boleh ditulis langsung di source code.** Semua akses lewat `getApiBaseUrl()` di `src/config/env.js`.
 - Variabel `VITE_*` ikut terbundel ke browser → **jangan** menaruh secret/kredensial apa pun.
 - Di Vercel, isi variabel yang sama di _Project Settings → Environment Variables_.
+
+### Masuk/Daftar dengan Google
+
+Frontend memakai Google Identity Services alur _authorization code_ (popup), lihat `src/features/auth/google.js`.
+
+1. Google Cloud Console → _APIs & Services → Credentials_ → buat **OAuth client ID** tipe _Web application_.
+2. _Authorized JavaScript origins_: `http://localhost:5173` dan domain produksi (Vercel). Redirect URI tidak perlu (popup memakai `postmessage`).
+3. Isi `VITE_GOOGLE_CLIENT_ID` di `.env.local` / Vercel. **Client secret hanya di backend.**
+4. Kontrak backend — `POST /auth/google` dengan body `{ code, intent: 'login' | 'register', role?, phone?, city?, category? }`:
+   - tukar `code` ke `https://oauth2.googleapis.com/token` dengan `redirect_uri: 'postmessage'`, verifikasi `id_token` (aud = client ID, `email_verified`);
+   - buat sesi cookie HttpOnly seperti `/auth/login`, balas `{ data: { user: { id, name, email, role } } }`;
+   - `404` bila `intent: 'login'` dan akun belum terdaftar, `409` bila `intent: 'register'` dan email sudah terdaftar.
 
 ## 5. Struktur Direktori
 

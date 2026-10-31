@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { useAuth } from '@/context/useAuth';
+import { homePathFor } from '@/features/auth/session';
+import { useGoogleAuth } from '@/features/auth/useGoogleAuth';
 import { register } from '@/features/auth/authApi';
 import { PASSWORD_MIN, passwordStrength } from '@/features/auth/password';
 import { DOMICILE_OPTIONS } from '@/features/auth/registerOptions';
@@ -10,7 +13,6 @@ import {
   CheckIcon,
   ChevronDownIcon,
   CircleCheckIcon,
-  GoogleMarkIcon,
   GridIcon,
   HeartIcon,
   InfoIcon,
@@ -21,6 +23,7 @@ import {
   UserIcon,
 } from '@/components/ui/icons';
 import AuthIntro, { AuthPageFooter } from './AuthIntro';
+import GoogleAuthButton from './GoogleAuthButton';
 import { AuthField, PasswordField } from './AuthFields';
 import './auth.css';
 
@@ -76,6 +79,9 @@ function validate(form) {
   return errors;
 }
 
+/** Isian yang tetap wajib saat daftar dengan Google (nama, email & sandi dari akun Google). */
+const GOOGLE_REQUIRED = ['kota', 'kategori', 'setuju'];
+
 function StrengthMeter({ password }) {
   const strength = passwordStrength(password);
   return (
@@ -95,6 +101,7 @@ function StrengthMeter({ password }) {
 /** Halaman Daftar Akun (US-CUST-01) — Pengguna atau Mitra Penyedia Layanan (?peran=mitra). */
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const { signIn } = useAuth();
   const [searchParams] = useSearchParams();
   const [form, setForm] = useState({
     role: searchParams.get('peran') === 'mitra' ? 'mitra' : 'pengguna',
@@ -149,6 +156,42 @@ export default function RegisterPage() {
           : error?.message || 'Terjadi kesalahan. Silakan coba lagi.';
       setStatus({ state: 'error', message });
     }
+  };
+
+  const google = useGoogleAuth({
+    intent: 'register',
+    errorMessages: { 409: 'Akun Google ini sudah terdaftar.' },
+    onSuccess: (data) => {
+      const user = data?.user ?? data;
+      if (isMitra) {
+        // Mitra menunggu verifikasi pengelola sebelum bisa masuk.
+        navigate(PATHS.registerSuccess, {
+          state: { email: user?.email, role: 'mitra', via: 'google' },
+        });
+      } else {
+        navigate(homePathFor(signIn(user)?.role), { replace: true });
+      }
+    },
+  });
+
+  const handleGoogle = () => {
+    const allErrors = validate(form);
+    const phoneFilled = Boolean(form.phone);
+    const keys = [...GOOGLE_REQUIRED, ...(phoneFilled ? ['wa'] : [])];
+    const nextErrors = Object.fromEntries(
+      Object.entries(allErrors).filter(([key]) => keys.includes(key)),
+    );
+    setErrors(nextErrors);
+    const firstInvalid = FIELD_ORDER.find((key) => nextErrors[key]);
+    if (firstInvalid) {
+      document.getElementById(firstInvalid)?.focus();
+      return;
+    }
+    google.start({
+      role: role.apiRole,
+      ...(phoneFilled && { phone: `+62${normalizePhone(form.phone)}` }),
+      ...(isMitra && { city: form.city, category: form.category }),
+    });
   };
 
   const loading = status.state === 'loading';
@@ -394,24 +437,18 @@ export default function RegisterPage() {
             atau
           </div>
 
-          <button
-            type="button"
-            className="auth-google"
-            onClick={() =>
-              setStatus({
-                state: 'info',
-                message: 'Daftar dengan Google belum tersedia. Silakan isi form di atas.',
-              })
+          <GoogleAuthButton
+            label="Daftar dengan Google"
+            google={google}
+            onClick={handleGoogle}
+            action={
+              google.errorCode === 409 && (
+                <Link to={PATHS.login} className="auth-link auth-link--strong">
+                  Masuk
+                </Link>
+              )
             }
-          >
-            <GoogleMarkIcon />
-            Daftar dengan Google
-          </button>
-          {status.state === 'info' && (
-            <p className="field-hint auth-info" role="status">
-              {status.message}
-            </p>
-          )}
+          />
 
           <div className="auth-card__foot">
             <p>

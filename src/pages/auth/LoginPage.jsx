@@ -5,12 +5,12 @@ import { isDev } from '@/config/env';
 import { useAuth } from '@/context/useAuth';
 import { DEMO_ACCOUNTS, homePathFor } from '@/features/auth/session';
 import { login } from '@/features/auth/authApi';
+import { useGoogleAuth } from '@/features/auth/useGoogleAuth';
 import { safeRedirectPath } from '@/features/auth/redirect';
 import { PATHS } from '@/routes/paths';
 import {
   EyeIcon,
   EyeOffIcon,
-  GoogleMarkIcon,
   HeartIcon,
   LockIcon,
   MailIcon,
@@ -18,6 +18,7 @@ import {
   ShieldCheckIcon,
 } from '@/components/ui/icons';
 import AuthIntro, { AuthPageFooter } from './AuthIntro';
+import GoogleAuthButton from './GoogleAuthButton';
 import './auth.css';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -68,6 +69,12 @@ export default function LoginPage() {
     const next = searchParams.get('next');
     navigate(next ? safeRedirectPath(next) : homePathFor(sessionUser?.role), { replace: true });
   };
+
+  const google = useGoogleAuth({
+    intent: 'login',
+    onSuccess: (data) => goAfterLogin(signIn(data?.user ?? data)),
+    errorMessages: { 404: 'Akun Google ini belum terdaftar.' },
+  });
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -221,25 +228,18 @@ export default function LoginPage() {
             atau
           </div>
 
-          <button
-            type="button"
-            className="auth-google"
-            onClick={() =>
-              setStatus({
-                state: 'info',
-                message:
-                  'Masuk dengan Google belum tersedia. Silakan gunakan email dan kata sandi.',
-              })
+          <GoogleAuthButton
+            label="Masuk dengan Google"
+            google={google}
+            onClick={() => google.start()}
+            action={
+              google.errorCode === 404 && (
+                <Link to={PATHS.register} className="auth-link auth-link--strong">
+                  Daftar dengan Google
+                </Link>
+              )
             }
-          >
-            <GoogleMarkIcon />
-            Masuk dengan Google
-          </button>
-          {status.state === 'info' && (
-            <p className="field-hint auth-info" role="status">
-              {status.message}
-            </p>
-          )}
+          />
 
           <div className="auth-card__foot">
             <p>
