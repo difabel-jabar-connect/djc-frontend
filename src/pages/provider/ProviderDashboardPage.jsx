@@ -12,13 +12,12 @@ import {
   CheckBadgeIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  DashboardIcon,
-  InboxIcon,
-  SettingsIcon,
   StarOutlineIcon,
-  UserIcon,
   WalletIcon,
 } from '@/components/ui/icons';
+import { threadsForProvider, unreadCount } from '@/features/chat/chatStore';
+import { useChatStore } from '@/features/chat/useChat';
+import { providerNavItems } from './providerNav';
 import {
   LAST_7_DAYS,
   MONTH_STATS,
@@ -195,21 +194,12 @@ export default function ProviderDashboardPage() {
     setSelectedDay(toISODate(next));
   };
 
-  const navItems = [
-    { label: 'Dashboard', icon: DashboardIcon, href: '#ringkasan', current: true },
-    { label: 'Profil Saya', icon: UserIcon, to: buildProviderPath(PROVIDER_ID) },
-    { label: 'Layanan Saya', icon: BriefcaseIcon },
-    {
-      label: 'Pesanan Masuk',
-      icon: InboxIcon,
-      href: '#pesanan',
-      badge: newCount,
-      badgeLabel: 'baru',
-    },
-    { label: 'Jadwal', icon: CalendarIcon, href: '#jadwal' },
-    { label: 'Ulasan', icon: StarOutlineIcon, to: `${buildProviderPath(PROVIDER_ID)}#ulasan` },
-    { label: 'Pengaturan', icon: SettingsIcon },
-  ];
+  useChatStore();
+  const chatUnread = threadsForProvider(PROVIDER_ID).reduce(
+    (sum, thread) => sum + unreadCount(thread, 'provider'),
+    0,
+  );
+  const navItems = providerNavItems({ page: 'dashboard', newCount, chatUnread });
 
   return (
     <DashboardShell

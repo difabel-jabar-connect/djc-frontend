@@ -1,0 +1,169 @@
+/* ===== Chat penyedia (kotak masuk + panel percakapan) ===== */
+
+.pchat {
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  gap: var(--space-4);
+  height: calc(100vh - 140px);
+  height: calc(100svh - 140px);
+  min-height: 520px;
+}
+
+.pchat__inbox {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+}
+
+.pchat__head {
+  padding: 18px 18px 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.pchat__head h1 {
+  margin: 0;
+  font-size: 1.375rem;
+}
+
+.pchat__head p {
+  margin: 4px 0 0;
+  color: var(--color-text-body);
+  font-size: var(--font-size-sm);
+}
+
+.pchat__list {
+  flex: 1;
+  margin: 0;
+  padding: 8px;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.pchat__thread {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.pchat__thread:hover {
+  background: var(--color-surface);
+}
+
+.pchat__thread.is-active {
+  background: #e8f0f8;
+}
+
+.pchat__thread:focus-visible {
+  outline: 3px solid var(--color-focus-outline);
+  outline-offset: -3px;
+}
+
+.pchat__avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  color: #fff;
+  font-weight: 800;
+}
+
+.pchat__summary {
+  display: grid;
+  flex: 1;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pchat__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.pchat__row time,
+.pchat__service {
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.pchat__preview {
+  overflow: hidden;
+  color: var(--color-text-body);
+  font-size: var(--font-size-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pchat__thread.is-unread .pchat__preview {
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.pchat__badge {
+  display: grid;
+  flex: none;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  background: #14a3a3;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.pchat__empty {
+  padding: 18px;
+  color: var(--color-text-body);
+}
+
+.pchat__main {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+
+.pchat__back {
+  display: none;
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.pchat__placeholder {
+  display: grid;
+  flex: 1;
+  place-content: center;
+  justify-items: center;
+  gap: 12px;
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-body);
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .pchat {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pchat.has-active .pchat__inbox,
+  .pchat:not(.has-active) .pchat__main {
+    display: none;
+  }
+
+  .pchat__back {
+    display: inline-flex;
+  }
+}

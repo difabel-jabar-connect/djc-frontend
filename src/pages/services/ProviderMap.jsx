@@ -134,22 +134,32 @@ function MapCard({ provider, onClose, style, below }) {
   );
 }
 
+const noop = () => {};
+
 /**
- * Peta SIG Cari Layanan (Leaflet + OpenStreetMap), dibatasi ke Jawa Barat.
+ * Peta SIG penyedia (Leaflet + OpenStreetMap), dibatasi ke Jawa Barat.
  * Pin harga per penyedia sesuai koordinat alamatnya; pin/kartu daftar saling sorot.
- * `onAreaSearch(area | null)` dipanggil saat pengguna memilih "Cari di area ini".
+ * `onAreaSearch(area | null)` dipanggil saat pengguna memilih "Cari di area ini"; tanpa
+ * prop ini (mis. di Beranda) fitur cari-di-area disembunyikan. Tombol perluas peta hanya
+ * tampil bila `onToggleExpand` diberikan. `scrollZoom={false}` mematikan zoom lewat scroll
+ * agar halaman panjang tetap bisa di-scroll melewati peta.
  */
 export default function ProviderMap({
   providers,
-  hoveredId,
-  onHover,
-  selectedId,
+  hoveredId = null,
+  onHover = noop,
+  selectedId = null,
   onSelect,
-  areaActive,
+  areaActive = false,
   onAreaSearch,
-  expanded,
+  expanded = false,
   onToggleExpand,
+  scrollZoom = true,
+  label = 'Peta SIG penyedia layanan di Jawa Barat',
 }) {
+  const areaSearch = Boolean(onAreaSearch);
+  // Hanya dibaca saat peta dibuat.
+  const scrollZoomRef = useRef(scrollZoom);
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const markersRef = useRef(new Map());
@@ -161,8 +171,10 @@ export default function ProviderMap({
   const [, setTick] = useState(0);
   const autoRef = useRef(autoSearch);
   autoRef.current = autoSearch;
-  const areaHandlerRef = useRef(onAreaSearch);
-  areaHandlerRef.current = onAreaSearch;
+  const areaHandlerRef = useRef(onAreaSearch ?? noop);
+  areaHandlerRef.current = onAreaSearch ?? noop;
+  const areaSearchRef = useRef(areaSearch);
+  areaSearchRef.current = areaSearch;
 
   const currentArea = () => {
     const b = mapRef.current.getBounds();
@@ -179,6 +191,7 @@ export default function ProviderMap({
       maxBounds: JABAR_MAX_BOUNDS,
       maxBoundsViscosity: 0.85,
       zoomSnap: 0.5,
+      scrollWheelZoom: scrollZoomRef.current,
       attributionControl: true,
     });
     mapRef.current = map;
@@ -216,6 +229,7 @@ export default function ProviderMap({
         programmaticRef.current = false;
         return;
       }
+      if (!areaSearchRef.current) return;
       if (autoRef.current) areaHandlerRef.current(currentArea());
       else setMoved(true);
     });
@@ -394,7 +408,7 @@ export default function ProviderMap({
     programmaticRef.current = true;
     mapRef.current?.fitBounds(JABAR_BOUNDS, { padding: [12, 12] });
     setMoved(false);
-    onAreaSearch(null);
+    onAreaSearch?.(null);
   };
 
   const selected = providers.find((p) => p.id === selectedId);
@@ -411,55 +425,59 @@ export default function ProviderMap({
   }
 
   return (
-    <div className="pm" role="region" aria-label="Peta SIG penyedia layanan di Jawa Barat">
+    <div className="pm" role="region" aria-label={label}>
       <div ref={containerRef} className="pm__canvas" />
 
-      <div className="pm__top">
-        {moved && !autoSearch ? (
-          <button
-            type="button"
-            className="pm__chip pm__chip--action"
-            onClick={() => {
-              onAreaSearch(currentArea());
-              setMoved(false);
-            }}
-          >
-            <SearchIcon size={16} strokeWidth={2.5} />
-            Cari di area ini
-          </button>
-        ) : (
-          <label className="pm__chip">
-            <input
-              type="checkbox"
-              checked={autoSearch}
-              onChange={(event) => {
-                setAutoSearch(event.target.checked);
+      {areaSearch && (
+        <div className="pm__top">
+          {moved && !autoSearch ? (
+            <button
+              type="button"
+              className="pm__chip pm__chip--action"
+              onClick={() => {
+                onAreaSearch(currentArea());
                 setMoved(false);
-                if (event.target.checked) onAreaSearch(currentArea());
               }}
-            />
-            Cari saat peta digeser
-          </label>
-        )}
-        {areaActive && (
-          <button type="button" className="pm__chip" onClick={resetView}>
-            <XIcon size={14} strokeWidth={2.5} />
-            Hapus area
-          </button>
-        )}
-      </div>
+            >
+              <SearchIcon size={16} strokeWidth={2.5} />
+              Cari di area ini
+            </button>
+          ) : (
+            <label className="pm__chip">
+              <input
+                type="checkbox"
+                checked={autoSearch}
+                onChange={(event) => {
+                  setAutoSearch(event.target.checked);
+                  setMoved(false);
+                  if (event.target.checked) onAreaSearch(currentArea());
+                }}
+              />
+              Cari saat peta digeser
+            </label>
+          )}
+          {areaActive && (
+            <button type="button" className="pm__chip" onClick={resetView}>
+              <XIcon size={14} strokeWidth={2.5} />
+              Hapus area
+            </button>
+          )}
+        </div>
+      )}
 
       <div className="pm__controls">
-        <button
-          type="button"
-          className="pm__btn"
-          aria-label={expanded ? 'Tampilkan daftar' : 'Perluas peta'}
-          title={expanded ? 'Tampilkan daftar' : 'Perluas peta'}
-          aria-pressed={expanded}
-          onClick={onToggleExpand}
-        >
-          <ExpandIcon expanded={expanded} />
-        </button>
+        {onToggleExpand && (
+          <button
+            type="button"
+            className="pm__btn"
+            aria-label={expanded ? 'Tampilkan daftar' : 'Perluas peta'}
+            title={expanded ? 'Tampilkan daftar' : 'Perluas peta'}
+            aria-pressed={expanded}
+            onClick={onToggleExpand}
+          >
+            <ExpandIcon expanded={expanded} />
+          </button>
+        )}
         <div className="pm__group">
           <button
             type="button"

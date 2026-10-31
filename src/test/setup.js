@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom/vitest';
 import { afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
+import { resetChatStore } from '@/features/chat/chatStore';
 
 afterEach(() => {
   cleanup();
@@ -9,6 +10,7 @@ afterEach(() => {
   vi.unstubAllEnvs();
   sessionStorage.clear();
   localStorage.clear();
+  resetChatStore();
 });
 
 // jsdom tidak mengimplementasikan scrollTo.

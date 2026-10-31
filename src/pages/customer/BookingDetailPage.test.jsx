@@ -23,10 +23,11 @@ describe('Halaman Detail Pesanan', () => {
     expect(items[1]).toHaveTextContent(/pesanan dibuat · menunggu respons.*oleh anda/i);
 
     const contact = within(screen.getByRole('region', { name: 'Kontak & Lokasi' }));
-    expect(contact.getByText('0812-3456-7890')).toBeInTheDocument();
-    expect(
-      contact.getByRole('link', { name: /hubungi deni setiawan via whatsapp/i }),
-    ).toHaveAttribute('href', 'https://wa.me/6281234567890');
+    expect(contact.queryByText(/whatsapp/i)).not.toBeInTheDocument();
+    expect(contact.getByRole('link', { name: /^chat dengan deni setiawan/i })).toHaveAttribute(
+      'href',
+      '/bookings/BK-0011/chat',
+    );
   });
 
   it('membatalkan pesanan: alasan wajib, penghitung karakter, lalu status berubah', async () => {

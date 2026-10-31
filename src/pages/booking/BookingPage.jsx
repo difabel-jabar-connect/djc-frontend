@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
+import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useAuth } from '@/context/useAuth';
 import { useCustomer } from '@/context/useCustomer';
@@ -23,8 +23,10 @@ import {
   validateStep,
 } from '@/features/booking/bookingDraft';
 import { findBooking } from '@/features/booking/customerBookings';
-import { PATHS, buildProviderPath } from '@/routes/paths';
-import { ArrowLeftIcon, ArrowRightIcon, SendIcon } from '@/components/ui/icons';
+import { homePathFor } from '@/features/auth/session';
+import { ensureThread } from '@/features/chat/chatStore';
+import { PATHS, buildAuthPath, buildBookingPath, buildProviderPath } from '@/routes/paths';
+import { ArrowLeftIcon, ArrowRightIcon, LogInIcon, SendIcon } from '@/components/ui/icons';
 import BookingStepper from './BookingStepper';
 import OrderSummary from './OrderSummary';
 import StepService from './StepService';
@@ -32,7 +34,7 @@ import StepSchedule from './StepSchedule';
 import StepDetails from './StepDetails';
 import StepReview from './StepReview';
 import BookingSuccessDialog from './BookingSuccess';
-import { BookingAssurance, ErrorSummary, StepNav } from './StepParts';
+import { BookingAssurance, ErrorSummary, GuestLoginNote, StepNav } from './StepParts';
 import './booking.css';
 import './bookingSteps.css';
 
@@ -51,15 +53,25 @@ function initialDraft(profile, user, searchParams, today) {
       ? requested
       : null;
   const base = createDraft({ profile, user, packageId: searchParams.get('paket'), date });
-  // Muat ulang di tengah alur (?langkah=…) → lanjutkan draf yang tersimpan.
+  // Muat ulang di tengah alur (?langkah=…) atau kembali dari halaman Masuk → lanjutkan draf.
   const stored = searchParams.has('langkah') ? loadDraft(profile.id) : null;
-  return stored ? { ...base, ...stored, agree: false } : base;
+  if (!stored) return base;
+  const draft = { ...base, ...stored, agree: false };
+  // Draf dari tamu belum punya alamat: pakai alamat utama akun yang baru masuk.
+  if (stored.addressId === 'lain' && !stored.customAddress?.trim())
+    draft.addressId = base.addressId;
+  return draft;
 }
+
+/** Langkah terakhir yang boleh diisi tamu (belum masuk): Pilih Layanan & Jadwal. */
+const GUEST_LAST_STEP = 2;
 
 /**
  * Pesan Layanan (FR-CUST-06/07) — 4 langkah, lalu pop-up sukses (desain pesan-layanan-1…5).
  * Langkah aktif ada di URL (?langkah=2) sehingga tombol Back browser berpindah langkah;
  * langkah yang prasyaratnya belum lengkap dikembalikan ke langkah pertama yang belum lengkap.
+ * Tamu hanya sampai langkah 2 (jadwal); "Lanjut" membawanya ke halaman Masuk dan, setelah
+ * berhasil masuk, kembali ke langkah 3 (Detail Pesanan) dengan draf yang tersimpan.
  */
 export default function BookingPage() {
   const { id } = useParams();
@@ -81,7 +93,10 @@ export default function BookingPage() {
   // Pesanan yang baru terkirim → pop-up sukses di atas langkah 4.
   const created = createdCode ? findBooking(bookings, createdCode) : null;
   const requested = Number(searchParams.get('langkah')) || 1;
-  const step = !profile ? 0 : Math.max(1, Math.min(requested, 4, firstIncompleteStep(context)));
+  const maxStep = user ? 4 : GUEST_LAST_STEP;
+  const step = !profile
+    ? 0
+    : Math.max(1, Math.min(requested, maxStep, firstIncompleteStep(context)));
 
   useEffect(() => {
     if (profile && !createdCode && step >= 1 && step <= 4) saveDraft(profile.id, draft);
@@ -95,6 +110,9 @@ export default function BookingPage() {
     }
     previousStep.current = step;
   }, [step]);
+
+  // Akun penyedia/admin/pengelola tidak memesan layanan.
+  if (user && user.role !== 'customer') return <Navigate to={homePathFor(user.role)} replace />;
 
   if (!profile) {
     return (
@@ -140,12 +158,28 @@ export default function BookingPage() {
       requestAnimationFrame(() => errorRef.current?.focus());
       return;
     }
+    if (!user && step >= GUEST_LAST_STEP) {
+      // Simpan draf sekarang (efek penyimpanan belum tentu jalan sebelum pindah halaman),
+      // lalu minta masuk; setelah berhasil kembali ke Detail Pesanan.
+      saveDraft(profile.id, draft);
+      const resume = buildBookingPath(profile.id, { langkah: String(GUEST_LAST_STEP + 1) });
+      navigate(buildAuthPath(PATHS.login, resume));
+      return;
+    }
     if (step < 4) {
       goTo(step + 1);
       return;
     }
     // TODO(API): POST pesanan ke backend; sementara disimpan di data pesanan lokal.
     const code = createBooking(draftToBooking(context));
+    // Buka percakapan chat pesanan ini agar langsung muncul di kotak masuk penyedia.
+    ensureThread({
+      code,
+      providerId: profile.id,
+      providerName: profile.name,
+      customerName: user.name,
+      service: pkg.title,
+    });
     clearDraft(profile.id);
     setCreatedCode(code);
   };
@@ -194,6 +228,7 @@ export default function BookingPage() {
           )}
           {step === 3 && <StepDetails {...stepProps} />}
           {step === 4 && <StepReview {...stepProps} goTo={goTo} />}
+          {!user && step === GUEST_LAST_STEP && <GuestLoginNote />}
           {step === 1 ? (
             <StepNav
               back={
@@ -210,7 +245,12 @@ export default function BookingPage() {
             <StepNav
               onBack={() => goTo(step - 1)}
               next={
-                step === 4 ? (
+                !user ? (
+                  <button type="submit" className="btn btn--primary step-nav__next">
+                    <LogInIcon size={20} />
+                    Masuk untuk Lanjut
+                  </button>
+                ) : step === 4 ? (
                   <button type="submit" className="btn btn--primary btn--xl step-nav__send">
                     <SendIcon />
                     Kirim Pesanan

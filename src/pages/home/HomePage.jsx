@@ -19,9 +19,9 @@ export default function HomePage() {
   return (
     <>
       <HeroSection />
-      <FeaturedProvidersSection />
       <ServiceMapSection />
       <RouteMapSection />
+      <FeaturedProvidersSection />
       <AccessibilitySection />
 
       {/* Panel cek koneksi backend (SP1-01) hanya untuk development, tidak ada di desain. */}

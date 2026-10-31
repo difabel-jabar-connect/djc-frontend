@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useLocation } from 'react-router';
+import { useLocation, useNavigationType } from 'react-router';
 
 /**
  * Pada SPA, pindah halaman tidak memindahkan fokus. Pindahkan fokus ke elemen
@@ -8,8 +8,18 @@ import { useLocation } from 'react-router';
  * ganda StrictMode tidak memfokuskan elemen saat halaman baru dibuka.
  */
 export function useRouteFocus(ref) {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
   const previousPathname = useRef(pathname);
+  const navigationType = useNavigationType();
+
+  // Layout baru terpasang karena navigasi di dalam aplikasi (mis. Masuk → Beranda):
+  // mulai dari atas, jangan mewarisi posisi gulir halaman sebelumnya. Muat ulang/Back
+  // (POP) dibiarkan agar browser memulihkan posisi gulirnya sendiri.
+  useEffect(() => {
+    if (navigationType !== 'POP' && !hash) window.scrollTo(0, 0);
+    // Hanya saat layout pertama kali terpasang.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (previousPathname.current === pathname) return;

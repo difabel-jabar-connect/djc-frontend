@@ -3,7 +3,8 @@ import { Link, useLocation } from 'react-router';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { resendVerification } from '@/features/auth/authApi';
 import { maskEmail } from '@/features/auth/password';
-import { PATHS } from '@/routes/paths';
+import { PATHS, buildAuthPath } from '@/routes/paths';
+import { safeRedirectPath } from '@/features/auth/redirect';
 import { ArrowRightIcon, ClockSmallIcon } from '@/components/ui/icons';
 import AuthIntro, { AuthPageFooter } from './AuthIntro';
 import './auth.css';
@@ -62,6 +63,8 @@ export default function RegisterSuccessPage() {
   const isMitra = state?.role === 'mitra';
   // Daftar dengan Google: email sudah terverifikasi Google, tidak perlu tautan verifikasi.
   const viaGoogle = state?.via === 'google';
+  // Daftar di tengah pemesanan → setelah masuk langsung lanjut ke pemesanan.
+  const next = state?.next ? safeRedirectPath(state.next) : null;
   const [resend, setResend] = useState({ state: 'idle', message: '' });
 
   const handleResend = async () => {
@@ -128,7 +131,10 @@ export default function RegisterSuccessPage() {
             </div>
           )}
 
-          <Link to={PATHS.login} className="btn btn--primary btn--block auth-submit">
+          <Link
+            to={buildAuthPath(PATHS.login, next)}
+            className="btn btn--primary btn--block auth-submit"
+          >
             Masuk Sekarang
             <ArrowRightIcon size={18} />
           </Link>

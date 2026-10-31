@@ -451,6 +451,14 @@ export const SettingsIcon = (p) => (
   </Svg>
 );
 
+export const LogInIcon = (p) => (
+  <Svg {...p}>
+    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+    <path d="m10 17 5-5-5-5" />
+    <path d="M15 12H3" />
+  </Svg>
+);
+
 export const LogOutIcon = (p) => (
   <Svg {...p}>
     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -608,7 +616,7 @@ export const PhoneIcon = (p) => (
   </Svg>
 );
 
-/** Gelembung obrolan (WhatsApp). */
+/** Gelembung obrolan (chat). */
 export const ChatIcon = (p) => (
   <Svg {...p}>
     <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />

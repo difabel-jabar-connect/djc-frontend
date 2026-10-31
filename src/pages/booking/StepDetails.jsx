@@ -195,7 +195,7 @@ export default function StepDetails({ profile, user, draft, update, errors }) {
         {!user.phone && (
           <div className="field">
             <label htmlFor="booking-phone" className="field-label">
-              Nomor WhatsApp{' '}
+              Nomor HP{' '}
               <span className="field-required" aria-hidden="true">
                 *
               </span>
@@ -227,7 +227,8 @@ export default function StepDetails({ profile, user, draft, update, errors }) {
         )}
         <p className="field-hint field-hint--icon">
           <InfoIcon size={18} />
-          Nomor ini dibagikan ke penyedia setelah pesanan diterima.
+          Komunikasi dengan penyedia lewat fitur Chat di aplikasi. Nomor HP hanya dipakai bila
+          darurat.
         </p>
       </section>
 

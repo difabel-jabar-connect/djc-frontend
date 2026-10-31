@@ -3,8 +3,8 @@ import { Link } from 'react-router';
 import Dialog from '@/components/ui/Dialog';
 import { RESPONSE_HOURS } from '@/features/booking/bookingDraft';
 import { formatBookingRange } from '@/features/booking/customerBookings';
-import { PATHS, buildBookingDetailPath } from '@/routes/paths';
-import { CheckIcon, ReceiptIcon, XIcon } from '@/components/ui/icons';
+import { PATHS, buildBookingChatPath, buildBookingDetailPath } from '@/routes/paths';
+import { ChatIcon, CheckIcon, ReceiptIcon, XIcon } from '@/components/ui/icons';
 import { StatusBadge } from '@/pages/customer/BookingParts';
 
 function SuccessContent({ booking, provider, onClose }) {
@@ -68,6 +68,20 @@ function SuccessContent({ booking, provider, onClose }) {
           <dd>{formatBookingRange(booking)} WIB</dd>
         </div>
       </dl>
+      <div className="booking-success__chat">
+        <p>
+          Ada pertanyaan soal pesanan? Chat langsung dengan {provider.name}, balasan masuk secara
+          real-time.
+        </p>
+        <Link
+          to={buildBookingChatPath(booking.code)}
+          className="btn btn--teal btn--md"
+          aria-label={`Chat dengan ${provider.name}`}
+        >
+          <ChatIcon />
+          Chat Penyedia
+        </Link>
+      </div>
       <div className="booking-success__actions">
         <Link to={buildBookingDetailPath(booking.code)} className="btn btn--primary btn--md">
           <ReceiptIcon />

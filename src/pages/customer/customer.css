@@ -1037,3 +1037,98 @@
     font-size: 1.5rem;
   }
 }
+
+/* ===== Chat pesanan (pelanggan) ===== */
+.chat-page {
+  padding-block: var(--space-3) var(--space-4);
+}
+
+.chat-page__inner {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.chat-page__back,
+.chat-page__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.chat-page__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: var(--space-4);
+  height: calc(100vh - var(--header-height) - 110px);
+  height: calc(100svh - var(--header-height) - 110px);
+  min-height: 480px;
+}
+
+.chat-page__aside {
+  align-self: start;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.chat-page__facts {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+}
+
+.chat-page__facts dt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-body);
+  font-size: var(--font-size-sm);
+}
+
+.chat-page__facts dd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 2px 0 0;
+  font-weight: 700;
+}
+
+.chat-page__note {
+  margin: 0;
+  padding: 12px;
+  border-radius: var(--radius);
+  background: #eef4fa;
+  color: var(--color-text-body);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+  .chat-page__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .chat-page__aside {
+    display: none;
+  }
+}
+
+/* Tombol chat di Detail Pesanan (dengan jumlah pesan belum dibaca). */
+.chat-button {
+  position: relative;
+}
+
+.chat-button__badge {
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  background: #fff;
+  color: #0c7272;
+  font-size: 12px;
+  font-weight: 800;
+}

@@ -11,13 +11,63 @@ import terapiIcon from '@/assets/icons/cat-terapi.svg';
  * `shortLabel` dipakai di chip Beranda yang ruangnya lebih sempit.
  */
 export const CATEGORIES = [
-  { slug: 'kebersihan', label: 'Kebersihan', icon: kebersihanIcon },
-  { slug: 'servis-elektronik', label: 'Servis Elektronik', icon: elektronikIcon },
-  { slug: 'jahit', label: 'Jahit', icon: jahitIcon },
-  { slug: 'kuliner', label: 'Kuliner', icon: kulinerIcon },
-  { slug: 'desain', label: 'Desain Grafis', shortLabel: 'Desain', icon: desainIcon },
-  { slug: 'terapi', label: 'Terapi Pijat', shortLabel: 'Terapi', icon: terapiIcon },
+  {
+    slug: 'kebersihan',
+    label: 'Kebersihan',
+    icon: kebersihanIcon,
+    keywords: ['bersih', 'cleaning', 'rumah', 'kantor', 'kos', 'cuci', 'sapu', 'pel'],
+  },
+  {
+    slug: 'servis-elektronik',
+    label: 'Servis Elektronik',
+    icon: elektronikIcon,
+    keywords: ['servis', 'service', 'tv', 'kipas', 'kulkas', 'mesin cuci', 'rice cooker', 'ac'],
+  },
+  {
+    slug: 'jahit',
+    label: 'Jahit',
+    icon: jahitIcon,
+    keywords: ['permak', 'baju', 'celana', 'seragam', 'vermak', 'busana', 'kebaya'],
+  },
+  {
+    slug: 'kuliner',
+    label: 'Kuliner',
+    icon: kulinerIcon,
+    keywords: ['kue', 'makanan', 'masak', 'catering', 'katering', 'nasi kotak', 'snack'],
+  },
+  {
+    slug: 'desain',
+    label: 'Desain Grafis',
+    shortLabel: 'Desain',
+    icon: desainIcon,
+    keywords: ['desain', 'design', 'logo', 'poster', 'banner', 'undangan', 'grafis'],
+  },
+  {
+    slug: 'terapi',
+    label: 'Terapi Pijat',
+    shortLabel: 'Terapi',
+    icon: terapiIcon,
+    keywords: ['pijat', 'urut', 'refleksi', 'massage', 'terapi'],
+  },
 ];
+
+const normalize = (text) => String(text).toLowerCase().trim().replace(/\s+/g, ' ');
+
+/**
+ * Cocokkan teks pencarian Beranda ke kategori layanan saja (bukan nama penyedia/kota).
+ * Mencocokkan awal kata pada nama kategori atau kata kunci jenis layanannya.
+ */
+export function matchCategories(query) {
+  const q = normalize(query);
+  if (!q) return CATEGORIES;
+  const hit = (text) =>
+    normalize(text)
+      .split(' ')
+      .some((_, i, words) => words.slice(i).join(' ').startsWith(q));
+  return CATEGORIES.filter(
+    (category) => hit(category.label) || category.keywords.some((word) => hit(word)),
+  );
+}
 
 export const getCategory = (slug) => CATEGORIES.find((category) => category.slug === slug);
 

@@ -5,6 +5,7 @@ import {
   ArrowRightIcon,
   ClipboardCheckIcon,
   ClockIcon,
+  LogInIcon,
   ShieldIcon,
 } from '@/components/ui/icons';
 
@@ -69,6 +70,24 @@ export function StepNav({ back, onBack, backLabel = 'Kembali', next }) {
           <ArrowRightIcon />
         </button>
       )}
+    </div>
+  );
+}
+
+/** Tamu di langkah Jadwal: langkah berikutnya perlu masuk/daftar, draf tetap tersimpan. */
+export function GuestLoginNote() {
+  return (
+    <div className="booking-note booking-note--guest" role="note">
+      <span className="icon-tile icon-tile--primary" aria-hidden="true">
+        <LogInIcon size={22} />
+      </span>
+      <span>
+        <strong>Masuk untuk melanjutkan</strong>
+        <span className="booking-note__text">
+          Langkah berikutnya (Detail Pesanan) memerlukan akun. Layanan dan jadwal yang Anda pilih
+          disimpan, setelah masuk atau daftar Anda langsung kembali ke sini.
+        </span>
+      </span>
     </div>
   );
 }

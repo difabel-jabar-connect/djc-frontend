@@ -16,7 +16,9 @@ import ResetPasswordSuccessPage from '@/pages/auth/ResetPasswordSuccessPage';
 import RegisterSuccessPage from '@/pages/auth/RegisterSuccessPage';
 import CustomerBookingsPage from '@/pages/customer/CustomerBookingsPage';
 import BookingDetailPage from '@/pages/customer/BookingDetailPage';
+import BookingChatPage from '@/pages/customer/BookingChatPage';
 import ProviderDashboardPage from '@/pages/provider/ProviderDashboardPage';
+import ProviderChatPage from '@/pages/provider/ProviderChatPage';
 import AdminLayout from '@/pages/admin/AdminLayout';
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
 import VerificationPage from '@/pages/admin/VerificationPage';
@@ -46,7 +48,7 @@ import { PATHS } from './paths';
 
 /**
  * Definisi rute (dipisah dari router agar mudah diuji dengan MemoryRouter).
- * Halaman pelanggan dilindungi <RequireAuth>. Proteksi dashboard penyedia/pengelola
+ * Halaman pelanggan dilindungi <RequireAuth> (Pesan Layanan menjaga sendiri langkah 3–4). Proteksi dashboard penyedia/pengelola
  * menyusul setelah Auth API backend (SP1-03) tersedia.
  */
 export const routes = [
@@ -62,6 +64,8 @@ export const routes = [
       { path: PATHS.resetPassword, element: <ResetPasswordPage /> },
       { path: PATHS.resetPasswordSuccess, element: <ResetPasswordSuccessPage /> },
       { path: PATHS.providerDashboard, element: <ProviderDashboardPage /> },
+      { path: PATHS.providerChat, element: <ProviderChatPage /> },
+      { path: PATHS.providerChatThread, element: <ProviderChatPage /> },
       {
         path: PATHS.adminDashboard,
         element: <AdminLayout />,
@@ -132,12 +136,14 @@ export const routes = [
       { path: PATHS.map, element: <MapPage /> },
       { path: PATHS.about, element: <AboutPage /> },
       { path: PATHS.providerDetail, element: <ProviderDetailPage /> },
+      // Tamu boleh memilih layanan & jadwal; masuk diminta sebelum Detail Pesanan (BookingPage).
+      { path: PATHS.booking, element: <BookingPage /> },
       {
         element: <RequireAuth allow="customer" />,
         children: [
-          { path: PATHS.booking, element: <BookingPage /> },
           { path: PATHS.customerBookings, element: <CustomerBookingsPage /> },
           { path: PATHS.bookingDetail, element: <BookingDetailPage /> },
+          { path: PATHS.bookingChat, element: <BookingChatPage /> },
         ],
       },
       { path: '*', element: <NotFoundPage /> },

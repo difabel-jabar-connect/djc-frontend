@@ -40,6 +40,48 @@ describe('Beranda setelah pelanggan masuk', () => {
     ).toHaveAttribute('href', '/bookings?status=menunggu');
   });
 
+  it('pencarian hanya menerima kategori layanan (bukan nama penyedia)', async () => {
+    const user = userEvent.setup();
+    const { router } = renderAt('/', customer);
+    const search = within(screen.getByRole('search', { name: 'Cari layanan' }));
+    const input = search.getByRole('combobox', { name: 'Kategori layanan' });
+
+    // Nama penyedia tidak dikenali sebagai kategori.
+    await user.type(input, 'Rizki Maulana');
+    await user.click(search.getByRole('button', { name: /cari layanan/i }));
+    expect(screen.getByRole('alert')).toHaveTextContent(/kategori layanan tidak ditemukan/i);
+    expect(router.state.location.pathname).toBe('/');
+
+    // Kata jenis layanan → saran kategori; pilih dengan keyboard.
+    await user.clear(input);
+    await user.type(input, 'kipas');
+    const listbox = screen.getByRole('listbox', { name: 'Saran kategori layanan' });
+    expect(
+      within(listbox)
+        .getAllByRole('option')
+        .map((o) => o.textContent),
+    ).toEqual(['Servis Elektronik']);
+    await user.keyboard('{ArrowDown}{Enter}');
+    expect(input).toHaveValue('Servis Elektronik');
+    await user.click(search.getByRole('button', { name: /cari layanan/i }));
+    expect(router.state.location.pathname).toBe('/services');
+    expect(router.state.location.search).toBe('?kategori=servis-elektronik&lokasi=Bandung');
+  });
+
+  it('urutan section mengikuti Beranda umum', () => {
+    renderAt('/', customer);
+    const titles = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent);
+    const order = [
+      /peta sebaran layanan/i,
+      /rute mudah menggunakan layanan/i,
+      /penyedia layanan unggulan/i,
+      /penyedia terdekat/i,
+      /ramah & aksesibel/i,
+    ].map((name) => titles.findIndex((title) => name.test(title)));
+    expect(order.every((index) => index >= 0)).toBe(true);
+    expect([...order].sort((x, y) => x - y)).toEqual(order);
+  });
+
   it('tombol Ubah lokasi memindahkan fokus ke pilihan lokasi', async () => {
     const user = userEvent.setup();
     renderAt('/', customer);
@@ -101,10 +143,11 @@ describe('Beranda setelah pelanggan masuk', () => {
     ).toBeInTheDocument();
   });
 
-  it('peta menampilkan lokasi pengguna dan radius', () => {
+  it('peta sebaran memakai peta SIG penyedia', async () => {
     renderAt('/', customer);
-    expect(screen.getByRole('img', { name: /lokasi anda: bandung/i })).toBeInTheDocument();
-    expect(screen.getByText('Radius ±5 km')).toBeInTheDocument();
+    expect(
+      await screen.findByRole('region', { name: /peta sig penyedia layanan di jawa barat/i }),
+    ).toBeInTheDocument();
   });
 });
 
