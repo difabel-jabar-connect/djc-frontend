@@ -11,6 +11,7 @@ export default function Dialog({
   onClose,
   labelledBy,
   describedBy,
+  role,
   className = '',
   children,
 }) {
@@ -36,6 +37,8 @@ export default function Dialog({
     <dialog
       ref={ref}
       className={`dialog ${className}`.trim()}
+      role={role}
+      aria-modal={role ? 'true' : undefined}
       aria-labelledby={labelledBy}
       aria-describedby={describedBy}
       onCancel={(event) => {

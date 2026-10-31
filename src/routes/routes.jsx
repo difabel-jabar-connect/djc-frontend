@@ -17,7 +17,30 @@ import RegisterSuccessPage from '@/pages/auth/RegisterSuccessPage';
 import CustomerBookingsPage from '@/pages/customer/CustomerBookingsPage';
 import BookingDetailPage from '@/pages/customer/BookingDetailPage';
 import ProviderDashboardPage from '@/pages/provider/ProviderDashboardPage';
+import AdminLayout from '@/pages/admin/AdminLayout';
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
+import VerificationPage from '@/pages/admin/VerificationPage';
+import UsersPage from '@/pages/admin/UsersPage';
+import CategoriesPage from '@/pages/admin/CategoriesPage';
+import ReviewsPage from '@/pages/admin/ReviewsPage';
+import OrdersPage from '@/pages/admin/OrdersPage';
+import AuditLogPage from '@/pages/admin/AuditLogPage';
+import SettingsLayout from '@/pages/admin/settings/SettingsLayout';
+import ProfileSettings from '@/pages/admin/settings/ProfileSettings';
+import SecuritySettings from '@/pages/admin/settings/SecuritySettings';
+import NotificationSettings from '@/pages/admin/settings/NotificationSettings';
+import PlatformInfoSettings from '@/pages/admin/settings/PlatformInfoSettings';
+import SystemRulesSettings from '@/pages/admin/settings/SystemRulesSettings';
+import PengelolaLayout from '@/pages/pengelola/PengelolaLayout';
+import OverviewPage from '@/pages/pengelola/OverviewPage';
+import AlumniPage from '@/pages/pengelola/AlumniPage';
+import AlumniDetailPage from '@/pages/pengelola/AlumniDetailPage';
+import PengelolaServicesPage from '@/pages/pengelola/ServicesPage';
+import PengelolaOrdersPage from '@/pages/pengelola/PengelolaOrdersPage';
+import RegionsPage from '@/pages/pengelola/RegionsPage';
+import PengelolaVerificationPage from '@/pages/pengelola/PengelolaVerificationPage';
+import ReportsPage from '@/pages/pengelola/ReportsPage';
+import { ServiceTabs } from '@/pages/pengelola/PengelolaParts';
 import RequireAuth from './RequireAuth';
 import { PATHS } from './paths';
 
@@ -39,7 +62,65 @@ export const routes = [
       { path: PATHS.resetPassword, element: <ResetPasswordPage /> },
       { path: PATHS.resetPasswordSuccess, element: <ResetPasswordSuccessPage /> },
       { path: PATHS.providerDashboard, element: <ProviderDashboardPage /> },
-      { path: PATHS.adminDashboard, element: <AdminDashboardPage /> },
+      {
+        path: PATHS.adminDashboard,
+        element: <AdminLayout />,
+        children: [
+          { index: true, element: <AdminDashboardPage /> },
+          { path: PATHS.adminVerification, element: <VerificationPage /> },
+          { path: PATHS.adminUsers, element: <UsersPage /> },
+          { path: PATHS.adminCategories, element: <CategoriesPage /> },
+          { path: PATHS.adminReviews, element: <ReviewsPage /> },
+          { path: PATHS.adminOrders, element: <OrdersPage /> },
+          { path: PATHS.adminAudit, element: <AuditLogPage /> },
+          {
+            path: PATHS.adminSettings,
+            element: <SettingsLayout />,
+            children: [
+              { index: true, element: <ProfileSettings /> },
+              { path: PATHS.adminSettingsSecurity, element: <SecuritySettings /> },
+              { path: PATHS.adminSettingsNotifications, element: <NotificationSettings /> },
+              { path: PATHS.adminSettingsPlatform, element: <PlatformInfoSettings /> },
+              { path: PATHS.adminSettingsRules, element: <SystemRulesSettings /> },
+            ],
+          },
+        ],
+      },
+      {
+        path: PATHS.pengelola,
+        element: <PengelolaLayout />,
+        children: [
+          { index: true, element: <OverviewPage /> },
+          { path: PATHS.pengelolaAlumni, element: <AlumniPage /> },
+          { path: PATHS.pengelolaAlumniDetail, element: <AlumniDetailPage /> },
+          { path: PATHS.pengelolaServices, element: <PengelolaServicesPage /> },
+          {
+            path: PATHS.pengelolaCategories,
+            element: (
+              <CategoriesPage
+                title="Data Layanan"
+                lead="Pantau layanan yang ditawarkan alumni dan kelola kategorinya."
+                tabs={<ServiceTabs />}
+              />
+            ),
+          },
+          { path: PATHS.pengelolaOrders, element: <PengelolaOrdersPage /> },
+          { path: PATHS.pengelolaRegions, element: <RegionsPage /> },
+          { path: PATHS.pengelolaVerification, element: <PengelolaVerificationPage /> },
+          { path: PATHS.pengelolaReports, element: <ReportsPage /> },
+          {
+            path: PATHS.pengelolaSettings,
+            element: <SettingsLayout />,
+            children: [
+              { index: true, element: <ProfileSettings /> },
+              { path: PATHS.pengelolaSettingsSecurity, element: <SecuritySettings /> },
+              { path: PATHS.pengelolaSettingsNotifications, element: <NotificationSettings /> },
+              { path: PATHS.pengelolaSettingsPlatform, element: <PlatformInfoSettings /> },
+              { path: PATHS.pengelolaSettingsRules, element: <SystemRulesSettings /> },
+            ],
+          },
+        ],
+      },
     ],
   },
   {
@@ -51,10 +132,10 @@ export const routes = [
       { path: PATHS.map, element: <MapPage /> },
       { path: PATHS.about, element: <AboutPage /> },
       { path: PATHS.providerDetail, element: <ProviderDetailPage /> },
-      { path: PATHS.booking, element: <BookingPage /> },
       {
         element: <RequireAuth allow="customer" />,
         children: [
+          { path: PATHS.booking, element: <BookingPage /> },
           { path: PATHS.customerBookings, element: <CustomerBookingsPage /> },
           { path: PATHS.bookingDetail, element: <BookingDetailPage /> },
         ],

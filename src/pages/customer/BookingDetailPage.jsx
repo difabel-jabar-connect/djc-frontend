@@ -401,9 +401,9 @@ export default function BookingDetailPage() {
             </section>
           </div>
 
-          <aside className="booking-aside" aria-label="Penyedia dan tindakan">
+          <aside className="detail-aside" aria-label="Penyedia dan tindakan">
             <section className="detail-card" aria-labelledby="detail-provider">
-              <h2 id="detail-provider" className="booking-aside__eyebrow">
+              <h2 id="detail-provider" className="detail-aside__eyebrow">
                 Penyedia
               </h2>
               <div className="provider-mini">
@@ -432,7 +432,7 @@ export default function BookingDetailPage() {
 
             <ContactCard booking={booking} provider={provider} />
 
-            <div className="booking-aside__actions">
+            <div className="detail-aside__actions">
               {CANCELLABLE.includes(booking.status) && (
                 <>
                   <button
@@ -444,7 +444,7 @@ export default function BookingDetailPage() {
                     <XCircleIcon />
                     Batalkan Pesanan
                   </button>
-                  <p className="booking-aside__hint">
+                  <p className="detail-aside__hint">
                     Pembatalan akan memberi tahu penyedia secara otomatis.
                   </p>
                 </>
@@ -460,13 +460,13 @@ export default function BookingDetailPage() {
                     <PencilIcon />
                     Beri Ulasan
                   </button>
-                  <p className="booking-aside__hint">
+                  <p className="detail-aside__hint">
                     Ulasan bisa diberikan hingga 7 hari setelah layanan selesai.
                   </p>
                 </>
               )}
               {booking.status === 'selesai' && booking.reviewed && (
-                <p className="booking-aside__hint">
+                <p className="detail-aside__hint">
                   {booking.review
                     ? `Ulasan Anda: ${booking.review.rating} dari 5 bintang.`
                     : 'Anda sudah memberi ulasan untuk pesanan ini.'}

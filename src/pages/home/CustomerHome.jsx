@@ -33,6 +33,8 @@ import {
 } from '@/components/ui/icons';
 import FeaturedProvidersSection from './FeaturedProvidersSection';
 import ServiceMapSection from './ServiceMapSection';
+import RouteMapSection from './RouteMapSection';
+import AccessibilitySection from './AccessibilitySection';
 import SectionHeader from './SectionHeader';
 import { HeroSearchForm, PopularCategories } from './HeroSearch';
 import './customerHome.css';
@@ -360,6 +362,8 @@ export default function CustomerHome() {
       <ActivitySection bookings={bookings} />
       <FeaturedProvidersSection favorites={favorites} onToggleFavorite={toggleFavorite} />
       <ServiceMapSection userCity={city || user.city} />
+      <RouteMapSection />
+      <AccessibilitySection />
 
       <section className="container help-banner-wrap" aria-label="Bantuan">
         <div className="help-banner">

@@ -20,7 +20,44 @@ export const PATHS = {
   bookingDetail: '/bookings/:code',
   providerDashboard: '/dashboard/provider',
   adminDashboard: '/admin',
+  adminVerification: '/admin/verifikasi',
+  adminUsers: '/admin/user',
+  adminCategories: '/admin/kategori',
+  adminReviews: '/admin/ulasan',
+  adminOrders: '/admin/pesanan',
+  adminAudit: '/admin/audit',
+  adminSettings: '/admin/pengaturan',
+  adminSettingsSecurity: '/admin/pengaturan/keamanan',
+  adminSettingsNotifications: '/admin/pengaturan/notifikasi',
+  adminSettingsPlatform: '/admin/pengaturan/informasi',
+  adminSettingsRules: '/admin/pengaturan/aturan',
+  pengelola: '/pengelola',
+  pengelolaAlumni: '/pengelola/alumni',
+  pengelolaAlumniDetail: '/pengelola/alumni/:id',
+  pengelolaServices: '/pengelola/layanan',
+  pengelolaCategories: '/pengelola/layanan/kategori',
+  pengelolaOrders: '/pengelola/pesanan',
+  pengelolaRegions: '/pengelola/wilayah',
+  pengelolaVerification: '/pengelola/verifikasi',
+  pengelolaReports: '/pengelola/laporan',
+  pengelolaSettings: '/pengelola/pengaturan',
+  pengelolaSettingsSecurity: '/pengelola/pengaturan/keamanan',
+  pengelolaSettingsNotifications: '/pengelola/pengaturan/notifikasi',
+  pengelolaSettingsPlatform: '/pengelola/pengaturan/informasi',
+  pengelolaSettingsRules: '/pengelola/pengaturan/aturan',
 };
+
+export const buildAlumniPath = (id) => `/pengelola/alumni/${encodeURIComponent(id)}`;
+
+/** URL halaman admin beserta query (mis. `{ cari: 'Joko' }`); nilai kosong diabaikan. */
+export function buildAdminPath(path, params = {}) {
+  const search = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value) search.set(key, value);
+  });
+  const query = search.toString();
+  return query ? `${path}?${query}` : path;
+}
 
 /** Bangun URL halaman pencarian beserta query (q, lokasi, kategori). Nilai kosong diabaikan. */
 export function buildServicesPath(params = {}) {

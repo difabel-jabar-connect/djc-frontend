@@ -28,10 +28,9 @@ describe('Routing dasar', () => {
   it.each([
     ['/services', /cari layanan/i],
     ['/map', /peta penyedia jasa/i],
-    ['/tentang', /tentang kami/i],
+    ['/tentang', /menghubungkan keterampilan/i],
     ['/provider/siti-nurjanah', /siti nurjanah/i],
     ['/provider/tidak-ada', /penyedia tidak ditemukan/i],
-    ['/pesan/rizki-maulana', /pemesanan layanan/i],
     ['/login', /selamat datang kembali/i],
     ['/lupa-kata-sandi', /lupa kata sandi/i],
     ['/lupa-kata-sandi/cek-email', /cek email anda/i],
@@ -40,8 +39,15 @@ describe('Routing dasar', () => {
     ['/register', /mulai terhubung bersama kami/i],
     // Halaman pelanggan: belum masuk → diarahkan ke halaman Masuk.
     ['/bookings', /selamat datang kembali/i],
+    ['/pesan/rizki-maulana', /selamat datang kembali/i],
     ['/dashboard/provider', /selamat datang/i],
-    ['/admin', /dashboard monitoring program/i],
+    ['/admin', /selamat datang/i],
+    ['/admin/verifikasi', /verifikasi penyedia/i],
+    ['/admin/user', /kelola user/i],
+    ['/admin/kategori', /kategori layanan/i],
+    ['/admin/ulasan', /moderasi ulasan/i],
+    ['/admin/pesanan', /monitoring pesanan/i],
+    ['/admin/audit', /audit log/i],
   ])('rute %s merender halaman placeholder', (path, heading) => {
     renderAt(path);
     expect(screen.getByRole('heading', { level: 1, name: heading })).toBeInTheDocument();
@@ -57,7 +63,9 @@ describe('Routing dasar', () => {
     renderAt('/');
     const nav = screen.getByRole('navigation', { name: /navigasi utama/i });
     await user.click(within(nav).getByRole('link', { name: 'Tentang' }));
-    expect(screen.getByRole('heading', { level: 1, name: /tentang kami/i })).toBeVisible();
+    expect(
+      screen.getByRole('heading', { level: 1, name: /menghubungkan keterampilan/i }),
+    ).toBeVisible();
     expect(within(nav).getByRole('link', { name: 'Tentang' })).toHaveAttribute(
       'aria-current',
       'page',

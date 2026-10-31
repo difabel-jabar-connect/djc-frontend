@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useReducer, useState } from 'react';
-import { SAMPLE_BOOKINGS } from '@/features/booking/customerBookings';
+import { SAMPLE_BOOKINGS, nextBookingCode } from '@/features/booking/customerBookings';
 import { CustomerContext } from './useCustomer';
 
 const FAVORITES_KEY = 'djc.favorites';
@@ -12,6 +12,17 @@ const nowStamp = () => {
 
 function bookingsReducer(bookings, action) {
   switch (action.type) {
+    case 'create':
+      return [
+        {
+          ...action.booking,
+          code: nextBookingCode(bookings),
+          status: 'menunggu',
+          unread: false,
+          history: [{ status: 'menunggu', by: 'Anda', at: nowStamp() }],
+        },
+        ...bookings,
+      ];
     case 'cancel':
       return bookings.map((b) =>
         b.code === action.code
@@ -60,6 +71,15 @@ export function CustomerProvider({ children, initialBookings = SAMPLE_BOOKINGS }
     [],
   );
   const markRead = useCallback((code) => dispatch({ type: 'read', code }), []);
+  // Kode dihitung di sini juga agar halaman sukses langsung tahu kode pesanan baru.
+  const createBooking = useCallback(
+    (booking) => {
+      const code = nextBookingCode(bookings);
+      dispatch({ type: 'create', booking });
+      return code;
+    },
+    [bookings],
+  );
 
   const toggleFavorite = useCallback((providerId) => {
     setFavorites((current) => {
@@ -76,8 +96,16 @@ export function CustomerProvider({ children, initialBookings = SAMPLE_BOOKINGS }
   }, []);
 
   const value = useMemo(
-    () => ({ bookings, cancelBooking, reviewBooking, markRead, favorites, toggleFavorite }),
-    [bookings, cancelBooking, reviewBooking, markRead, favorites, toggleFavorite],
+    () => ({
+      bookings,
+      createBooking,
+      cancelBooking,
+      reviewBooking,
+      markRead,
+      favorites,
+      toggleFavorite,
+    }),
+    [bookings, createBooking, cancelBooking, reviewBooking, markRead, favorites, toggleFavorite],
   );
   return <CustomerContext.Provider value={value}>{children}</CustomerContext.Provider>;
 }

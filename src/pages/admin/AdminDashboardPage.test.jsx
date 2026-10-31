@@ -1,58 +1,90 @@
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { vi } from 'vitest';
 import { renderAt } from '@/test/renderWithRouter';
 
-describe('Dashboard Pengelola', () => {
-  it('menampilkan statistik program, grafik beraksesibel, dan verifikasi', () => {
+describe('Dashboard Admin', () => {
+  it('menampilkan sapaan, ringkasan, antrean, aktivitas, dan grafik beraksesibel', () => {
     renderAt('/admin');
     expect(
-      screen.getByRole('heading', { level: 1, name: /dashboard monitoring program/i }),
+      screen.getByRole('heading', { level: 1, name: /selamat datang, andi pratama/i }),
     ).toBeVisible();
-    const stats = within(screen.getByRole('region', { name: /ringkasan program/i }));
+
+    const stats = within(screen.getByRole('region', { name: /ringkasan platform/i }));
+    expect(stats.getByText('10')).toBeInTheDocument();
     expect(stats.getByText('2.346')).toBeInTheDocument();
-    expect(stats.getByText('+4 kota')).toBeInTheDocument();
-
-    expect(
-      screen.getByRole('img', { name: /alumni aktif per bulan 2026: jan 1\.420/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('img', { name: /pesanan per bulan 2026: .*okt 192/i }),
-    ).toBeInTheDocument();
-    expect(screen.getByText(/naik 60% dari sep \(120\)/i)).toBeInTheDocument();
-    expect(screen.getByRole('img', { name: 'Capaian 94 persen dari target' })).toBeInTheDocument();
-    expect(screen.getByText(/tinggal 154 alumni lagi/i)).toBeInTheDocument();
-
-    const nav = screen.getByRole('navigation', { name: /menu pengelola/i });
-    expect(within(nav).getByRole('link', { name: 'Verifikasi, 18 menunggu' })).toHaveAttribute(
+    expect(stats.getByRole('link', { name: /tinjau sekarang/i })).toHaveAttribute(
       'href',
-      '#verifikasi',
+      '/admin/verifikasi',
     );
-    expect(within(nav).getByText('Pengaturan').closest('[aria-disabled]')).toHaveAttribute(
-      'aria-disabled',
-      'true',
+
+    // Antrean verifikasi: terlama di atas, maksimal 5 baris.
+    const queue = within(screen.getByRole('table', { name: /antrean verifikasi/i }));
+    const rows = queue.getAllByRole('row').slice(1);
+    expect(rows).toHaveLength(5);
+    expect(rows[0]).toHaveTextContent('Rudi Hartono');
+    expect(queue.getByRole('link', { name: 'Tinjau pendaftaran Rudi Hartono' })).toHaveAttribute(
+      'href',
+      '/admin/verifikasi?tinjau=v-rudi',
+    );
+
+    const activity = within(screen.getByRole('region', { name: /aktivitas terbaru/i }));
+    expect(activity.getAllByRole('listitem')[0]).toHaveTextContent(
+      /andi pratama menyetujui yuni astuti sebagai penyedia/i,
+    );
+
+    expect(
+      screen.getByRole('img', {
+        name: /pesanan harian 28 sep 2026 sampai 27 okt 2026, .*tertinggi 10 pesanan pada 17 okt/i,
+      }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/207 pesanan/)).toBeInTheDocument();
+
+    const todo = within(screen.getByRole('region', { name: /perlu tindakan/i }));
+    expect(todo.getByRole('link', { name: 'Buka: Ulasan dilaporkan, 2' })).toHaveAttribute(
+      'href',
+      '/admin/ulasan?tab=dilaporkan',
     );
   });
 
-  it('Unduh Laporan membuat file CSV', async () => {
-    const createObjectURL = vi.fn(() => 'blob:laporan');
-    const revokeObjectURL = vi.fn();
-    vi.stubGlobal('URL', Object.assign(globalThis.URL, { createObjectURL, revokeObjectURL }));
-    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+  it('rentang waktu mengubah grafik tren pesanan', async () => {
     const user = userEvent.setup();
     renderAt('/admin');
+    await user.selectOptions(screen.getByLabelText('Rentang waktu'), '7');
+    expect(screen.getByText(/total 7 hari/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole('img', { name: /pesanan harian 21 okt 2026 sampai 27 okt 2026/i }),
+    ).toBeInTheDocument();
+  });
 
-    await user.click(screen.getByRole('button', { name: /unduh laporan/i }));
-    expect(createObjectURL).toHaveBeenCalledWith(expect.any(Blob));
-    expect(click).toHaveBeenCalled();
-    expect(revokeObjectURL).toHaveBeenCalledWith('blob:laporan');
+  it('sidebar menandai halaman aktif dan berpindah ke halaman admin lain', async () => {
+    const user = userEvent.setup();
+    renderAt('/admin');
+    const nav = screen.getByRole('navigation', { name: /menu admin/i });
+    expect(within(nav).getByRole('link', { name: 'Dashboard' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+    expect(
+      within(nav).getByRole('link', { name: 'Verifikasi Penyedia, 10 menunggu' }),
+    ).toBeInTheDocument();
+    expect(within(nav).getByRole('link', { name: 'Pengaturan' })).toHaveAttribute(
+      'href',
+      '/admin/pengaturan',
+    );
+
+    await user.click(within(nav).getByRole('link', { name: 'Kelola User' }));
+    expect(screen.getByRole('heading', { level: 1, name: 'Kelola User' })).toBeVisible();
+    expect(within(nav).getByRole('link', { name: 'Kelola User' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+    expect(screen.getByRole('main')).toHaveFocus();
   });
 
   it('menu akun membuka dan menutup dengan Escape', async () => {
     const user = userEvent.setup();
     renderAt('/admin');
     const button = screen.getByRole('button', { name: /andi pratama/i });
-    expect(button).toHaveAttribute('aria-expanded', 'false');
     await user.click(button);
     expect(button).toHaveAttribute('aria-expanded', 'true');
     await user.keyboard('{Escape}');

@@ -90,6 +90,17 @@ describe('Beranda setelah pelanggan masuk', () => {
     expect(within(dialog).getByRole('radio', { name: '4 bintang, Baik' })).toBeChecked();
   });
 
+  it('juga memuat bagian Cara menggunakan (rute) dan Aksesibilitas', () => {
+    renderAt('/', customer);
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Rute Mudah Menggunakan Layanan' }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: /ilustrasi rute/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Ramah & Aksesibel untuk Semua' }),
+    ).toBeInTheDocument();
+  });
+
   it('peta menampilkan lokasi pengguna dan radius', () => {
     renderAt('/', customer);
     expect(screen.getByRole('img', { name: /lokasi anda: bandung/i })).toBeInTheDocument();
