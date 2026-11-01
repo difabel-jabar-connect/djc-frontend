@@ -8,7 +8,8 @@ import { register } from '@/features/auth/authApi';
 import { PASSWORD_MIN, passwordStrength } from '@/features/auth/password';
 import { DOMICILE_OPTIONS } from '@/features/auth/registerOptions';
 import { CATEGORIES } from '@/features/search/catalog';
-import { PATHS } from '@/routes/paths';
+import { PATHS, buildAuthPath, isBookingNext } from '@/routes/paths';
+import { safeRedirectPath } from '@/features/auth/redirect';
 import {
   CheckIcon,
   ChevronDownIcon,
@@ -64,9 +65,9 @@ function validate(form) {
   if (!form.email.trim()) errors.email = 'Email wajib diisi.';
   else if (!EMAIL_PATTERN.test(form.email.trim()))
     errors.email = 'Format email belum benar, contoh: nama@email.com.';
-  if (!form.phone) errors.wa = 'Nomor WhatsApp wajib diisi.';
+  if (!form.phone) errors.wa = 'Nomor HP wajib diisi.';
   else if (!PHONE_PATTERN.test(normalizePhone(form.phone)))
-    errors.wa = 'Nomor WhatsApp belum valid, contoh: 81234567890.';
+    errors.wa = 'Nomor HP belum valid, contoh: 81234567890.';
   if (mitra && !form.city) errors.kota = 'Pilih kota/kabupaten domisili.';
   if (mitra && !form.category) errors.kategori = 'Pilih kategori keahlian.';
   if (!form.password) errors.sandi = 'Kata sandi wajib diisi.';
@@ -103,6 +104,8 @@ export default function RegisterPage() {
   const navigate = useNavigate();
   const { signIn } = useAuth();
   const [searchParams] = useSearchParams();
+  // Tujuan setelah akun siap (mis. lanjut pemesanan) — diteruskan sampai halaman Masuk.
+  const next = searchParams.get('next') ? safeRedirectPath(searchParams.get('next')) : null;
   const [form, setForm] = useState({
     role: searchParams.get('peran') === 'mitra' ? 'mitra' : 'pengguna',
     name: '',
@@ -148,7 +151,7 @@ export default function RegisterPage() {
         password: form.password,
         ...(isMitra && { city: form.city, category: form.category }),
       });
-      navigate(PATHS.registerSuccess, { state: { email, role: form.role } });
+      navigate(PATHS.registerSuccess, { state: { email, role: form.role, next } });
     } catch (error) {
       const message =
         error?.status === 409
@@ -169,7 +172,7 @@ export default function RegisterPage() {
           state: { email: user?.email, role: 'mitra', via: 'google' },
         });
       } else {
-        navigate(homePathFor(signIn(user)?.role), { replace: true });
+        navigate(next ?? homePathFor(signIn(user)?.role), { replace: true });
       }
     },
   });
@@ -215,6 +218,13 @@ export default function RegisterPage() {
             <h2 id="form-title">Daftar Akun Baru</h2>
             <p>Lengkapi data berikut untuk membuat akun.</p>
           </div>
+
+          {isBookingNext(next) && !isMitra && (
+            <p className="auth-info" role="status">
+              Setelah akun dibuat dan Anda masuk, pemesanan dilanjutkan ke Detail Pesanan. Layanan
+              dan jadwal yang Anda pilih sudah tersimpan.
+            </p>
+          )}
 
           {status.state === 'error' && (
             <p className="auth-alert" role="alert">
@@ -282,7 +292,7 @@ export default function RegisterPage() {
 
           <AuthField
             id="wa"
-            label="Nomor WhatsApp"
+            label="Nomor HP"
             error={errors.wa}
             prefix={
               <span className="auth-input__prefix" aria-hidden="true">
@@ -443,7 +453,7 @@ export default function RegisterPage() {
             onClick={handleGoogle}
             action={
               google.errorCode === 409 && (
-                <Link to={PATHS.login} className="auth-link auth-link--strong">
+                <Link to={buildAuthPath(PATHS.login, next)} className="auth-link auth-link--strong">
                   Masuk
                 </Link>
               )
@@ -453,7 +463,7 @@ export default function RegisterPage() {
           <div className="auth-card__foot">
             <p>
               Sudah punya akun?{' '}
-              <Link to={PATHS.login} className="auth-link auth-link--strong">
+              <Link to={buildAuthPath(PATHS.login, next)} className="auth-link auth-link--strong">
                 Masuk
               </Link>
             </p>

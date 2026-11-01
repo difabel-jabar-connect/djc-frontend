@@ -13,7 +13,9 @@ import {
 } from '@/features/booking/customerBookings';
 import { getSampleProvider } from '@/features/providers/sampleProviders';
 import { formatRating, formatRupiah } from '@/lib/format';
-import { PATHS, buildBookingPath, buildProviderPath } from '@/routes/paths';
+import { PATHS, buildBookingChatPath, buildBookingPath, buildProviderPath } from '@/routes/paths';
+import { CHAT_OPEN_STATUSES, getThread, unreadCount } from '@/features/chat/chatStore';
+import { useChatStore } from '@/features/chat/useChat';
 import RatingStars from '@/components/ui/RatingStars';
 import {
   ArrowLeftIcon,
@@ -28,7 +30,6 @@ import {
   MapPinIcon,
   NoteIcon,
   PencilIcon,
-  PhoneIcon,
   ReceiptIcon,
   RotateCcwIcon,
   RouteIcon,
@@ -83,11 +84,10 @@ function bannerCopy(booking, provider) {
 }
 
 const LOCKED_TEXT = {
-  menunggu: 'Kontak dan alamat penyedia terbuka setelah penyedia menerima pesanan.',
-  selesai:
-    'Kontak dan alamat ditutup kembali setelah layanan selesai, untuk menjaga privasi penyedia.',
-  dibatalkan: 'Kontak dan alamat tidak ditampilkan untuk pesanan yang dibatalkan.',
-  ditolak: 'Kontak dan alamat tidak ditampilkan untuk pesanan yang ditolak.',
+  menunggu: 'Alamat penyedia terbuka setelah penyedia menerima pesanan.',
+  selesai: 'Alamat ditutup kembali setelah layanan selesai, untuk menjaga privasi penyedia.',
+  dibatalkan: 'Alamat tidak ditampilkan untuk pesanan yang dibatalkan.',
+  ditolak: 'Alamat tidak ditampilkan untuk pesanan yang ditolak.',
 };
 
 function DetailRow({ icon: Icon, label, children, note = false }) {
@@ -141,6 +141,36 @@ function StatusTimeline({ history }) {
   );
 }
 
+/** Chat real-time dengan penyedia (pengganti WhatsApp); setelah pesanan ditutup = riwayat. */
+function ChatButton({ booking, provider }) {
+  useChatStore();
+  const unread = unreadCount(getThread(booking.code), 'customer');
+  const open = CHAT_OPEN_STATUSES.includes(booking.status);
+  return (
+    <>
+      <Link
+        to={buildBookingChatPath(booking.code)}
+        className={`btn btn--block ${open ? 'btn--teal' : 'btn--outline'} chat-button`}
+        aria-label={`${open ? 'Chat dengan' : 'Lihat riwayat chat dengan'} ${provider.name}${unread ? `, ${unread} pesan belum dibaca` : ''}`}
+      >
+        <ChatIcon />
+        {open ? 'Chat Penyedia' : 'Riwayat Chat'}
+        {unread > 0 && (
+          <span className="chat-button__badge" aria-hidden="true">
+            {unread}
+          </span>
+        )}
+      </Link>
+      {open && (
+        <p className="detail-aside__hint">
+          Tanya jadwal, lokasi, atau detail pekerjaan langsung lewat chat. Pesan masuk secara
+          real-time.
+        </p>
+      )}
+    </>
+  );
+}
+
 function ContactCard({ booking, provider }) {
   const visible = CONTACT_VISIBLE.includes(booking.status) && booking.contact;
   return (
@@ -148,27 +178,9 @@ function ContactCard({ booking, provider }) {
       <h2 id="contact-title" className="contact-card__title">
         Kontak &amp; Lokasi
       </h2>
+      <ChatButton booking={booking} provider={provider} />
       {visible ? (
         <>
-          <div className="contact-row">
-            <span className="contact-row__icon" aria-hidden="true">
-              <PhoneIcon />
-            </span>
-            <div>
-              <span className="contact-row__label">Nomor telepon</span>
-              <span className="contact-row__phone">{booking.contact.phone}</span>
-            </div>
-          </div>
-          <a
-            href={`https://wa.me/${booking.contact.whatsapp}`}
-            target="_blank"
-            rel="noreferrer"
-            className="btn btn--primary btn--block"
-            aria-label={`Hubungi ${provider.name} via WhatsApp, membuka aplikasi baru`}
-          >
-            <ChatIcon />
-            Hubungi via WhatsApp
-          </a>
           <div className="contact-row contact-row--split">
             <span className="contact-row__icon" aria-hidden="true">
               <MapPinIcon />

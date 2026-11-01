@@ -52,6 +52,56 @@
   margin-top: 24px;
 }
 
+/* Hero setelah masuk juga setinggi satu layar: jarak & judul mengikuti tinggi layar. */
+.hero--full.hero--personal {
+  padding-block: clamp(1rem, 3vh, 2.5rem);
+}
+
+.hero--full.hero--personal .hero__inner--personal {
+  align-items: center;
+}
+
+.hero--full.hero--personal .hero__title--personal {
+  margin-top: clamp(10px, 2vh, 20px);
+}
+
+.hero--full.hero--personal .hero__lead {
+  margin-top: clamp(8px, 1.8vh, 20px);
+}
+
+.hero--full.hero--personal .hero-search {
+  margin-top: clamp(12px, 2.4vh, 24px);
+}
+
+.hero--full.hero--personal .hero__subheading {
+  margin-top: clamp(14px, 2.6vh, 32px);
+}
+
+@media (min-width: 1025px) and (max-height: 760px) {
+  .hero--full.hero--personal .hero-search {
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .hero--full.hero--personal .hero-search__field {
+    min-height: 50px;
+  }
+
+  .hero--full.hero--personal .hero-search__location,
+  .hero--full.hero--personal .hero-search__submit {
+    min-height: 50px;
+  }
+
+  .hero--full.hero--personal .category-chip {
+    min-height: 38px;
+  }
+
+  .hero--full.hero--personal .active-order {
+    gap: 12px;
+    padding: var(--space-3);
+  }
+}
+
 /* ----- Kartu Pesanan Aktif ----- */
 .active-order {
   display: flex;

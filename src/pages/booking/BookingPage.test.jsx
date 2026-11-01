@@ -17,11 +17,43 @@ const stepper = () => screen.getByRole('navigation', { name: /langkah pemesanan/
 const next = (user) => user.click(screen.getByRole('button', { name: 'Lanjut' }));
 
 describe('Pesan Layanan', () => {
-  it('meminta masuk dulu sebagai pelanggan', () => {
-    renderAt('/pesan/rizki-maulana');
-    expect(
-      screen.getByRole('heading', { level: 1, name: /selamat datang kembali/i }),
-    ).toBeVisible();
+  it('tamu bisa memilih layanan & jadwal, lalu masuk dan lanjut ke Detail Pesanan', async () => {
+    sessionStorage.clear();
+    const user = userEvent.setup();
+    const { router } = renderAt('/pesan/rizki-maulana?tanggal=2026-10-21');
+
+    // Langkah 1 & 2 terbuka untuk tamu.
+    expect(screen.getByRole('heading', { level: 1, name: 'Pesan Layanan' })).toBeVisible();
+    await next(user);
+    await user.click(await screen.findByRole('button', { name: '10.00 WIB' }));
+    expect(screen.getByRole('note')).toHaveTextContent(/masuk untuk melanjutkan/i);
+    expect(screen.queryByRole('button', { name: 'Lanjut' })).not.toBeInTheDocument();
+
+    // Langkah 3 lewat URL tetap ditahan di langkah 2 selama belum masuk.
+    await user.click(screen.getByRole('button', { name: /masuk untuk lanjut/i }));
+    expect(router.state.location.pathname).toBe('/login');
+    expect(new URLSearchParams(router.state.location.search).get('next')).toBe(
+      '/pesan/rizki-maulana?langkah=3',
+    );
+    expect(screen.getByRole('status')).toHaveTextContent(/melanjutkan pemesanan/i);
+    expect(screen.getByRole('link', { name: 'Daftar sekarang' })).toHaveAttribute(
+      'href',
+      '/register?next=%2Fpesan%2Frizki-maulana%3Flangkah%3D3',
+    );
+
+    // Setelah masuk → kembali ke Detail Pesanan dengan jadwal yang tadi dipilih.
+    const demo = within(screen.getByRole('region', { name: /akun demo/i }));
+    await user.click(demo.getByRole('button', { name: /pelanggan/i }));
+    expect(await screen.findByRole('heading', { level: 2, name: /detail pesanan/i })).toBeVisible();
+    expect(router.state.location.search).toBe('?langkah=3');
+    expect(screen.getByRole('radio', { name: /rumah/i })).toBeChecked();
+    expect(within(summary()).getByText('Rabu, 21 Oktober 2026')).toBeInTheDocument();
+    expect(within(summary()).getByText(/10\.00–12\.00 WIB/)).toBeInTheDocument();
+  });
+
+  it('tamu yang membuka langkah 3 lewat URL tetap di langkah Jadwal', () => {
+    renderAt('/pesan/rizki-maulana?tanggal=2026-10-21&langkah=3');
+    expect(screen.getByRole('heading', { level: 2, name: /pilih jadwal/i })).toBeInTheDocument();
   });
 
   it('alur lengkap 4 langkah → pesanan terkirim dan muncul di Pesanan Saya', async () => {
@@ -108,6 +140,11 @@ describe('Pesan Layanan', () => {
     expect(within(dialog).getByText('BK-0013')).toBeInTheDocument();
     expect(dialog).toHaveTextContent('Status: Menunggu');
     expect(within(dialog).getByText('Sel, 20 Okt 2026 · 09.00–11.00 WIB')).toBeInTheDocument();
+    expect(within(dialog).getByRole('link', { name: 'Chat dengan Rizki Maulana' })).toHaveAttribute(
+      'href',
+      '/bookings/BK-0013/chat',
+    );
+    expect(within(dialog).queryByText(/whatsapp/i)).not.toBeInTheDocument();
 
     await user.click(within(dialog).getByRole('link', { name: /lihat detail pesanan/i }));
     expect(await screen.findByRole('heading', { level: 1, name: /BK-0013/ })).toBeVisible();
@@ -159,7 +196,7 @@ describe('Pesan Layanan', () => {
     expect(within(summary()).getByText('Rabu, 21 Oktober 2026')).toBeInTheDocument();
   });
 
-  it('akun tanpa nomor WhatsApp & alamat tersimpan wajib mengisinya di langkah 3', async () => {
+  it('akun tanpa nomor HP & alamat tersimpan wajib mengisinya di langkah 3', async () => {
     const user = userEvent.setup();
     renderAt('/pesan/rizki-maulana?tanggal=2026-10-21', {
       user: { name: 'Rina Amalia', email: 'rina@gmail.com', role: 'customer' },
@@ -171,7 +208,7 @@ describe('Pesan Layanan', () => {
 
     await next(user);
     expect(screen.getByRole('alert')).toHaveTextContent('Periksa kembali 2 isian berikut');
-    await user.type(screen.getByLabelText(/nomor whatsapp/i), '0812 9999 1111');
+    await user.type(screen.getByLabelText(/nomor hp/i), '0812 9999 1111');
     await user.type(screen.getByLabelText(/alamat lengkap/i), 'Jl. Riau No. 1, Bandung');
     await next(user);
     expect(await screen.findByRole('region', { name: 'Ringkasan pesanan' })).toHaveTextContent(

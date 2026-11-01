@@ -34,7 +34,7 @@ export const CANCEL_REASON_MAX = 200;
 /** Status yang masih boleh dibatalkan pelanggan. */
 export const CANCELLABLE = ['menunggu', 'diterima'];
 
-/** Kontak & alamat penyedia hanya terbuka selama pesanan aktif. */
+/** Alamat penyedia hanya terbuka selama pesanan aktif (komunikasi lewat chat). */
 export const CONTACT_VISIBLE = ['diterima', 'berjalan'];
 
 export const SAMPLE_BOOKINGS = [
@@ -69,8 +69,6 @@ export const SAMPLE_BOOKINGS = [
     quantity: 2,
     note: 'Kipas angin berdiri tidak mau berputar dan berbunyi mendengung.',
     contact: {
-      phone: '0812-3456-7890',
-      whatsapp: '6281234567890',
       address: 'Jl. Cikutra No. 112, Cibeunying Kidul, Kota Bandung, Jawa Barat 40124',
     },
     unread: true,
@@ -84,7 +82,7 @@ export const SAMPLE_BOOKINGS = [
     providerId: 'agus-setiawan',
     service: 'Desain Grafis',
     status: 'berjalan',
-    mode: 'Dikerjakan jarak jauh, hasil dikirim lewat WhatsApp',
+    mode: 'Dikerjakan jarak jauh, hasil dikirim lewat chat',
     date: '2026-10-23',
     start: 9,
     hours: 2,
@@ -93,8 +91,6 @@ export const SAMPLE_BOOKINGS = [
     quantity: 1,
     note: 'Logo untuk usaha kue rumahan, warna hijau toska.',
     contact: {
-      phone: '0813-2222-4545',
-      whatsapp: '6281322224545',
       address: 'Jl. Dipatiukur No. 35, Coblong, Kota Bandung, Jawa Barat 40132',
     },
     unread: true,

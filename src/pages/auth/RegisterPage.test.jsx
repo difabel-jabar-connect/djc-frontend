@@ -12,7 +12,7 @@ const jsonResponse = (body, status = 200) =>
 async function fillCommon(user, { password = 'Rahasia123!' } = {}) {
   await user.type(screen.getByLabelText(/nama lengkap/i), 'Rina Amalia');
   await user.type(screen.getByLabelText(/^email/i), 'rina.amalia@gmail.com');
-  await user.type(screen.getByLabelText(/nomor whatsapp/i), '081234567890');
+  await user.type(screen.getByLabelText(/nomor hp/i), '081234567890');
   await user.type(screen.getByLabelText(/^kata sandi/i), password);
   await user.type(screen.getByLabelText(/^konfirmasi kata sandi/i), password);
   await user.click(screen.getByRole('checkbox', { name: /saya menyetujui/i }));

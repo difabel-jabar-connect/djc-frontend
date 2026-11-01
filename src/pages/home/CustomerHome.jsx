@@ -11,7 +11,12 @@ import {
 } from '@/features/booking/customerBookings';
 import { SAMPLE_NEARBY_KM, getSampleProvider } from '@/features/providers/sampleProviders';
 import { getCategory } from '@/features/search/catalog';
-import { PATHS, buildBookingDetailPath, buildBookingPath } from '@/routes/paths';
+import {
+  PATHS,
+  buildBookingChatPath,
+  buildBookingDetailPath,
+  buildBookingPath,
+} from '@/routes/paths';
 import ProviderCard from '@/components/ui/ProviderCard';
 import StarRatingInput from '@/components/ui/StarRatingInput';
 import {
@@ -117,7 +122,6 @@ function ActiveBookingCard({ bookings }) {
 
 function ActiveBookingBody({ booking }) {
   const provider = getSampleProvider(booking.providerId);
-  const contactable = Boolean(booking.contact?.whatsapp);
   return (
     <>
       <div className="active-order__who">
@@ -155,18 +159,14 @@ function ActiveBookingBody({ booking }) {
         >
           Lihat Detail
         </Link>
-        {contactable && (
-          <a
-            href={`https://wa.me/${booking.contact.whatsapp}`}
-            target="_blank"
-            rel="noreferrer"
-            className="btn btn--primary"
-            aria-label={`Hubungi ${provider.name} via WhatsApp, membuka aplikasi baru`}
-          >
-            <MessageIcon size={18} />
-            Hubungi
-          </a>
-        )}
+        <Link
+          to={buildBookingChatPath(booking.code)}
+          className="btn btn--primary"
+          aria-label={`Chat dengan ${provider.name}`}
+        >
+          <MessageIcon size={18} />
+          Chat
+        </Link>
       </div>
     </>
   );
@@ -330,7 +330,7 @@ export default function CustomerHome() {
 
   return (
     <>
-      <section className="hero hero--personal" aria-labelledby="hero-title">
+      <section className="hero hero--full hero--personal" aria-labelledby="hero-title">
         <div className="container hero__inner hero__inner--personal">
           <div className="hero__content">
             <button
@@ -358,11 +358,13 @@ export default function CustomerHome() {
         </div>
       </section>
 
+      {/* Urutan mengikuti Beranda umum: peta SIG → rute → penyedia unggulan, lalu bagian
+          khusus akun (terdekat & aktivitas) sebelum aksesibilitas. */}
+      <ServiceMapSection />
+      <RouteMapSection />
+      <FeaturedProvidersSection favorites={favorites} onToggleFavorite={toggleFavorite} />
       <NearbySection favorites={favorites} onToggleFavorite={toggleFavorite} />
       <ActivitySection bookings={bookings} />
-      <FeaturedProvidersSection favorites={favorites} onToggleFavorite={toggleFavorite} />
-      <ServiceMapSection userCity={city || user.city} />
-      <RouteMapSection />
       <AccessibilitySection />
 
       <section className="container help-banner-wrap" aria-label="Bantuan">

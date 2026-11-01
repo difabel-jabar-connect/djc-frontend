@@ -18,7 +18,10 @@ export const PATHS = {
   registerSuccess: '/register/berhasil',
   customerBookings: '/bookings',
   bookingDetail: '/bookings/:code',
+  bookingChat: '/bookings/:code/chat',
   providerDashboard: '/dashboard/provider',
+  providerChat: '/dashboard/provider/chat',
+  providerChatThread: '/dashboard/provider/chat/:code',
   adminDashboard: '/admin',
   adminVerification: '/admin/verifikasi',
   adminUsers: '/admin/user',
@@ -68,6 +71,21 @@ export function buildServicesPath(params = {}) {
   const query = search.toString();
   return query ? `${PATHS.services}?${query}` : PATHS.services;
 }
+
+/** URL Masuk/Daftar yang membawa tujuan setelah berhasil (`?next=`), mis. lanjut pemesanan. */
+export function buildAuthPath(path, next) {
+  return next ? `${path}?next=${encodeURIComponent(next)}` : path;
+}
+
+/** Tujuan `next` mengarah ke alur Pesan Layanan? (untuk pesan konteks di halaman Masuk/Daftar) */
+export const isBookingNext = (next) => typeof next === 'string' && next.startsWith('/pesan/');
+
+/** Chat pelanggan dengan penyedia untuk satu pesanan. */
+export const buildBookingChatPath = (code) => `/bookings/${encodeURIComponent(code)}/chat`;
+
+/** Chat sisi penyedia (kotak masuk), opsional langsung ke percakapan `code`. */
+export const buildProviderChatPath = (code) =>
+  code ? `/dashboard/provider/chat/${encodeURIComponent(code)}` : '/dashboard/provider/chat';
 
 export const buildProviderPath = (id) => `/provider/${encodeURIComponent(id)}`;
 

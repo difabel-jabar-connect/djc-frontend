@@ -39,7 +39,9 @@ describe('Routing dasar', () => {
     ['/register', /mulai terhubung bersama kami/i],
     // Halaman pelanggan: belum masuk → diarahkan ke halaman Masuk.
     ['/bookings', /selamat datang kembali/i],
-    ['/pesan/rizki-maulana', /selamat datang kembali/i],
+    ['/bookings/BK-0011/chat', /selamat datang kembali/i],
+    // Pesan Layanan terbuka untuk tamu sampai langkah Jadwal (masuk diminta sesudahnya).
+    ['/pesan/rizki-maulana', /pesan layanan/i],
     ['/dashboard/provider', /selamat datang/i],
     ['/admin', /selamat datang/i],
     ['/admin/verifikasi', /verifikasi penyedia/i],

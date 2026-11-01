@@ -575,6 +575,18 @@ html:has(.app-header) {
   background: var(--color-surface);
 }
 
+/* Teal — aksi chat (kontras putih ±5,5:1). */
+.btn--teal {
+  border-color: #0c7272;
+  background: #0c7272;
+  color: #ffffff;
+}
+
+.btn--teal:hover {
+  border-color: #095c5c;
+  background: #095c5c;
+}
+
 .btn--danger {
   border-color: #dc2626;
   background: var(--color-bg);

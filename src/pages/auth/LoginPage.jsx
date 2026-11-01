@@ -7,7 +7,7 @@ import { DEMO_ACCOUNTS, homePathFor } from '@/features/auth/session';
 import { login } from '@/features/auth/authApi';
 import { useGoogleAuth } from '@/features/auth/useGoogleAuth';
 import { safeRedirectPath } from '@/features/auth/redirect';
-import { PATHS } from '@/routes/paths';
+import { PATHS, buildAuthPath, isBookingNext } from '@/routes/paths';
 import {
   EyeIcon,
   EyeOffIcon,
@@ -55,6 +55,9 @@ export default function LoginPage() {
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState({ state: 'idle', message: '' });
   const fieldRefs = { email: useRef(null), sandi: useRef(null) };
+  const nextParam = searchParams.get('next');
+  const next = nextParam ? safeRedirectPath(nextParam) : null;
+  const registerPath = buildAuthPath(PATHS.register, next);
 
   const update = (key) => (event) => {
     const value = key === 'remember' ? event.target.checked : event.target.value;
@@ -66,8 +69,7 @@ export default function LoginPage() {
 
   /** Kembali ke halaman tujuan (`?next=`) atau halaman awal sesuai peran. */
   const goAfterLogin = (sessionUser) => {
-    const next = searchParams.get('next');
-    navigate(next ? safeRedirectPath(next) : homePathFor(sessionUser?.role), { replace: true });
+    navigate(next ?? homePathFor(sessionUser?.role), { replace: true });
   };
 
   const google = useGoogleAuth({
@@ -120,6 +122,13 @@ export default function LoginPage() {
             <h2 id="form-title">Masuk ke Akun Anda</h2>
             <p>Silakan masukkan email dan kata sandi Anda.</p>
           </div>
+
+          {isBookingNext(next) && (
+            <p className="auth-info" role="status">
+              Masuk atau daftar dulu untuk melanjutkan pemesanan. Layanan dan jadwal yang Anda pilih
+              sudah tersimpan, setelah masuk Anda langsung lanjut ke Detail Pesanan.
+            </p>
+          )}
 
           {status.state === 'error' && (
             <p className="auth-alert" role="alert">
@@ -234,7 +243,7 @@ export default function LoginPage() {
             onClick={() => google.start()}
             action={
               google.errorCode === 404 && (
-                <Link to={PATHS.register} className="auth-link auth-link--strong">
+                <Link to={registerPath} className="auth-link auth-link--strong">
                   Daftar dengan Google
                 </Link>
               )
@@ -244,7 +253,7 @@ export default function LoginPage() {
           <div className="auth-card__foot">
             <p>
               Belum punya akun?{' '}
-              <Link to={PATHS.register} className="auth-link auth-link--strong">
+              <Link to={registerPath} className="auth-link auth-link--strong">
                 Daftar sekarang
               </Link>
             </p>

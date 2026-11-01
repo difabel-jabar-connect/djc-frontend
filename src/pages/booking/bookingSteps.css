@@ -817,6 +817,24 @@ p.selection-note {
   font-size: 0.75rem;
 }
 
+.booking-success__chat {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: #e7f6f6;
+}
+
+.booking-success__chat p {
+  flex: 1 1 16rem;
+  margin: 0;
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
 .booking-success__actions {
   display: flex;
   flex-wrap: wrap;

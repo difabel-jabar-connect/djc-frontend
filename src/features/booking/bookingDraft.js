@@ -116,10 +116,9 @@ export function validateStep(step, { draft, profile, user, today }) {
   if (step === 3) {
     if (!user?.phone) {
       const phone = normalizePhone(draft.phone);
-      if (!phone)
-        errors['booking-phone'] = 'Isi nomor WhatsApp agar penyedia bisa menghubungi Anda.';
+      if (!phone) errors['booking-phone'] = 'Isi nomor HP aktif Anda.';
       else if (!PHONE_PATTERN.test(phone)) {
-        errors['booking-phone'] = 'Nomor WhatsApp belum valid, contoh: 81234567890.';
+        errors['booking-phone'] = 'Nomor HP belum valid, contoh: 81234567890.';
       }
     }
     if (!selectedAddress(draft, user)) {
