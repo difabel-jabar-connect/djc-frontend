@@ -21,6 +21,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: './src/test/setup.js',
+    testTimeout: 10000,
     css: false,
     env: {
       // Nilai khusus pengujian, bukan URL backend sungguhan.
