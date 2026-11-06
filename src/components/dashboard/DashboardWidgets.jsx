@@ -14,13 +14,11 @@ export function Trend({ value, note = 'dari bulan lalu' }) {
 }
 
 /** Kartu statistik ringkas. `tone` mengatur warna ikon bulat. */
-export function StatCard({ label, icon: Icon, tone = 'navy', value, children }) {
+/** KPI = label + angka (tanpa ikon dalam kotak berwarna; `icon`/`tone` diabaikan). */
+export function StatCard({ label, value, children }) {
   return (
     <div className="dash-card dash-stat">
       <div className="dash-stat__head">
-        <span className={`dash-stat__icon dash-stat__icon--${tone}`} aria-hidden="true">
-          <Icon size={22} />
-        </span>
         <span className="dash-stat__label">{label}</span>
       </div>
       <span className="dash-stat__value">{value}</span>

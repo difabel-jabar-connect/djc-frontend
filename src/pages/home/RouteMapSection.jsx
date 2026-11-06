@@ -1,12 +1,11 @@
 import { useState } from 'react';
-import { CalendarIcon, CheckCircleIcon, CheckIcon, SearchIcon } from '@/components/ui/icons';
+import { CheckIcon } from '@/components/ui/icons';
 import SectionHeader from './SectionHeader';
 
 const STEPS = [
   {
     title: 'Cari Layanan',
     description: 'Temukan layanan berdasarkan kategori, lokasi, atau nama penyedia.',
-    icon: SearchIcon,
     // Posisi kartu & penanda pada ilustrasi (koordinat kanvas 792×440, sesuai desain).
     card: { left: 70, top: 207, arrow: 'bottom' },
     marker: { left: 146, top: 271 },
@@ -14,14 +13,12 @@ const STEPS = [
   {
     title: 'Pesan Layanan',
     description: 'Pilih paket dan jadwal, lalu kirim pesanan ke penyedia.',
-    icon: CalendarIcon,
     card: { left: 312, top: 312, arrow: 'top' },
     marker: { left: 388, top: 256 },
   },
   {
     title: 'Gunakan Layanan',
     description: 'Nikmati layanan berkualitas dari alumni difabel Jawa Barat.',
-    icon: CheckCircleIcon,
     card: { left: 532, top: 64, arrow: 'bottom' },
     marker: { left: 608, top: 128 },
   },
@@ -41,7 +38,7 @@ function RouteIllustration({ highlighted }) {
       aria-label="Ilustrasi rute: Mulai, 01 Cari Layanan, 02 Pesan Layanan, 03 Gunakan Layanan, lalu Layanan selesai."
     >
       <svg className="route-map__bg" viewBox="0 0 792 440" aria-hidden="true" focusable="false">
-        <g fill="none" stroke="#e8f3fa" strokeWidth="1.6">
+        <g fill="none" stroke="#e4e8ee" strokeWidth="1.6">
           {[40, 92, 150, 214, 280, 346, 410].map((y) => (
             <path
               key={y}
@@ -52,7 +49,7 @@ function RouteIllustration({ highlighted }) {
           <circle cx="610" cy="330" r="52" />
           <circle cx="610" cy="330" r="76" />
         </g>
-        <g fill="#cfe3f1">
+        <g fill="#c3cad4">
           {[60, 80, 100].flatMap((x) =>
             [60, 80].map((y) => <circle key={`a${x}${y}`} cx={x} cy={y} r="3" />),
           )}
@@ -81,7 +78,7 @@ function RouteIllustration({ highlighted }) {
         <path
           d={ROUTE_PATH}
           fill="none"
-          stroke="#14a3a3"
+          stroke="#1a9a94"
           strokeWidth="3"
           strokeDasharray="14 12"
           strokeLinecap="round"
@@ -95,7 +92,6 @@ function RouteIllustration({ highlighted }) {
       </span>
 
       {STEPS.map((step, index) => {
-        const Icon = step.icon;
         const active = highlighted === index;
         return (
           <span key={step.title}>
@@ -103,9 +99,6 @@ function RouteIllustration({ highlighted }) {
               className={`route-map__card route-map__card--${step.card.arrow}${active ? ' is-active' : ''}`}
               style={pos(step.card)}
             >
-              <span className="route-map__card-icon">
-                <Icon size={18} strokeWidth={2.25} />
-              </span>
               {step.title}
             </span>
             <span
@@ -127,7 +120,7 @@ function RouteIllustration({ highlighted }) {
       >
         <path
           d="M28 68 C25 60 4 44 4 26 A24 24 0 1 1 52 26 C52 44 31 60 28 68 Z"
-          fill="#14a3a3"
+          fill="#1a9a94"
           stroke="#fff"
           strokeWidth="3"
         />
@@ -135,7 +128,7 @@ function RouteIllustration({ highlighted }) {
         <path
           d="m22 26 4.5 4.5 8-8.5"
           fill="none"
-          stroke="#0c7272"
+          stroke="#0b6b67"
           strokeWidth="3"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -159,18 +152,17 @@ export default function RouteMapSection() {
   const highlighted = hovered ?? pinned;
 
   return (
-    <section className="home-section home-section--tinted" aria-labelledby="steps-title">
+    <section id="cara-pesan" className="home-section" aria-labelledby="steps-title">
       <div className="container">
         <SectionHeader
           id="steps-title"
-          eyebrow="Cara menggunakan"
           title="Rute Mudah Menggunakan Layanan"
           description="Dari mencari hingga menikmati layanan, semuanya bisa dilakukan dari satu tempat."
         />
         <div className="route">
           <ol className="route__steps" aria-label="Langkah menggunakan layanan">
             {STEPS.map((step, index) => {
-              const Icon = step.icon;
+              const number = String(index + 1).padStart(2, '0');
               return (
                 <li key={step.title}>
                   <button
@@ -184,11 +176,11 @@ export default function RouteMapSection() {
                     onFocus={() => setHovered(index)}
                     onBlur={() => setHovered(null)}
                   >
-                    <span className="route__card-icon" aria-hidden="true">
-                      <Icon size={24} />
+                    <span className="route__card-num" aria-hidden="true">
+                      {number}
                     </span>
                     <span className="route__card-text">
-                      <span className="route__card-step">Langkah {index + 1}</span>
+                      <span className="visually-hidden">Langkah {index + 1}</span>
                       <span className="route__card-title">{step.title}</span>
                       <span className="route__card-desc">{step.description}</span>
                     </span>

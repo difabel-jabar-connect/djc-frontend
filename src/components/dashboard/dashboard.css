@@ -39,7 +39,7 @@
 }
 
 .dash-brand > span > span {
-  color: #0c7272;
+  color: var(--color-accent);
   font-size: 0.8125rem;
   font-weight: 600;
 }
@@ -82,7 +82,7 @@
   padding: 0 6px;
   border: 2px solid #ffffff;
   border-radius: var(--radius-pill);
-  background: #dc2626;
+  background: #b91c1c;
   color: #ffffff;
   font-size: 0.75rem;
   font-weight: 800;
@@ -216,7 +216,7 @@
   min-height: 48px;
   padding: 0 14px;
   border-radius: var(--radius);
-  color: #374151;
+  color: var(--color-text-body);
   font-weight: 500;
   text-decoration: none;
 }
@@ -253,7 +253,7 @@ a.dash-side__item:hover {
 .dash-soon {
   padding: 1px 8px;
   border-radius: var(--radius-pill);
-  background: #f3f4f6;
+  background: var(--color-surface);
   color: var(--color-text-body);
   font-size: 0.75rem;
   font-weight: 700;
@@ -272,7 +272,7 @@ a.dash-side__item:hover {
 }
 
 .dash-count--danger {
-  background: #dc2626;
+  background: #b91c1c;
 }
 
 .dash-count--warning {
@@ -325,7 +325,7 @@ a.dash-side__item:hover {
 
 .dash-logout:hover {
   border-color: #b91c1c;
-  background: #fef2f2;
+  background: #fdecec;
 }
 
 /* ----- Konten ----- */
@@ -350,9 +350,6 @@ a.dash-side__item:hover {
 .dash-card {
   border-radius: var(--radius-lg);
   background: var(--color-bg);
-  box-shadow:
-    0 1px 3px rgb(11 60 110 / 6%),
-    0 4px 12px rgb(11 60 110 / 6%);
 }
 
 .dash-panel {
@@ -463,16 +460,16 @@ a.dash-side__item:hover {
 
 .dash-stat__icon--teal {
   background: var(--color-accent-soft);
-  color: #0c7272;
+  color: var(--color-accent);
 }
 
 .dash-stat__icon--amber {
-  background: #fffbeb;
+  background: #fdf6e7;
   color: #b45309;
 }
 
 .dash-stat__icon--green {
-  background: #f0fdf4;
+  background: #e8f5ec;
   color: #15803d;
 }
 
@@ -519,7 +516,7 @@ a.dash-side__item:hover {
   gap: 2px;
   padding: 2px 8px;
   border-radius: var(--radius-pill);
-  background: #f0fdf4;
+  background: #e8f5ec;
   color: #15803d;
   font-weight: 700;
 }
@@ -545,32 +542,32 @@ a.dash-side__item:hover {
 }
 
 .dash-status--success {
-  background: #f0fdf4;
+  background: #e8f5ec;
   color: #15803d;
 }
 
 .dash-status--warning {
-  background: #fffbeb;
+  background: #fdf6e7;
   color: #b45309;
 }
 
 .dash-status--danger {
-  background: #fef2f2;
+  background: #fdecec;
   color: #b91c1c;
 }
 
 .dash-status--info {
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: #eaeff5;
+  color: #0b3c6e;
 }
 
 .dash-status--orange {
-  background: #fff7ed;
-  color: #c2410c;
+  background: #fdf6e7;
+  color: #b45309;
 }
 
 .dash-status--neutral {
-  background: #f3f4f6;
+  background: var(--color-surface);
   color: var(--color-text-body);
 }
 
@@ -589,7 +586,7 @@ a.dash-side__item:hover {
 
 .dash-table th {
   padding: 10px 6px;
-  background: #f7fbfe;
+  background: var(--color-paper);
   color: var(--color-text-body);
   font-weight: 700;
   text-align: left;
@@ -606,7 +603,7 @@ a.dash-side__item:hover {
 
 .dash-table td {
   padding: 10px 6px;
-  border-bottom: 1px solid #eef0f3;
+  border-bottom: 1px solid var(--color-surface);
   vertical-align: middle;
 }
 
@@ -615,7 +612,7 @@ a.dash-side__item:hover {
 }
 
 .dash-table tbody tr:hover td {
-  background: #f7fbfe;
+  background: var(--color-paper);
 }
 
 .dash-person {
@@ -674,7 +671,7 @@ a.dash-side__item:hover {
 .dash-new {
   padding: 2px 10px;
   border-radius: var(--radius-pill);
-  background: #fef2f2;
+  background: #fdecec;
   color: #b91c1c;
   font-size: var(--font-size-sm);
   font-weight: 700;
@@ -693,7 +690,7 @@ a.dash-side__item:hover {
 }
 
 .dash-chip svg {
-  color: #0c7272;
+  color: var(--color-accent);
 }
 
 /* Grafik */
@@ -798,7 +795,7 @@ a.dash-side__item:hover {
 }
 
 .dash-footer a:focus-visible {
-  outline-color: #5fd4d4;
+  outline-color: #7fd1c9;
 }
 
 .dash-footer p {
@@ -851,4 +848,135 @@ a.dash-side__item:hover {
   .dash-user__text {
     display: none;
   }
+}
+
+/* ===== Gaya app "Framed sheet" (tasteskill v2, seed 78940106) =====
+   Sidebar + bar atas = satu bingkai L berwarna lembut tanpa garis di antaranya; kerja di atas
+   lembar putih (inset 8px kanan & bawah, sudut 16px, tepi 1px, tanpa bayangan). Warna hanya di
+   data, status, dan satu aksi utama. KPI berupa angka, bukan ikon dalam kotak berwarna. */
+.dash {
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --dash-frame: #eef1f5;
+  --dash-edge: #e1e6ec;
+
+  background: var(--dash-frame);
+}
+
+.dash-topbar {
+  min-height: 64px;
+  border-bottom: 0;
+  background: var(--dash-frame);
+}
+
+.dash-side {
+  border-right: 0;
+  background: var(--dash-frame);
+}
+
+.dash-main {
+  margin: 0 8px 8px 0;
+  padding: 24px;
+  border: 1px solid var(--dash-edge);
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+a.dash-side__item:hover {
+  background: #e3e8ee;
+  color: var(--color-text);
+}
+
+.dash-side__item[aria-current='page'],
+.dash-side__item[aria-current='page']:hover {
+  background: #dce2ea;
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.dash-side__note {
+  background: transparent;
+}
+
+.dash-side__note svg {
+  display: none;
+}
+
+.dash-card {
+  border: 1px solid var(--dash-edge);
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.dash-stat__icon {
+  display: none;
+}
+
+/* Banner sambutan: judul halaman biasa, tanpa gradien & ilustrasi. */
+.dash .welcome,
+.dash .ad-welcome {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+/* Ikon pendamping teks: polos, warna teks (bukan dalam lingkaran/kotak berwarna). */
+.dash .ad-activity__icon,
+.dash .ad-todo__icon,
+.dash .pg-tile__icon {
+  width: auto;
+  height: auto;
+  background: none;
+  color: var(--color-text-muted);
+}
+
+/* Angka yang sejajar & berubah memakai digit selebar sama. */
+.dash table,
+.dash .dash-stat__value,
+.dash [class*='__value'],
+.dash [class*='-count'] {
+  font-variant-numeric: tabular-nums;
+}
+
+.dash .welcome__text h1,
+.dash .ad-welcome__title {
+  font-size: clamp(1.5rem, 1.2rem + 0.8vw, 1.875rem);
+  line-height: 1.2;
+}
+
+.dash .welcome__art,
+.dash .ad-welcome__art {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  /* Menu tidak lagi digeser keluar layar: item membungkus di dalam margin. */
+  .dash-side {
+    overflow-x: visible;
+    border-bottom: 0;
+  }
+
+  .dash-side__list {
+    flex-wrap: wrap;
+  }
+
+  .dash-side__item {
+    min-height: 44px;
+    padding: 0 12px;
+  }
+}
+
+@media (max-width: 900px) {
+  .dash-main {
+    margin: 0;
+    border-radius: 0;
+    border-inline: 0;
+  }
+}
+
+.dash {
+  font-variant-numeric: tabular-nums;
 }

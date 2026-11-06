@@ -1,6 +1,6 @@
 /* ===== Beranda setelah masuk (desain "Beranda — Login") ===== */
 .hero--personal {
-  padding-block: clamp(2rem, 1rem + 3vw, 3.5rem) clamp(3rem, 1.5rem + 4vw, 4.5rem);
+  padding: clamp(2rem, 1rem + 3vw, 3.5rem) var(--margin);
 }
 
 .hero__inner.hero__inner--personal {
@@ -17,10 +17,10 @@
   padding: 0 var(--space-3);
   border: 0;
   border-radius: var(--radius-pill);
-  background: var(--color-accent-soft);
-  color: #0c7272;
+  background: var(--color-bg);
+  color: var(--color-text);
   font-size: var(--font-size-sm);
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
 }
 
@@ -33,15 +33,12 @@
   display: flex;
   flex-direction: column;
   margin-top: 20px;
-  line-height: 1.25;
+  line-height: 1.02;
 }
 
-.hero__title--personal > span:first-child {
-  color: var(--color-primary);
-}
-
+.hero__title--personal > span:first-child,
 .hero__title--personal .hero__title-accent {
-  color: #0c7272;
+  color: var(--color-text);
 }
 
 .hero--personal .hero__lead {
@@ -55,6 +52,7 @@
 /* Hero setelah masuk juga setinggi satu layar: jarak & judul mengikuti tinggi layar. */
 .hero--full.hero--personal {
   padding-block: clamp(1rem, 3vh, 2.5rem);
+  padding-inline: var(--margin);
 }
 
 .hero--full.hero--personal .hero__inner--personal {
@@ -108,10 +106,8 @@
   flex-direction: column;
   gap: 18px;
   padding: var(--space-4);
-  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-bg);
-  box-shadow: var(--shadow-md);
 }
 
 .active-order__head {
@@ -183,7 +179,7 @@
 
 .active-order__line svg {
   flex: none;
-  color: #0c7272;
+  color: var(--color-accent);
 }
 
 .active-order__line--muted {
@@ -197,7 +193,7 @@
   gap: 6px;
   padding: 4px 10px;
   border-radius: var(--radius-pill);
-  background: #f0fdf4;
+  background: #e8f5ec;
   color: #15803d;
   font-size: var(--font-size-sm);
   font-weight: 700;
@@ -214,7 +210,7 @@
   margin: 0;
   padding: 14px 8px;
   border-radius: var(--radius);
-  background: #f7fbfe;
+  background: var(--color-paper);
   list-style: none;
 }
 
@@ -248,7 +244,7 @@
   place-items: center;
   width: 28px;
   height: 28px;
-  border: 2px solid #9ca3af;
+  border: 2px solid #8a94a3;
   border-radius: 50%;
   background: #ffffff;
   color: var(--color-text-body);
@@ -263,9 +259,9 @@
 }
 
 .order-progress__step--current .order-progress__marker {
-  border-color: #0c7272;
-  background: #0c7272;
-  box-shadow: 0 0 0 4px #cdedec;
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  outline: 4px solid #dcefec;
   color: #ffffff;
 }
 
@@ -281,13 +277,13 @@
 }
 
 .order-progress__step--current .order-progress__label {
-  color: #0c7272;
+  color: var(--color-accent);
   font-weight: 800;
 }
 
 .order-progress__now {
   margin-top: -6px;
-  color: #0c7272;
+  color: var(--color-accent);
   font-size: 0.75rem;
   font-weight: 700;
 }
@@ -310,7 +306,7 @@
   min-height: 44px;
   padding: 0 12px;
   border-radius: var(--radius-sm);
-  background: #fffbeb;
+  background: #fdf6e7;
   color: var(--color-text);
   font-size: 0.9375rem;
   text-decoration: none;
@@ -330,7 +326,7 @@
   gap: 6px;
   padding: 2px 8px;
   border-radius: var(--radius-pill);
-  background: #fef3c7;
+  background: #fdf6e7;
   color: #92400e;
   font-size: var(--font-size-sm);
   font-weight: 700;
@@ -355,9 +351,7 @@
 
 .reorder {
   gap: 12px;
-  border: 1px solid var(--color-border);
   background: var(--color-bg);
-  box-shadow: var(--shadow-sm);
 }
 
 .reorder h3,
@@ -373,7 +367,7 @@
 
 .reorder h3 svg,
 .quick-review h3 svg {
-  color: #0c7272;
+  color: var(--color-accent);
 }
 
 .reorder ul {
@@ -390,7 +384,7 @@
 }
 
 .reorder li + li {
-  border-top: 1px solid #eef0f3;
+  margin-top: 4px;
 }
 
 .reorder li:last-child {

@@ -33,7 +33,7 @@ export default function CategoriesPage({
     category && {
       name: category.name,
       initials: <CategoryIcon icon={category.icon} size={20} />,
-      color: '#0c7272',
+      color: '#0b6b67',
       meta: `${category.services} layanan · ${category.active ? 'Aktif' : 'Nonaktif'}`,
     };
 

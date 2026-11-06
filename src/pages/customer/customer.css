@@ -2,7 +2,7 @@
 .customer-page {
   min-height: 100%;
   padding-block: var(--space-4) 80px;
-  background: #f7fafc;
+  background: var(--color-paper);
 }
 
 .customer-page__inner {
@@ -84,7 +84,7 @@
 }
 
 .booking-tabs__tab:hover {
-  background: #f1f7fc;
+  background: #eaeff5;
   color: var(--color-primary);
 }
 
@@ -106,7 +106,7 @@
   padding: 0 8px;
   border-radius: var(--radius-pill);
   background: var(--color-border);
-  color: #374151;
+  color: var(--color-text-body);
   font-size: var(--font-size-sm);
   font-weight: 700;
 }
@@ -135,16 +135,10 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-bg);
-  box-shadow:
-    0 1px 2px rgb(11 60 110 / 4%),
-    0 2px 8px rgb(11 60 110 / 4%);
 }
 
 .order-card:hover {
   border-color: var(--color-accent-strong);
-  box-shadow:
-    0 0 0 1px var(--color-accent-strong),
-    0 4px 12px rgb(11 60 110 / 8%);
 }
 
 .order-card__top {
@@ -156,7 +150,8 @@
 
 .booking-code {
   color: var(--color-text-muted);
-  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-family: var(--font-family);
+  font-variant-numeric: tabular-nums;
   font-size: var(--font-size-sm);
   font-weight: 600;
   letter-spacing: 0.3px;
@@ -214,9 +209,9 @@
   gap: 10px;
   margin: 0;
   padding: 10px 14px;
-  border: 1px solid #fcd34d;
+  border: 1px solid #e3bf6f;
   border-radius: var(--radius-sm);
-  background: #fffbeb;
+  background: #fdf6e7;
   color: #92400e;
   line-height: 22px;
 }
@@ -233,7 +228,7 @@
   justify-content: space-between;
   gap: var(--space-3) var(--space-4);
   padding-top: var(--space-3);
-  border-top: 1px solid #eef0f3;
+  border-top: 1px solid var(--color-surface);
 }
 
 .order-card__meta {
@@ -250,7 +245,7 @@
 }
 
 .order-card__meta svg {
-  color: #0c7272;
+  color: var(--color-accent);
 }
 
 /* Tombol di atas tautan meregang agar tetap bisa diklik. */
@@ -343,7 +338,8 @@
 .booking-detail__title h1 {
   margin: 0;
   color: var(--color-primary);
-  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-family: var(--font-family);
+  font-variant-numeric: tabular-nums;
   font-size: var(--font-size-xl);
   line-height: 40px;
 }
@@ -361,10 +357,10 @@
 .booking-flash {
   margin: 0;
   padding: 12px 16px;
-  border: 1px solid #bbf7d0;
+  border: 1px solid #b9dfc4;
   border-radius: var(--radius);
-  background: #f0fdf4;
-  color: #166534;
+  background: #e8f5ec;
+  color: #1e6b3a;
   font-weight: 600;
 }
 
@@ -420,9 +416,6 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-bg);
-  box-shadow:
-    0 1px 2px rgb(11 60 110 / 4%),
-    0 2px 8px rgb(11 60 110 / 4%);
 }
 
 .detail-card--tight {
@@ -461,7 +454,7 @@
 }
 
 .detail-list__row + .detail-list__row {
-  border-top: 1px solid #eef0f3;
+  border-top: 1px solid var(--color-surface);
 }
 
 .detail-list__icon,
@@ -472,8 +465,8 @@
   width: 40px;
   height: 40px;
   border-radius: var(--radius-sm);
-  background: var(--color-accent-soft);
-  color: #0c7272;
+  background: none;
+  color: var(--color-accent);
 }
 
 .detail-list__row > div,
@@ -650,7 +643,7 @@
   padding: 0 10px;
   border-radius: var(--radius-pill);
   background: var(--color-accent-soft);
-  color: #0c7272;
+  color: var(--color-accent);
   font-size: var(--font-size-sm);
   font-weight: 700;
 }
@@ -683,11 +676,9 @@
 
 .detail-aside__eyebrow {
   margin: 0;
-  color: #0c7272;
+  color: var(--color-accent);
   font-size: var(--font-size-sm);
   font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
 }
 
 .provider-mini {
@@ -732,7 +723,7 @@
   padding: 0 12px;
   border-radius: var(--radius-pill);
   background: var(--color-accent-soft);
-  color: #0c7272;
+  color: var(--color-accent);
   font-size: var(--font-size-sm);
   font-weight: 700;
 }
@@ -757,7 +748,7 @@
 
 .contact-row--split {
   padding-top: var(--space-3);
-  border-top: 1px solid #eef0f3;
+  border-top: 1px solid var(--color-surface);
 }
 
 .contact-row__phone {
@@ -785,9 +776,9 @@
   display: flex;
   gap: 12px;
   padding: 14px;
-  border: 1px dashed #9ca3af;
+  border: 1px dashed #8a94a3;
   border-radius: var(--radius);
-  background: #f7fafc;
+  background: var(--color-paper);
 }
 
 .contact-locked__icon {
@@ -796,10 +787,10 @@
   place-items: center;
   width: 40px;
   height: 40px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-sm);
   background: #ffffff;
-  color: #374151;
+  color: var(--color-text-body);
 }
 
 .contact-locked > div {
@@ -815,7 +806,7 @@
 }
 
 .contact-locked__city svg {
-  color: #0c7272;
+  color: var(--color-accent);
 }
 
 .contact-locked__text {
@@ -851,7 +842,7 @@
   padding: 14px 16px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  background: #f7fafc;
+  background: var(--color-paper);
 }
 
 .review-summary > div {
@@ -878,7 +869,7 @@
 }
 
 .review-summary__date svg {
-  color: #0c7272;
+  color: var(--color-accent);
 }
 
 .form-fieldset {
@@ -950,7 +941,7 @@
 
 .form-textarea:focus,
 .form-textarea:focus-visible {
-  border-color: #0c7272;
+  border-color: var(--color-accent);
   outline: none;
   box-shadow: 0 0 0 3px rgb(20 163 163 / 35%);
 }
@@ -984,7 +975,7 @@
   align-items: center;
   gap: 8px;
   margin: 0;
-  color: #0c7272;
+  color: var(--color-accent);
   font-size: var(--font-size-sm);
   font-weight: 600;
 }
@@ -1099,7 +1090,7 @@
   margin: 0;
   padding: 12px;
   border-radius: var(--radius);
-  background: #eef4fa;
+  background: #eaeff5;
   color: var(--color-text-body);
   font-size: var(--font-size-sm);
   line-height: 1.5;
@@ -1128,7 +1119,7 @@
   padding: 0 6px;
   border-radius: var(--radius-pill);
   background: #fff;
-  color: #0c7272;
+  color: var(--color-accent);
   font-size: 12px;
   font-weight: 800;
 }

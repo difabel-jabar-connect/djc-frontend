@@ -14,7 +14,6 @@ import {
   StarFilledIcon,
   WalletIcon,
 } from '@/components/ui/icons';
-import { SewingBannerArt } from './ProfileArt';
 
 /** Section 3. HEADER PROFIL — kartu identitas penyedia + ringkasan di kanan. */
 export default function ProfileHeader({ profile, selectedDate }) {
@@ -43,13 +42,6 @@ export default function ProfileHeader({ profile, selectedDate }) {
             <GraduationIcon size={18} />
             Alumni PPSGHD Jawa Barat
           </span>
-          {profile.banner === 'jahit' ? (
-            <SewingBannerArt />
-          ) : (
-            <span className="profile-card__banner-icon" aria-hidden="true">
-              <img src={profile.categoryIcon} alt="" width="20" height="20" />
-            </span>
-          )}
           <span
             className="profile-card__avatar"
             style={{ backgroundColor: profile.avatarColor }}
@@ -61,6 +53,9 @@ export default function ProfileHeader({ profile, selectedDate }) {
 
         <div className="profile-card__body">
           <div className="profile-card__identity">
+            <h1 id="nama-penyedia" className="profile-card__name">
+              {profile.name}
+            </h1>
             <div className="profile-card__badges">
               {profile.verified && (
                 <span className="pill">
@@ -75,9 +70,6 @@ export default function ProfileHeader({ profile, selectedDate }) {
                 </span>
               )}
             </div>
-            <h1 id="nama-penyedia" className="profile-card__name">
-              {profile.name}
-            </h1>
             <ul className="profile-card__meta">
               <li>
                 <StarFilledIcon size={18} className="text-star" />

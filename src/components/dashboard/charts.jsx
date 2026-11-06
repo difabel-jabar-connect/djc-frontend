@@ -19,7 +19,7 @@ function Axis({ ticks, min, max, left, right, top, bottom, format }) {
           x2={right}
           y1={y}
           y2={y}
-          stroke={index === 0 ? '#cbd5e1' : '#eef0f3'}
+          stroke={index === 0 ? '#c3cad4' : '#eef1f5'}
           strokeWidth={index === 0 ? 1.5 : 1}
         />
         <text x={left - 8} y={y + 4} textAnchor="end">
@@ -41,7 +41,7 @@ function Callout({ x, y, title, value, width }) {
         d={`M${boxX + width} ${boxY + 16} L${boxX + width + 8} ${boxY + 20} L${boxX + width} ${boxY + 24} Z`}
         fill="#0b3c6e"
       />
-      <text x={boxX + 10} y={boxY + 16} fill="#cbd5e1" fontSize="12" fontWeight="600">
+      <text x={boxX + 10} y={boxY + 16} fill="#c3cad4" fontSize="12" fontWeight="600">
         {title}
       </text>
       <text x={boxX + 10} y={boxY + 33} fill="#fff" fontWeight="700">
@@ -100,7 +100,7 @@ export function LineChart({
       {points.slice(0, -1).map(([x, y]) => (
         <circle key={x} cx={x} cy={y} r="3.5" fill="#fff" stroke="#0b3c6e" strokeWidth="2" />
       ))}
-      <circle cx={last[0]} cy={last[1]} r="6" fill="#14a3a3" stroke="#fff" strokeWidth="2.5" />
+      <circle cx={last[0]} cy={last[1]} r="6" fill="#1a9a94" stroke="#fff" strokeWidth="2.5" />
       {callout && <Callout x={last[0]} y={last[1]} {...callout} />}
       {labels.map((label, i) =>
         label ? (
@@ -143,7 +143,7 @@ export function BarChart({
         const x = left + i * slot + (slot - barWidth) / 2;
         if (value == null) {
           return (
-            <rect key={i} x={x} y={bottom - 4} width={barWidth} height="4" rx="2" fill="#e5e7eb" />
+            <rect key={i} x={x} y={bottom - 4} width={barWidth} height="4" rx="2" fill="#e4e8ee" />
           );
         }
         const y = scale(value, 0, max, top, bottom);
@@ -155,7 +155,7 @@ export function BarChart({
             width={barWidth}
             height={bottom - y}
             rx="3"
-            fill={i === lastIndex ? '#0c7272' : '#14a3a3'}
+            fill={i === lastIndex ? '#0b6b67' : '#1a9a94'}
           />
         );
       })}
@@ -195,13 +195,13 @@ export function DonutProgress({ percent, size = 96, label }) {
       aria-label={label}
       className="donut"
     >
-      <circle cx="48" cy="48" r={radius} fill="none" stroke="#e3f6f6" strokeWidth="11" />
+      <circle cx="48" cy="48" r={radius} fill="none" stroke="#dcefec" strokeWidth="11" />
       <circle
         cx="48"
         cy="48"
         r={radius}
         fill="none"
-        stroke="#14a3a3"
+        stroke="#1a9a94"
         strokeWidth="11"
         strokeLinecap="round"
         strokeDasharray={`${(percent / 100) * circumference} ${circumference}`}

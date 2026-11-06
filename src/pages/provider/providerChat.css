@@ -57,7 +57,7 @@
 }
 
 .pchat__thread.is-active {
-  background: #e8f0f8;
+  background: #eaeff5;
 }
 
 .pchat__thread:focus-visible {
@@ -117,7 +117,7 @@
   height: 22px;
   padding: 0 6px;
   border-radius: var(--radius-pill);
-  background: #14a3a3;
+  background: var(--color-accent-strong);
   color: #fff;
   font-size: 12px;
   font-weight: 800;

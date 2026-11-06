@@ -22,7 +22,7 @@ import PasswordResetLayout from './PasswordResetLayout';
 function RequirementCheck() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <circle cx="12" cy="12" r="10" fill="#16a34a" />
+      <circle cx="12" cy="12" r="10" fill="#15803d" />
       <path
         d="m7.5 12.5 3 3 6-6"
         fill="none"

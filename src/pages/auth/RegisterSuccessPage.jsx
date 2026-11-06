@@ -12,7 +12,7 @@ import './auth.css';
 function MailSentArt() {
   return (
     <svg width="180" height="136" viewBox="0 0 180 136" aria-hidden="true" focusable="false">
-      <circle cx="90" cy="70" r="64" fill="#e8f3fa" />
+      <circle cx="90" cy="70" r="64" fill="#eaeff5" />
       <rect
         x="34"
         y="40"
@@ -32,11 +32,11 @@ function MailSentArt() {
       />
       <path
         d="M36 114 L74 78 M144 114 L106 78"
-        stroke="#c9e3f2"
+        stroke="#d5dfea"
         strokeWidth="3"
         strokeLinecap="round"
       />
-      <circle cx="138" cy="40" r="22" fill="#16a34a" stroke="#fff" strokeWidth="4" />
+      <circle cx="138" cy="40" r="22" fill="#15803d" stroke="#fff" strokeWidth="4" />
       <path
         d="m128 40.5 7 7 13-14"
         fill="none"
@@ -45,8 +45,8 @@ function MailSentArt() {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <path d="M26 22 L28 28 L34 30 L28 32 L26 38 L24 32 L18 30 L24 28 Z" fill="#14a3a3" />
-      <circle cx="164" cy="98" r="5" fill="#b6d4e8" />
+      <path d="M26 22 L28 28 L34 30 L28 32 L26 38 L24 32 L18 30 L24 28 Z" fill="#1a9a94" />
+      <circle cx="164" cy="98" r="5" fill="#b4c5d8" />
     </svg>
   );
 }

@@ -9,9 +9,9 @@
   min-height: 184px;
   overflow: hidden;
   padding: 32px 36px;
-  border: 1px solid #d3e5f1;
+  border: 1px solid #d5dfea;
   border-radius: var(--radius-lg);
-  background: linear-gradient(115deg, #ffffff 0%, #eaf5fb 45%, #d9f1f0 100%);
+  background: none;
 }
 
 .welcome__text {
@@ -100,7 +100,7 @@
 
 .orders-table__detail td {
   padding: 4px 8px 16px;
-  background: #f7fbfe;
+  background: var(--color-paper);
 }
 
 .orders-table__detail dl {
@@ -191,11 +191,11 @@
 }
 
 .week-strip__dot--on {
-  background: #0c7272;
+  background: var(--color-accent);
 }
 
 .week-strip__day[aria-pressed='true'] .week-strip__dot--on {
-  background: #5fd4d4;
+  background: #7fd1c9;
 }
 
 .week-legend {
@@ -231,15 +231,15 @@
 }
 
 .agenda__item--success {
-  border-left-color: #16a34a;
+  border-left-color: #15803d;
 }
 
 .agenda__item--info {
-  border-left-color: #2563eb;
+  border-left-color: #0b3c6e;
 }
 
 .agenda__item--neutral {
-  border-left-color: #9ca3af;
+  border-left-color: #8a94a3;
 }
 
 .icon-tile--soft-teal {
@@ -303,7 +303,7 @@
   padding: var(--space-3);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  background: #f7fbfe;
+  background: var(--color-paper);
 }
 
 .trend__totals span:first-child {
@@ -362,14 +362,14 @@
 
 .checklist__done {
   flex: none;
-  color: #16a34a;
+  color: #15803d;
 }
 
 .checklist__todo {
   flex: none;
   width: 20px;
   height: 20px;
-  border: 2px dashed #9ca3af;
+  border: 2px dashed #8a94a3;
   border-radius: 50%;
 }
 

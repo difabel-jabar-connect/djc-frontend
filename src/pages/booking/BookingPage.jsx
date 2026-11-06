@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
+import { motion } from 'motion/react';
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router';
+import { swapIn } from '@/lib/motion';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useAuth } from '@/context/useAuth';
 import { useCustomer } from '@/context/useCustomer';
@@ -196,11 +198,6 @@ export default function BookingPage() {
   return (
     <>
       <section className="booking-hero" aria-labelledby="page-title">
-        <div className="booking-hero__art" aria-hidden="true">
-          <span className="booking-hero__blob" />
-          <span className="booking-hero__ring" />
-          <span className="booking-hero__tile" />
-        </div>
         <div className="container booking-hero__content">
           <div className="booking-hero__intro">
             <h1 id="page-title" className="search-hero__title">
@@ -222,12 +219,15 @@ export default function BookingPage() {
           onSubmit={handleSubmit}
         >
           <ErrorSummary ref={errorRef} errors={errors} />
-          {step === 1 && <StepService {...stepProps} />}
-          {step === 2 && (
-            <StepSchedule {...stepProps} today={today} onChangeService={() => goTo(1)} />
-          )}
-          {step === 3 && <StepDetails {...stepProps} />}
-          {step === 4 && <StepReview {...stepProps} goTo={goTo} />}
+          {/* Isi langkah baru bergeser masuk dari arah "maju" (key = langkah). */}
+          <motion.div key={step} className="booking-step" {...swapIn}>
+            {step === 1 && <StepService {...stepProps} />}
+            {step === 2 && (
+              <StepSchedule {...stepProps} today={today} onChangeService={() => goTo(1)} />
+            )}
+            {step === 3 && <StepDetails {...stepProps} />}
+            {step === 4 && <StepReview {...stepProps} goTo={goTo} />}
+          </motion.div>
           {!user && step === GUEST_LAST_STEP && <GuestLoginNote />}
           {step === 1 ? (
             <StepNav

@@ -1,7 +1,50 @@
 import '@testing-library/jest-dom/vitest';
 import { afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
+import { MotionGlobalConfig } from 'motion';
 import { resetChatStore } from '@/features/chat/chatStore';
+
+// Animasi Motion langsung selesai di test, dan elemen dirender langsung di keadaan
+// akhirnya (initial={false}) agar pemeriksaan "terlihat" tidak bergantung pada frame animasi.
+MotionGlobalConfig.skipAnimations = true;
+vi.mock('motion/react', async (importOriginal) => {
+  const actual = await importOriginal();
+  const { createElement, forwardRef } = await import('react');
+  const cache = new Map();
+  const settled = (tag) => {
+    if (!cache.has(tag)) {
+      const Component = forwardRef(function Settled(props, ref) {
+        return createElement(actual.motion[tag], { ...props, initial: false, ref });
+      });
+      cache.set(tag, Component);
+    }
+    return cache.get(tag);
+  };
+  return { ...actual, motion: new Proxy(actual.motion, { get: (_, tag) => settled(tag) }) };
+});
+
+// jsdom tidak punya IntersectionObserver: anggap semua elemen langsung terlihat
+// (dipakai whileInView untuk reveal saat scroll).
+class InstantIntersectionObserver {
+  constructor(callback) {
+    this.callback = callback;
+  }
+
+  observe(target) {
+    this.callback([{ isIntersecting: true, intersectionRatio: 1, target }], this);
+  }
+
+  unobserve() {}
+
+  disconnect() {}
+
+  takeRecords() {
+    return [];
+  }
+}
+if (!('IntersectionObserver' in window)) {
+  window.IntersectionObserver = InstantIntersectionObserver;
+}
 
 afterEach(() => {
   cleanup();

@@ -40,7 +40,7 @@ function AreaMap({ providerName, address, radiusKm }) {
         role="img"
         aria-label={`Peta mini: alamat ${address.label} Anda berada ${inside ? 'di dalam' : 'di luar'} radius layanan penyedia, sekitar ${address.distanceKm} km.`}
       >
-        <rect width="736" height="200" rx="12" fill="#e8f3fa" />
+        <rect width="736" height="200" rx="12" fill="#eaeff5" />
         <g fill="none" stroke="#fff" strokeWidth="10" strokeLinecap="round">
           <path d="M0 140 C184 110 368 170 736 120" />
           <path d="M220.8 0 C257.6 80 184 140 235.5 200" />
@@ -50,22 +50,22 @@ function AreaMap({ providerName, address, radiusKm }) {
           cx={center.x}
           cy={center.y}
           r={radius}
-          fill="#14a3a3"
+          fill="#1a9a94"
           fillOpacity="0.1"
-          stroke="#0c7272"
+          stroke="#0b6b67"
           strokeWidth="2.5"
           strokeDasharray="7 7"
         />
-        <circle cx={center.x} cy={center.y} r="9" fill="#14a3a3" stroke="#fff" strokeWidth="3" />
-        <rect x="177" y="88" width="114" height="24" rx="8" fill="#fff" stroke="#9fdcdc" />
+        <circle cx={center.x} cy={center.y} r="9" fill="#1a9a94" stroke="#fff" strokeWidth="3" />
+        <rect x="177" y="88" width="114" height="24" rx="8" fill="#fff" stroke="#9fd2cd" />
         <text
           x="234"
           y="105"
           textAnchor="middle"
-          fontFamily="Plus Jakarta Sans, system-ui, sans-serif"
+          fontFamily="Atkinson Hyperlegible Next, system-ui, sans-serif"
           fontSize="13"
           fontWeight="700"
-          fill="#0c7272"
+          fill="#0b6b67"
         >
           {providerName} (Penyedia)
         </text>
@@ -78,7 +78,7 @@ function AreaMap({ providerName, address, radiusKm }) {
           x={pin.x + 16 + labelWidth / 2}
           y={pin.y - 12}
           textAnchor="middle"
-          fontFamily="Plus Jakarta Sans, system-ui, sans-serif"
+          fontFamily="Atkinson Hyperlegible Next, system-ui, sans-serif"
           fontSize="14"
           fontWeight="700"
           fill="#fff"
@@ -98,7 +98,7 @@ function AreaMap({ providerName, address, radiusKm }) {
         </span>
         <span>
           <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="12" cy="12" r="6" fill="#14a3a3" />
+            <circle cx="12" cy="12" r="6" fill="#1a9a94" />
           </svg>
           Penyedia
         </span>
@@ -109,7 +109,7 @@ function AreaMap({ providerName, address, radiusKm }) {
               cy="12"
               r="9"
               fill="none"
-              stroke="#0c7272"
+              stroke="#0b6b67"
               strokeWidth="2"
               strokeDasharray="3 3"
             />

@@ -31,15 +31,25 @@ import {
   RotateCwIcon,
   SearchIcon,
   ShieldIcon,
-  SparkleIcon,
   StarFilledIcon,
   StarOutlineIcon,
   TagIcon,
   TypeIcon,
   WalletIcon,
 } from '@/components/ui/icons';
-import { AboutHeroArt, AboutServiceMap } from './AboutArt';
+import { AboutServiceMap } from './AboutArt';
+import TopoCanvas from '@/components/motif/TopoCanvas';
+import { projectToShape } from '@/features/map/jabarShape';
 import './about.css';
+
+/** Titik lokasi di peta 3D hero — kota yang sama & posisi yang sama dengan pin di Beranda. */
+const HERO_PINS = [
+  { id: 'purwakarta', label: 'Purwakarta', lat: -6.5569, lng: 107.4431 },
+  { id: 'bandung', label: 'Bandung', lat: -6.887, lng: 107.596 },
+  { id: 'indramayu', label: 'Indramayu', lat: -6.3373, lng: 108.3258 },
+  { id: 'cirebon', label: 'Cirebon', lat: -6.7063, lng: 108.557 },
+  { id: 'tasikmalaya', label: 'Tasikmalaya', lat: -7.3274, lng: 108.2207 },
+].map(({ lat, lng, ...pin }) => ({ ...pin, ...projectToShape(lat, lng) }));
 
 const BEFORE = [
   { label: 'Jenis layanan', icon: LayersIcon },
@@ -120,7 +130,11 @@ const MAP_FEATURES = [
 ];
 
 const A11Y = [
-  { title: 'Font mudah dibaca', text: 'Plus Jakarta Sans, minimal 16px.', icon: TypeIcon },
+  {
+    title: 'Font mudah dibaca',
+    text: 'Atkinson Hyperlegible (dirancang untuk low vision), minimal 16px.',
+    icon: TypeIcon,
+  },
   { title: 'Kontras warna cukup', text: 'Memenuhi rasio kontras WCAG AA.', icon: ContrastIcon },
   { title: 'Navigasi sederhana', text: 'Menu singkat dan konsisten.', icon: CompassIcon },
   { title: 'Label di setiap form', text: 'Setiap isian punya label terlihat.', icon: TagIcon },
@@ -176,17 +190,12 @@ export default function AboutPage() {
       <section className="about-hero" aria-labelledby="about-title">
         <div className="container about-hero__inner">
           <div className="about-hero__content">
-            <p className="about-badge">
-              <SparkleIcon size={16} />
-              Tentang Difabel Jabar Connect
-            </p>
             <h1 id="about-title" className="about-hero__title">
-              Menghubungkan <span>Keterampilan</span> dengan Kebutuhan
+              Tentang Difabel Jabar Connect
             </h1>
             <p className="about-hero__lead">
-              Difabel Jabar Connect adalah platform layanan berbasis lokasi yang mempertemukan
-              alumni penyandang disabilitas UPTD PPSGHD Jawa Barat dengan masyarakat yang
-              membutuhkan jasa mereka.
+              Kami menghubungkan keterampilan alumni penyandang disabilitas UPTD PPSGHD Jawa Barat
+              dengan warga yang membutuhkan jasa mereka, lewat peta layanan berbasis lokasi.
             </p>
             <div>
               <Link to={PATHS.services} className="btn btn--primary btn--md">
@@ -196,7 +205,7 @@ export default function AboutPage() {
             </div>
           </div>
           <div className="about-hero__visual">
-            <AboutHeroArt />
+            <TopoCanvas pins={HERO_PINS} />
           </div>
         </div>
       </section>
@@ -205,11 +214,7 @@ export default function AboutPage() {
       <section className="home-section home-section--tinted" aria-labelledby="latar-title">
         <div className="container about-split">
           <div className="about-split__text">
-            <SectionHeader
-              id="latar-title"
-              eyebrow="Latar belakang"
-              title="Keterampilan Sudah Ada, Aksesnya yang Belum"
-            />
+            <SectionHeader id="latar-title" title="Keterampilan ada, akses belum" />
             <p className="about-lead">
               Alumni UPTD PPSGHD telah memiliki keterampilan dan siap melayani masyarakat. Namun,
               akses pasar mereka masih terbatas karena belum ada media yang menghubungkan penyedia
@@ -248,7 +253,7 @@ export default function AboutPage() {
       {/* Tujuan */}
       <section className="home-section" aria-labelledby="tujuan-title">
         <div className="container about-goal">
-          <h2 id="tujuan-title" className="section-header__eyebrow about-goal__eyebrow">
+          <h2 id="tujuan-title" className="section-title about-goal__title">
             Tujuan kami
           </h2>
           <figure className="about-goal__quote">
@@ -282,18 +287,16 @@ export default function AboutPage() {
           <SectionHeader
             id="cara-title"
             align="center"
-            eyebrow="Cara kerja"
             title="Satu Alur dari Cari hingga Ulasan"
             description="Dari menemukan penyedia sampai memberi ulasan, semua langkah ada di satu platform."
           />
           <ol className="about-flow" aria-label="Alur penggunaan">
-            {FLOW.map(({ title, text, icon: Icon }, index) => (
-              <li key={title}>
-                <span className="about-flow__badge" aria-hidden="true">
-                  <Icon size={30} />
-                  <span className="about-flow__number">{String(index + 1).padStart(2, '0')}</span>
+            {FLOW.map(({ title, text }, index) => (
+              <li key={title} className="about-flow__step">
+                <span className="about-flow__node" aria-hidden="true">
+                  {String(index + 1).padStart(2, '0')}
                 </span>
-                <div>
+                <div className="about-flow__body">
                   <h3 className="about-card__heading">
                     <span className="visually-hidden">Langkah {index + 1}: </span>
                     {title}
@@ -379,7 +382,6 @@ export default function AboutPage() {
           <div className="about-map__info">
             <SectionHeader
               id="peta-title"
-              eyebrow="Peta layanan"
               title="Lokasi adalah Inti Platform"
               description="Setiap penyedia ditampilkan sesuai titik lokasinya, sehingga Anda bisa menemukan layanan terdekat dengan mudah."
             />
@@ -409,8 +411,7 @@ export default function AboutPage() {
         <div className="container">
           <SectionHeader
             id="akses-title"
-            eyebrow="Aksesibilitas"
-            title="Dibuat untuk dan oleh Penyandang Disabilitas"
+            title="Dibuat bersama difabel"
             description="Aksesibilitas bukan fitur tambahan, melainkan bagian inti dari platform ini. Desain kami mengacu pada prinsip dasar WCAG."
           />
           <ul className="about-a11y">
@@ -452,7 +453,6 @@ export default function AboutPage() {
           <SectionHeader
             id="kolab-title"
             align="center"
-            eyebrow="Kolaborasi"
             title="Bekerja Sama dengan"
             description="Platform ini lahir dari kolaborasi untuk membuka akses pasar bagi alumni difabel."
           />
@@ -475,7 +475,7 @@ export default function AboutPage() {
       {/* CTA */}
       <section className="container about-cta-wrap" aria-labelledby="cta-title">
         <div className="about-cta">
-          <h2 id="cta-title">Mari Wujudkan Jawa Barat yang Lebih Inklusif</h2>
+          <h2 id="cta-title">Jawa Barat yang lebih inklusif</h2>
           <p>Temukan layanan dari alumni difabel di sekitar Anda, mudah, dekat, dan terpercaya.</p>
           <Link to={PATHS.services} className="btn btn--md about-cta__btn">
             <SearchIcon strokeWidth={2.25} />

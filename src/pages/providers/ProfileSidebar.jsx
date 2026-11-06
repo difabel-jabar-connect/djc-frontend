@@ -39,7 +39,7 @@ function ServiceAreaMap({ profile }) {
       role="img"
       aria-label={`Peta area layanan: ${description}`}
     >
-      <rect width="342" height="260" rx="12" fill="#e8f3fa" />
+      <rect width="342" height="260" rx="12" fill="#eaeff5" />
       <path
         d="M18 40 C60 20 120 26 170 18 C230 10 290 24 326 40 L330 236 C280 248 200 244 150 248 C90 252 40 246 14 236 Z"
         fill="#fff"
@@ -53,9 +53,9 @@ function ServiceAreaMap({ profile }) {
         cx="171"
         cy="132"
         r="78"
-        fill="#14a3a3"
+        fill="#1a9a94"
         fillOpacity="0.1"
-        stroke="#14a3a3"
+        stroke="#1a9a94"
         strokeWidth="2.5"
         strokeDasharray="7 7"
       />
@@ -63,7 +63,7 @@ function ServiceAreaMap({ profile }) {
         {labels.map(({ name, x, y, box: [bx, by, bw] }) => (
           <g key={name}>
             <circle cx={x} cy={y} r="5" fill="#6b7280" />
-            <rect x={bx} y={by} width={bw} height="24" rx="8" fill="#fff" stroke="#cbd5e1" />
+            <rect x={bx} y={by} width={bw} height="24" rx="8" fill="#fff" stroke="#c3cad4" />
             <text x={x} y={by + 17}>
               {name}
             </text>
@@ -77,7 +77,7 @@ function ServiceAreaMap({ profile }) {
           stroke="#fff"
           strokeWidth="3"
         />
-        <circle cx="0" cy="-28" r="5.5" fill="#14a3a3" />
+        <circle cx="0" cy="-28" r="5.5" fill="#1a9a94" />
         <rect x={-labelWidth / 2} y="8" width={labelWidth} height="28" rx="10" fill="#0b3c6e" />
         <text className="area-map__center" x="0" y="27" textAnchor="middle">
           {centerLabel}

@@ -20,7 +20,7 @@ describe('Routing dasar', () => {
   it('menampilkan beranda beserta status API (mode development)', async () => {
     renderAt('/');
     expect(
-      screen.getByRole('heading', { level: 1, name: /temukan layanan terpercaya/i }),
+      screen.getByRole('heading', { level: 1, name: /jasa alumni difabel jabar/i }),
     ).toBeVisible();
     expect(await screen.findByText(/terhubung ke backend/i)).toBeInTheDocument();
   });
@@ -28,7 +28,7 @@ describe('Routing dasar', () => {
   it.each([
     ['/services', /cari layanan/i],
     ['/map', /peta penyedia jasa/i],
-    ['/tentang', /menghubungkan keterampilan/i],
+    ['/tentang', /tentang difabel jabar connect/i],
     ['/provider/siti-nurjanah', /siti nurjanah/i],
     ['/provider/tidak-ada', /penyedia tidak ditemukan/i],
     ['/login', /selamat datang kembali/i],
@@ -66,7 +66,7 @@ describe('Routing dasar', () => {
     const nav = screen.getByRole('navigation', { name: /navigasi utama/i });
     await user.click(within(nav).getByRole('link', { name: 'Tentang' }));
     expect(
-      screen.getByRole('heading', { level: 1, name: /menghubungkan keterampilan/i }),
+      screen.getByRole('heading', { level: 1, name: /tentang difabel jabar connect/i }),
     ).toBeVisible();
     expect(within(nav).getByRole('link', { name: 'Tentang' })).toHaveAttribute(
       'aria-current',

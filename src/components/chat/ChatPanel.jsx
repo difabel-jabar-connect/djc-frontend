@@ -1,4 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
+import { DURATION, EASE_OUT } from '@/lib/motion';
 import { useChatStore } from '@/features/chat/useChat';
 import {
   CHAT_MAX,
@@ -149,33 +151,42 @@ export default function ChatPanel({ code, viewer, peer, closed = false, quickRep
         onScroll={handleScroll}
       >
         <ol className="chat__list">
-          {messages.map((message) => {
-            const day = dayKey(message.at);
-            const separator = day !== previousDay;
-            previousDay = day;
-            const mine = message.from === role;
-            return (
-              <li key={message.id} className="chat__item">
-                {separator && (
-                  <p className="chat__day">
-                    <span>{dayLabel(message.at)}</span>
-                  </p>
-                )}
-                {message.from === 'system' ? (
-                  <p className="chat__system">{message.text}</p>
-                ) : (
-                  <div className={`chat-bubble${mine ? ' chat-bubble--mine' : ''}`}>
-                    <span className="visually-hidden">{mine ? 'Anda' : peer.name}: </span>
-                    <p className="chat-bubble__text">{message.text}</p>
-                    <span className="chat-bubble__meta">
-                      <time dateTime={message.at}>{TIME.format(new Date(message.at))}</time>
-                      {mine && <Receipt seen={seenByOther(thread, message)} />}
-                    </span>
-                  </div>
-                )}
-              </li>
-            );
-          })}
+          {/* initial={false}: riwayat lama tidak dianimasikan, hanya pesan yang baru masuk. */}
+          <AnimatePresence initial={false}>
+            {messages.map((message) => {
+              const day = dayKey(message.at);
+              const separator = day !== previousDay;
+              previousDay = day;
+              const mine = message.from === role;
+              return (
+                <motion.li
+                  key={message.id}
+                  className="chat__item"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: DURATION.base, ease: EASE_OUT }}
+                >
+                  {separator && (
+                    <p className="chat__day">
+                      <span>{dayLabel(message.at)}</span>
+                    </p>
+                  )}
+                  {message.from === 'system' ? (
+                    <p className="chat__system">{message.text}</p>
+                  ) : (
+                    <div className={`chat-bubble${mine ? ' chat-bubble--mine' : ''}`}>
+                      <span className="visually-hidden">{mine ? 'Anda' : peer.name}: </span>
+                      <p className="chat-bubble__text">{message.text}</p>
+                      <span className="chat-bubble__meta">
+                        <time dateTime={message.at}>{TIME.format(new Date(message.at))}</time>
+                        {mine && <Receipt seen={seenByOther(thread, message)} />}
+                      </span>
+                    </div>
+                  )}
+                </motion.li>
+              );
+            })}
+          </AnimatePresence>
         </ol>
         {peerTyping && (
           <div className="chat-bubble chat-bubble--typing" aria-hidden="true">

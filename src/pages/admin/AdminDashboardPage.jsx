@@ -53,14 +53,14 @@ function WelcomeArt() {
       <path
         d="M108 96 L126 80 L140 88 L176 58"
         fill="none"
-        stroke="#14a3a3"
+        stroke="#1a9a94"
         strokeWidth="4"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <rect x="108" y="100" width="10" height="6" rx="2" fill="#c9e3f2" />
-      <rect x="124" y="96" width="10" height="10" rx="2" fill="#c9e3f2" />
-      <rect x="140" y="92" width="10" height="14" rx="2" fill="#c9e3f2" />
+      <rect x="108" y="100" width="10" height="6" rx="2" fill="#d5dfea" />
+      <rect x="124" y="96" width="10" height="10" rx="2" fill="#d5dfea" />
+      <rect x="140" y="92" width="10" height="14" rx="2" fill="#d5dfea" />
       <path
         d="M60 26 C72 34 84 36 96 36 V68 C96 92 80 106 60 114 C40 106 24 92 24 68 V36 C36 36 48 34 60 26 Z"
         fill="#0b3c6e"
@@ -75,9 +75,9 @@ function WelcomeArt() {
       />
       <path
         d="M186 18 L189 26 L197 28 L190 33 L192 41 L186 37 L180 41 L182 33 L175 28 L183 26 Z"
-        fill="#14a3a3"
+        fill="#1a9a94"
       />
-      <circle cx="196" cy="120" r="5" fill="#b6d4e8" />
+      <circle cx="196" cy="120" r="5" fill="#b4c5d8" />
     </svg>
   );
 }
@@ -123,7 +123,7 @@ function TrendChart({ values, end }) {
               x2={right}
               y1={y(tick)}
               y2={y(tick)}
-              stroke={i === 0 ? '#cbd5e1' : '#eef0f3'}
+              stroke={i === 0 ? '#c3cad4' : '#eef1f5'}
               strokeWidth={i === 0 ? 1.5 : 1}
             />
             <text x={left - 12} y={y(tick) + 5} textAnchor="end">
@@ -144,7 +144,7 @@ function TrendChart({ values, end }) {
           cx={x(peakIndex)}
           cy={y(peak)}
           r="6"
-          fill="#14a3a3"
+          fill="#1a9a94"
           stroke="#fff"
           strokeWidth="2.5"
         />

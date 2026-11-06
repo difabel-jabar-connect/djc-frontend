@@ -21,6 +21,8 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: './src/test/setup.js',
+    // Alur UI panjang (form + dialog + drawer) bisa melewati 5 dtk saat suite berjalan paralel.
+    testTimeout: 15000,
     css: false,
     env: {
       // Nilai khusus pengujian, bukan URL backend sungguhan.
