@@ -24,6 +24,11 @@ export default defineConfig({
     // Alur UI panjang (form + dialog + drawer) bisa melewati 5 dtk saat suite berjalan paralel.
     testTimeout: 15000,
     css: false,
+    poolOptions: {
+      forks: {
+        maxForks: 2,
+      },
+    },
     env: {
       // Nilai khusus pengujian, bukan URL backend sungguhan.
       VITE_API_BASE_URL: 'http://api.test/api/v1',
