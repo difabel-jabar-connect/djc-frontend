@@ -68,7 +68,9 @@ export default function ProviderCard({
       <ul className="provider-card__meta">
         <li className="provider-card__category">
           <span className="provider-card__category-icon">
-            <img src={provider.categoryIcon} alt="" width="20" height="20" />
+            {provider.categoryIcon && (
+              <img src={provider.categoryIcon} alt="" width="20" height="20" />
+            )}
           </span>
           <span className="visually-hidden">Kategori: </span>
           {provider.category}

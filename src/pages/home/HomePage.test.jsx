@@ -1,24 +1,12 @@
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { vi } from 'vitest';
 import { renderAt } from '@/test/renderWithRouter';
 
-beforeEach(() => {
-  vi.stubGlobal(
-    'fetch',
-    vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ data: { status: 'ok' } }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }),
-    ),
-  );
-});
-
-// Tunggu panel status API (dev) selesai memuat agar tidak ada update state di luar act().
+// Tunggu panel status API (dev) & data penyedia (backend tiruan) selesai dimuat.
 async function renderHome() {
   const result = renderAt('/');
   await screen.findByText(/terhubung ke backend/i);
+  await screen.findByText(/alumni kuliner di peta/i);
   return result;
 }
 
@@ -71,6 +59,7 @@ describe('Beranda', () => {
     const picker = within(screen.getByRole('group', { name: 'Lihat alumni di peta' }));
     expect(picker.getByRole('radio', { name: 'Kuliner' })).toBeChecked();
     expect(picker.getByText(/5 alumni kuliner di peta/i)).toBeInTheDocument();
+    expect(document.querySelectorAll('.hero-motif .topo__pin')).toHaveLength(5);
 
     await user.click(picker.getByRole('radio', { name: 'Terapi Pijat' }));
     expect(picker.getByText(/2 alumni terapi pijat di peta/i)).toBeInTheDocument();

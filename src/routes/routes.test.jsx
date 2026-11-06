@@ -2,15 +2,21 @@ import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 import { renderAt } from '@/test/renderWithRouter';
+import { fakeFetch } from '@/test/fakeApi';
 
+/** Health check selalu "ok"; permintaan lain (penyedia, layanan) ke backend tiruan. */
 const mockHealthOk = () =>
   vi.stubGlobal(
     'fetch',
-    vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ data: { status: 'ok' } }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }),
+    vi.fn((input, init) =>
+      String(input).endsWith('/health')
+        ? Promise.resolve(
+            new Response(JSON.stringify({ data: { status: 'ok' } }), {
+              status: 200,
+              headers: { 'Content-Type': 'application/json' },
+            }),
+          )
+        : fakeFetch(input, init),
     ),
   );
 
@@ -50,9 +56,10 @@ describe('Routing dasar', () => {
     ['/admin/ulasan', /moderasi ulasan/i],
     ['/admin/pesanan', /monitoring pesanan/i],
     ['/admin/audit', /audit log/i],
-  ])('rute %s merender halaman placeholder', (path, heading) => {
+  ])('rute %s merender halaman placeholder', async (path, heading) => {
     renderAt(path);
-    expect(screen.getByRole('heading', { level: 1, name: heading })).toBeInTheDocument();
+    // Profil & Pesan Layanan memuat data penyedia dari backend (tiruan) lebih dulu.
+    expect(await screen.findByRole('heading', { level: 1, name: heading })).toBeInTheDocument();
   });
 
   it('menampilkan halaman 404 untuk rute tidak dikenal', () => {

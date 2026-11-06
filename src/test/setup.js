@@ -1,8 +1,10 @@
 import '@testing-library/jest-dom/vitest';
-import { afterEach, vi } from 'vitest';
+import { afterEach, beforeEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import { MotionGlobalConfig } from 'motion';
 import { resetChatStore } from '@/features/chat/chatStore';
+import { clearSearchCache } from '@/features/search/useProviderSearch';
+import { fakeApi, fakeFetch } from './fakeApi';
 
 // Animasi Motion langsung selesai di test, dan elemen dirender langsung di keadaan
 // akhirnya (initial={false}) agar pemeriksaan "terlihat" tidak bergantung pada frame animasi.
@@ -46,8 +48,16 @@ if (!('IntersectionObserver' in window)) {
   window.IntersectionObserver = InstantIntersectionObserver;
 }
 
+// Backend tiruan (GET /services, GET /providers/:id, POST /bookings) untuk setiap test.
+// Test yang butuh respons lain cukup memasang vi.stubGlobal('fetch', …) sendiri.
+beforeEach(() => {
+  vi.stubGlobal('fetch', vi.fn(fakeFetch));
+});
+
 afterEach(() => {
   cleanup();
+  fakeApi.reset();
+  clearSearchCache();
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
   vi.unstubAllEnvs();

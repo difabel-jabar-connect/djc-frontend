@@ -1,7 +1,10 @@
 import { Link } from 'react-router';
 import { HeartIcon } from '@/components/ui/icons';
 import { CATEGORY_PHOTOS } from '@/features/content/photoCredits';
-import { FEATURED_PROVIDERS } from '@/features/providers/featuredProviders';
+import { usePublicProviders } from '@/features/search/useProviderSearch';
+
+/** Jumlah penyedia unggulan (rating tertinggi dari backend). */
+const FEATURED_COUNT = 4;
 import { formatRating, formatRupiah } from '@/lib/format';
 import { useInViewClass } from '@/hooks/useInViewClass';
 import { PATHS, buildBookingPath, buildProviderPath } from '@/routes/paths';
@@ -93,6 +96,8 @@ function ProviderPanel({ provider, index, favorite, onToggleFavorite }) {
 /** Section PENYEDIA UNGGULAN — kisi panel putih yang seragam. Setelah masuk ada tombol favorit. */
 export default function FeaturedProvidersSection({ favorites, onToggleFavorite }) {
   const ref = useInViewClass();
+  const { status, providers } = usePublicProviders();
+  const featured = providers.slice(0, FEATURED_COUNT);
   return (
     <section className="picks" aria-labelledby="featured-title">
       <div className="picks__head">
@@ -103,8 +108,15 @@ export default function FeaturedProvidersSection({ favorites, onToggleFavorite }
           Lihat Semua Penyedia
         </Link>
       </div>
+      {status !== 'success' && (
+        <p className="picks__status" role="status">
+          {status === 'loading'
+            ? 'Memuat penyedia unggulan…'
+            : 'Penyedia unggulan belum bisa dimuat. Muat ulang halaman untuk mencoba lagi.'}
+        </p>
+      )}
       <ul ref={ref} className="picks__list">
-        {FEATURED_PROVIDERS.map((provider, index) => (
+        {featured.map((provider, index) => (
           <ProviderPanel
             key={provider.id}
             provider={provider}

@@ -4,8 +4,10 @@ import Pagination from '@/components/ui/Pagination';
 import { ChevronDownIcon, SortIcon } from '@/components/ui/icons';
 import { SORT_OPTIONS } from '@/features/search/catalog';
 
-/** KIRI: jumlah hasil, urutan, kartu layanan, dan paginasi. */
+/** KIRI: jumlah hasil, urutan, kartu layanan, dan paginasi (status memuat/gagal dari API). */
 export default function SearchResults({
+  status = 'success',
+  onRetry,
   result,
   sort,
   onSortChange,
@@ -46,8 +48,16 @@ export default function SearchResults({
     <section className="results" aria-labelledby="hasil-title">
       <div className="results__head">
         <h2 id="hasil-title" className="results__title" aria-live="polite">
-          Ditemukan <strong>{result.total}</strong> penyedia layanan
-          {areaActive && <span className="results__area"> di area peta</span>}
+          {status === 'loading' ? (
+            'Mencari penyedia layanan…'
+          ) : status === 'error' ? (
+            'Hasil belum bisa dimuat'
+          ) : (
+            <>
+              Ditemukan <strong>{result.total}</strong> penyedia layanan
+              {areaActive && <span className="results__area"> di area peta</span>}
+            </>
+          )}
         </h2>
         <div className="results__sort">
           <label htmlFor="urut" className="search-panel__label">
@@ -72,7 +82,21 @@ export default function SearchResults({
         </div>
       </div>
 
-      {result.total > 0 ? (
+      {status === 'loading' ? (
+        <ul className="results__grid results__grid--loading" aria-hidden="true">
+          {[0, 1, 2, 3].map((n) => (
+            <li key={n} className="results__skeleton" />
+          ))}
+        </ul>
+      ) : status === 'error' ? (
+        <div className="results__empty" role="alert">
+          <p className="results__empty-title">Tidak dapat terhubung ke server.</p>
+          <p>Periksa koneksi internet Anda, lalu coba lagi.</p>
+          <button type="button" className="btn btn--primary" onClick={onRetry}>
+            Coba Lagi
+          </button>
+        </div>
+      ) : result.total > 0 ? (
         <>
           <ul ref={gridRef} className="results__grid">
             {result.items.map((provider) => (

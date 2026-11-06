@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
-import { getProviderProfile } from '@/features/providers/providerProfiles';
+import { useProviderProfile } from '@/features/providers/useProviderProfile';
 import { startOfDay, upcomingDays } from '@/features/booking/schedule';
 import { buildServicesPath, PATHS } from '@/routes/paths';
 import { ChevronRightIcon } from '@/components/ui/icons';
@@ -14,6 +14,7 @@ import {
   StatsSection,
 } from './ProfileSections';
 import ProfileSidebar from './ProfileSidebar';
+import ProviderStatus from './ProviderStatus';
 import './providerProfile.css';
 
 const SECTION_LINKS = [
@@ -24,26 +25,33 @@ const SECTION_LINKS = [
   { id: 'lokasi', label: 'Lokasi' },
 ];
 
-/** Halaman Profil Penyedia (FR-CUST-05). Data sementara dari contoh lokal. */
+/** Halaman Profil Penyedia (FR-CUST-05). Data dari GET /providers/:id (backend). */
 export default function ProviderDetailPage() {
   const { id } = useParams();
-  const profile = getProviderProfile(id);
-  const [selectedDate, setSelectedDate] = useState('');
-  const [activeSection, setActiveSection] = useState('tentang');
-  useDocumentTitle(profile ? `${profile.name} · Profil Penyedia` : 'Penyedia tidak ditemukan');
+  const { status, profile, retry } = useProviderProfile(id);
+  useDocumentTitle(
+    profile
+      ? `${profile.name} · Profil Penyedia`
+      : status === 'notfound'
+        ? 'Penyedia tidak ditemukan'
+        : 'Profil Penyedia',
+  );
 
   if (!profile) {
     return (
-      <section className="container page" aria-labelledby="page-title">
-        <h1 id="page-title">Penyedia tidak ditemukan</h1>
-        <p className="lead">Profil yang Anda cari tidak tersedia atau sudah tidak aktif.</p>
-        <Link to={PATHS.services} className="btn btn--primary">
-          Kembali ke Cari Layanan
-        </Link>
-      </section>
+      <ProviderStatus
+        status={status}
+        onRetry={retry}
+        notFoundLead="Profil yang Anda cari tidak tersedia atau sudah tidak aktif."
+      />
     );
   }
+  return <ProviderProfileView key={profile.id} profile={profile} />;
+}
 
+function ProviderProfileView({ profile }) {
+  const [selectedDate, setSelectedDate] = useState('');
+  const [activeSection, setActiveSection] = useState('tentang');
   const days = upcomingDays(startOfDay(new Date()), profile.workDays);
 
   return (

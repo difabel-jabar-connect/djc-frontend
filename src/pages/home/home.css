@@ -657,6 +657,11 @@
   margin-bottom: 32px;
 }
 
+.picks__status {
+  margin: 0 0 var(--space-3);
+  color: var(--color-text-muted);
+}
+
 .picks__all,
 .pick__link {
   display: inline-flex;

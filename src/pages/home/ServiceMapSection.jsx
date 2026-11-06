@@ -1,7 +1,7 @@
 import { lazy, Suspense, useState } from 'react';
 import { Link } from 'react-router';
 import { JABAR_BOUNDS, inArea } from '@/features/map/jabarGeo';
-import { SAMPLE_PROVIDERS } from '@/features/providers/sampleProviders';
+import { usePublicProviders } from '@/features/search/useProviderSearch';
 import { useInViewClass } from '@/hooks/useInViewClass';
 import { PATHS } from '@/routes/paths';
 
@@ -52,8 +52,10 @@ export default function ServiceMapSection() {
   // Setelah "Cara memesan" diklik, tombolnya tetap biru sebagai tanda pilihan aktif.
   const [howChosen, setHowChosen] = useState(false);
   const plateRef = useInViewClass();
+  const { status, providers: all } = usePublicProviders();
+  const providers = all.filter((p) => p.lat !== null && p.lng !== null);
   const region = REGIONS.find((r) => r.id === regionId);
-  const inRegion = SAMPLE_PROVIDERS.filter((p) => inArea(p, areaOf(region.bounds)));
+  const inRegion = providers.filter((p) => inArea(p, areaOf(region.bounds)));
   const cities = new Set(inRegion.map((p) => p.city)).size;
 
   return (
@@ -61,7 +63,7 @@ export default function ServiceMapSection() {
       <div ref={plateRef} className="showcase__plate shutter">
         <Suspense fallback={<div className="pm pm--loading">Memuat peta…</div>}>
           <ProviderMap
-            providers={SAMPLE_PROVIDERS}
+            providers={providers}
             hoveredId={hoveredId}
             onHover={setHoveredId}
             selectedId={selectedId}
@@ -95,9 +97,17 @@ export default function ServiceMapSection() {
             Peta Sebaran Layanan
           </h2>
           <p className="showcase__desc" aria-live="polite">
-            Di {region.name} ada <strong>{inRegion.length} alumni</strong> di {cities} kota dan
-            kabupaten. Klik pin harga untuk melihat penyedia, atau perbesar peta dengan tombol + dan
-            −.
+            {status === 'loading' ? (
+              'Memuat sebaran alumni…'
+            ) : status === 'error' ? (
+              'Data sebaran alumni belum bisa dimuat. Muat ulang halaman untuk mencoba lagi.'
+            ) : (
+              <>
+                Di {region.name} ada <strong>{inRegion.length} alumni</strong> di {cities} kota dan
+                kabupaten. Klik pin harga untuk melihat penyedia, atau perbesar peta dengan tombol +
+                dan −.
+              </>
+            )}
           </p>
         </div>
 

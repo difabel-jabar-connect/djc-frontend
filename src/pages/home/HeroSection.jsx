@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 import TopoCanvas from '@/components/motif/TopoCanvas';
 import { projectToShape } from '@/features/map/jabarShape';
-import { SAMPLE_PROVIDERS } from '@/features/providers/sampleProviders';
+import { usePublicProviders } from '@/features/search/useProviderSearch';
 import { CATEGORIES } from '@/features/search/catalog';
 import { PATHS, buildServicesPath } from '@/routes/paths';
 
@@ -15,8 +15,11 @@ const DEFAULT_TRADE = 'kuliner';
 export default function HeroSection() {
   const [trade, setTrade] = useState(DEFAULT_TRADE);
   const category = CATEGORIES.find((c) => c.slug === trade);
-  const providers = SAMPLE_PROVIDERS.filter((p) => p.categorySlug === trade);
-  const pins = providers.map((p) => ({ id: p.id, label: p.city, ...projectToShape(p.lat, p.lng) }));
+  const { status, providers: all } = usePublicProviders();
+  const providers = all.filter((p) => p.categorySlug === trade);
+  const pins = providers
+    .filter((p) => p.lat !== null && p.lng !== null)
+    .map((p) => ({ id: p.id, label: p.city, ...projectToShape(p.lat, p.lng) }));
 
   return (
     <section className="hero-motif" aria-labelledby="hero-title">
@@ -60,7 +63,12 @@ export default function HeroSection() {
             ))}
           </div>
           <p className="trade-picker__result" aria-live="polite">
-            {providers.length} alumni {category.label.toLowerCase()} di peta ·{' '}
+            {status === 'loading'
+              ? 'Memuat alumni di peta…'
+              : status === 'error'
+                ? 'Data alumni belum bisa dimuat'
+                : `${providers.length} alumni ${category.label.toLowerCase()} di peta`}{' '}
+            ·{' '}
             <Link to={buildServicesPath({ kategori: trade })}>
               Lihat semua
               <span className="visually-hidden"> penyedia {category.label}</span>

@@ -1,4 +1,5 @@
-import { DAY_OPTIONS, getCategory, PRICE_OPTIONS, RATING_OPTIONS } from './catalog';
+import { cityKey } from '@/features/providers/providerAdapters';
+import { DAY_OPTIONS, getCategory, PRICE_OPTIONS, RATING_OPTIONS, SORT_TO_API } from './catalog';
 
 export const PAGE_SIZE = 6;
 
@@ -20,46 +21,32 @@ export function readCriteria(searchParams) {
   };
 }
 
-const normalize = (value) => value.toLocaleLowerCase('id-ID');
-
-function matchesQuery(provider, q) {
-  if (!q) return true;
-  const haystack = normalize(
-    [
-      provider.name,
-      provider.category,
-      getCategory(provider.categorySlug)?.label ?? '',
-      provider.city,
-      provider.description,
-    ].join(' '),
-  );
-  return normalize(q)
-    .split(/\s+/)
-    .every((word) => haystack.includes(word));
+/**
+ * Kriteria UI → parameter GET /services. Kata kunci, kategori, rating, harga, hari, dan
+ * urutan disaring backend. Lokasi disaring di klien (lihat filterByCity) karena backend
+ * menyimpan "Kota Bandung"/"Kabupaten Bandung" sedangkan filter UI memakai "Bandung".
+ * Nilai yang tidak dikenal (mis. tautan lama ?hari=kerja) diabaikan.
+ */
+export function toApiCriteria(criteria) {
+  const price = PRICE_OPTIONS.find((option) => option.value === criteria.harga);
+  const rating = RATING_OPTIONS.find((option) => option.value === criteria.rating);
+  const day = DAY_OPTIONS.find((option) => option.value === criteria.hari);
+  return {
+    q: criteria.q || undefined,
+    category: getCategory(criteria.kategori) ? criteria.kategori : undefined,
+    min_rating: rating?.min,
+    min_price: price?.min,
+    max_price: price?.max,
+    day_of_week: day?.value,
+    sort: SORT_TO_API[criteria.urut] ?? SORT_TO_API.relevan,
+  };
 }
 
-/** Saring + urutkan penyedia sesuai kriteria (sementara di sisi klien). */
-export function filterProviders(providers, criteria) {
-  const minRating = RATING_OPTIONS.find((o) => o.value === criteria.rating)?.min;
-  const priceTest = PRICE_OPTIONS.find((o) => o.value === criteria.harga)?.test;
-
-  const result = providers.filter(
-    (provider) =>
-      matchesQuery(provider, criteria.q) &&
-      (!criteria.kategori || provider.categorySlug === criteria.kategori) &&
-      (!criteria.lokasi || provider.city === criteria.lokasi) &&
-      (!minRating || provider.rating >= minRating) &&
-      (!priceTest || priceTest(provider.priceFrom)) &&
-      (!criteria.hari || provider.availability.includes(criteria.hari)),
-  );
-
-  if (criteria.urut === 'rating') {
-    return [...result].sort((a, b) => b.rating - a.rating || b.reviewCount - a.reviewCount);
-  }
-  if (criteria.urut === 'harga') {
-    return [...result].sort((a, b) => a.priceFrom - b.priceFrom);
-  }
-  return result;
+/** Saring kartu penyedia per kota ("Bandung" cocok dengan "Kota Bandung" & "Kab. Bandung"). */
+export function filterByCity(providers, lokasi) {
+  if (!lokasi) return providers;
+  const key = cityKey(lokasi);
+  return providers.filter((provider) => cityKey(provider.cityRaw || provider.city) === key);
 }
 
 /** Potong hasil per halaman. Halaman di luar jangkauan dijepit ke halaman terakhir. */
@@ -88,6 +75,6 @@ export function describeActiveFilters(criteria) {
     labelOf(RATING_OPTIONS, criteria.rating) &&
       `Rating ${labelOf(RATING_OPTIONS, criteria.rating)}`,
     labelOf(PRICE_OPTIONS, criteria.harga),
-    labelOf(DAY_OPTIONS, criteria.hari),
+    labelOf(DAY_OPTIONS, criteria.hari) && `Tersedia ${labelOf(DAY_OPTIONS, criteria.hari)}`,
   ].filter(Boolean);
 }

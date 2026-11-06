@@ -1,34 +1,31 @@
-import {
-  MAX_DURATION,
-  MIN_DURATION,
-  SAMPLE_FULL_SLOTS,
-  START_SLOTS,
-  formatLongDate,
-  maxDurationFrom,
-} from '@/features/booking/schedule';
-import { isHourly, priceLabel, timeLabel } from '@/features/booking/bookingDraft';
+import { MAX_DURATION, formatLongDate } from '@/features/booking/schedule';
+import { isHourly, minHoursOf, priceLabel, timeLabel } from '@/features/booking/bookingDraft';
 import { BriefcaseIcon, CheckIcon, ClockIcon, MinusIcon, PlusIcon } from '@/components/ui/icons';
 import BookingCalendar from './BookingCalendar';
 import { StepHeading } from './StepParts';
 
-/** Langkah 2 — tanggal, jam mulai, dan durasi. */
+/**
+ * Langkah 2 — tanggal, jam mulai, dan durasi. Jam mulai (`slots`) dihitung dari jadwal
+ * penyedia pada tanggal terpilih; durasi dibatasi minimal paket dan jam tutup slot.
+ */
 export default function StepSchedule({
   profile,
   pkg,
   draft,
   date,
   hours,
+  slots,
   today,
   update,
   errors,
   onChangeService,
 }) {
   const hourly = isHourly(pkg);
-  const maxHours = maxDurationFrom(draft.start, SAMPLE_FULL_SLOTS);
+  const minHours = minHoursOf(pkg);
+  const maxHours = slots.find((s) => s.slot === draft.start)?.maxHours ?? MAX_DURATION;
 
-  const pickStart = (slot) => {
-    const limit = maxDurationFrom(slot, SAMPLE_FULL_SLOTS);
-    update({ start: slot, duration: Math.min(draft.duration, limit) });
+  const pickStart = ({ slot, maxHours: limit }) => {
+    update({ start: slot, duration: Math.max(minHours, Math.min(draft.duration, limit)) });
   };
 
   return (
@@ -114,33 +111,27 @@ export default function StepSchedule({
             aria-labelledby="lbl-waktu"
             className="time-slots time-slots--3"
           >
-            {START_SLOTS.map((slot) =>
-              SAMPLE_FULL_SLOTS.includes(slot) ? (
-                <button
-                  key={slot}
-                  type="button"
-                  className="time-slot"
-                  disabled
-                  aria-label={`${slot} WIB, penuh`}
-                >
-                  <s>{slot}</s>
-                  <span className="time-slot__full">Penuh</span>
-                </button>
-              ) : (
-                <button
-                  key={slot}
-                  type="button"
-                  className="time-slot"
-                  aria-label={`${slot} WIB`}
-                  aria-pressed={draft.start === slot}
-                  onClick={() => pickStart(slot)}
-                >
-                  {draft.start === slot && <CheckIcon size={18} />}
-                  {slot}
-                </button>
-              ),
-            )}
+            {slots.map((option) => (
+              <button
+                key={option.slot}
+                type="button"
+                className="time-slot"
+                aria-label={`${option.slot} WIB`}
+                aria-pressed={draft.start === option.slot}
+                onClick={() => pickStart(option)}
+              >
+                {draft.start === option.slot && <CheckIcon size={18} />}
+                {option.slot}
+              </button>
+            ))}
           </div>
+          {!slots.length && (
+            <p className="field-hint" role="status">
+              {date
+                ? 'Tidak ada jam tersisa di tanggal ini. Pilih tanggal lain.'
+                : 'Pilih tanggal terlebih dahulu untuk melihat jam yang tersedia.'}
+            </p>
+          )}
           {errors['booking-time'] && <p className="field-error">{errors['booking-time']}</p>}
         </section>
       </div>
@@ -152,12 +143,12 @@ export default function StepSchedule({
               Durasi
             </h3>
             <p id="durasi-help" className="field-hint">
-              {pkg.estimate ? `${pkg.estimate} · ` : ''}minimal {MIN_DURATION} jam, maksimal{' '}
-              {MAX_DURATION} jam.
+              {pkg.estimate ? `${pkg.estimate} · ` : ''}minimal {minHours} jam, maksimal{' '}
+              {Math.max(MAX_DURATION, minHours)} jam.
               {draft.start && maxHours < MAX_DURATION && (
                 <>
                   {' '}
-                  Dari jam {draft.start} paling lama {maxHours} jam (jeda istirahat/slot penuh).
+                  Dari jam {draft.start} paling lama {maxHours} jam (sebelum jam tutup penyedia).
                 </>
               )}
             </p>
@@ -172,7 +163,7 @@ export default function StepSchedule({
               type="button"
               className="duration-stepper__btn"
               aria-label="Kurangi durasi"
-              disabled={hours <= MIN_DURATION}
+              disabled={hours <= minHours}
               onClick={() => update({ duration: hours - 1 })}
             >
               <MinusIcon size={22} strokeWidth={2.5} />

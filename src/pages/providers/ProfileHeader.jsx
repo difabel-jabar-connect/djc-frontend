@@ -77,7 +77,9 @@ export default function ProfileHeader({ profile, selectedDate }) {
                 <strong>{formatRating(profile.rating)}</strong>({profile.reviewCount} ulasan)
               </li>
               <li>
-                <img src={profile.categoryIcon} alt="" width="18" height="18" />
+                {profile.categoryIcon && (
+                  <img src={profile.categoryIcon} alt="" width="18" height="18" />
+                )}
                 <span className="visually-hidden">Kategori: </span>
                 {profile.categoryLabel}
               </li>

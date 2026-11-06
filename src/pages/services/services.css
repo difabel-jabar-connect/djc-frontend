@@ -243,6 +243,25 @@
   margin: 0;
 }
 
+/* Kartu bayangan selama hasil dimuat dari server (berdenyut pelan, mati untuk reduced-motion). */
+.results__skeleton {
+  min-height: 248px;
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .results__skeleton {
+    animation: results-pulse 1.4s var(--ease-in-out) infinite alternate;
+  }
+}
+
+@keyframes results-pulse {
+  to {
+    opacity: 0.55;
+  }
+}
+
 .results__empty-title {
   color: var(--color-text);
   font-size: var(--font-size-md);

@@ -1,10 +1,6 @@
-import { SAMPLE_PROVIDERS } from '@/features/providers/sampleProviders';
-import { filterProviders, paginate, readCriteria } from './searchProviders';
+import { filterByCity, paginate, readCriteria, toApiCriteria } from './searchProviders';
 
-// Tujuh penyedia pertama = data dasar untuk memeriksa urutan & kombinasi filter secara pasti.
-const BASE = SAMPLE_PROVIDERS.slice(0, 7);
 const criteria = (overrides = {}) => ({ ...readCriteria(new URLSearchParams()), ...overrides });
-const names = (list) => list.map((p) => p.name);
 
 describe('readCriteria', () => {
   it('membaca query string dan memberi nilai bawaan', () => {
@@ -13,41 +9,65 @@ describe('readCriteria', () => {
   });
 });
 
-describe('filterProviders', () => {
-  it('tanpa filter mengembalikan semua penyedia', () => {
-    expect(filterProviders(SAMPLE_PROVIDERS, criteria())).toHaveLength(SAMPLE_PROVIDERS.length);
+describe('toApiCriteria', () => {
+  it('tanpa filter hanya mengirim urutan bawaan', () => {
+    expect(toApiCriteria(criteria())).toEqual({
+      q: undefined,
+      category: undefined,
+      min_rating: undefined,
+      min_price: undefined,
+      max_price: undefined,
+      day_of_week: undefined,
+      sort: 'newest',
+    });
   });
 
-  it('mencari kata kunci di nama, kategori, kota, dan deskripsi (tanpa peka huruf)', () => {
-    expect(names(filterProviders(SAMPLE_PROVIDERS, criteria({ q: 'PIJAT bogor' })))).toEqual([
-      'Fahri Hidayat',
-    ]);
-    expect(names(filterProviders(SAMPLE_PROVIDERS, criteria({ q: 'logo' })))).toEqual([
-      'Agus Setiawan',
-    ]);
-  });
-
-  it('menggabungkan filter kategori, lokasi, rating, harga, dan hari', () => {
-    expect(names(filterProviders(BASE, criteria({ lokasi: 'Bandung', rating: '4.5' })))).toEqual([
-      'Rizki Maulana',
-      'Agus Setiawan',
-      'Rina Agustina',
-    ]);
-    expect(names(filterProviders(BASE, criteria({ harga: 'lt50' })))).toEqual([
-      'Lina Kurnia',
-      'Siti Nurjanah',
-      'Rina Agustina',
-    ]);
+  it('memetakan kata kunci, kategori, rating, harga, hari, dan urutan ke parameter backend', () => {
     expect(
-      names(filterProviders(BASE, criteria({ hari: 'akhir-pekan', kategori: 'terapi' }))),
-    ).toEqual(['Fahri Hidayat']);
+      toApiCriteria(
+        criteria({
+          q: 'servis tv',
+          kategori: 'servis-elektronik',
+          rating: '4.5',
+          harga: '50-100',
+          hari: '6',
+          urut: 'harga',
+        }),
+      ),
+    ).toEqual({
+      q: 'servis tv',
+      category: 'servis-elektronik',
+      min_rating: 4.5,
+      min_price: 50000,
+      max_price: 100000,
+      day_of_week: '6',
+      sort: 'price_asc',
+    });
+    expect(toApiCriteria(criteria({ harga: 'lt50', urut: 'rating' }))).toMatchObject({
+      min_price: undefined,
+      max_price: 49999,
+      sort: 'rating_desc',
+    });
   });
 
-  it('mengurutkan berdasarkan rating dan harga', () => {
-    expect(filterProviders(BASE, criteria({ urut: 'rating' }))[0].name).toBe('Lina Kurnia');
-    expect(filterProviders(BASE, criteria({ urut: 'harga' })).map((p) => p.priceFrom)).toEqual([
-      25000, 25000, 30000, 50000, 60000, 75000, 100000,
-    ]);
+  it('mengabaikan nilai yang tidak dikenal (mis. tautan lama ?hari=kerja)', () => {
+    expect(
+      toApiCriteria(criteria({ hari: 'kerja', kategori: 'tidak-ada', urut: 'terdekat' })),
+    ).toMatchObject({ day_of_week: undefined, category: undefined, sort: 'newest' });
+  });
+});
+
+describe('filterByCity', () => {
+  const providers = [
+    { id: 'a', city: 'Bandung', cityRaw: 'Kota Bandung' },
+    { id: 'b', city: 'Kab. Bandung', cityRaw: 'Kabupaten Bandung' },
+    { id: 'c', city: 'Bekasi', cityRaw: 'Kota Bekasi' },
+  ];
+
+  it('mencocokkan nama dasar kota (kota & kabupaten), tanpa filter = semua', () => {
+    expect(filterByCity(providers, 'Bandung').map((p) => p.id)).toEqual(['a', 'b']);
+    expect(filterByCity(providers, 'Bekasi').map((p) => p.id)).toEqual(['c']);
+    expect(filterByCity(providers, '')).toHaveLength(3);
   });
 });
 
