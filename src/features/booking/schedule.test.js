@@ -3,6 +3,8 @@ import {
   calculateServiceFee,
   formatSlotRange,
   parseISODate,
+  startSlotsFor,
+  toApiTime,
   toggleSlot,
   upcomingDays,
 } from './schedule';
@@ -69,5 +71,57 @@ describe('tanggal', () => {
       'Sab 24 Okt true',
       'Min 25 Okt false',
     ]);
+  });
+});
+
+describe('startSlotsFor (jadwal penyedia dari backend)', () => {
+  const availability = [
+    { day_of_week: 3, start_time: '08:00', end_time: '12:00' },
+    { day_of_week: 3, start_time: '13:30', end_time: '17:00' },
+  ];
+  const wednesday = new Date(2026, 9, 21);
+  const earlier = new Date(2026, 9, 19, 9);
+  const slots = (date, options) =>
+    startSlotsFor(availability, date, { now: earlier, ...options }).map((s) => s.slot);
+
+  it('jam mulai per jam di dalam slot, durasi maksimal sampai slot tutup', () => {
+    expect(slots(wednesday)).toEqual([
+      '08.00',
+      '09.00',
+      '10.00',
+      '11.00',
+      '14.00',
+      '15.00',
+      '16.00',
+    ]);
+    const nine = startSlotsFor(availability, wednesday, { now: earlier }).find(
+      (s) => s.slot === '09.00',
+    );
+    expect(nine.maxHours).toBe(3);
+  });
+
+  it('minimal jam layanan memangkas jam mulai yang terlalu dekat jam tutup', () => {
+    expect(slots(wednesday, { minHours: 2 })).toEqual([
+      '08.00',
+      '09.00',
+      '10.00',
+      '14.00',
+      '15.00',
+    ]);
+  });
+
+  it('hari libur/tanpa tanggal kosong; jam yang sudah lewat hari ini tidak ditawarkan', () => {
+    expect(slots(new Date(2026, 9, 22))).toEqual([]);
+    expect(slots(null)).toEqual([]);
+    expect(slots(wednesday, { now: new Date(2026, 9, 21, 10, 15) })).toEqual([
+      '11.00',
+      '14.00',
+      '15.00',
+      '16.00',
+    ]);
+  });
+
+  it('format jam backend', () => {
+    expect(toApiTime('09.00')).toBe('09:00');
   });
 });

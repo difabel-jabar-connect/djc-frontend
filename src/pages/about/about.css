@@ -3,6 +3,8 @@
 /* ----- Hero ----- */
 .about-hero {
   padding-block: clamp(2.5rem, 0.9rem + 4vw, 4.5rem) clamp(3rem, 1.5rem + 4vw, 5.5rem);
+  /* Bidang peta 3D yang dimiringkan sedikit melewati tepi layar sempit: potong, jangan geser. */
+  overflow-x: clip;
 }
 
 .about-hero__inner {
@@ -26,21 +28,21 @@
   padding: 8px var(--space-3);
   border-radius: var(--radius-pill);
   background: var(--color-accent-soft);
-  color: #0c7272;
+  color: var(--color-accent);
   font-size: var(--font-size-sm);
   font-weight: 700;
 }
 
 .about-hero__title {
   margin: 0;
-  font-size: var(--font-size-display);
-  font-weight: 700;
-  line-height: 1.25;
-  letter-spacing: -0.5px;
+  font-size: clamp(2.5rem, 0.8rem + 4.4vw, 5.25rem);
+  font-weight: 600;
+  line-height: 0.98;
+  letter-spacing: -0.045em;
 }
 
 .about-hero__title span {
-  color: #0c7272;
+  color: var(--color-accent);
 }
 
 .about-hero__lead,
@@ -74,10 +76,8 @@
   gap: var(--space-3);
   margin: 0;
   padding: 24px;
-  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-bg);
-  box-shadow: var(--shadow-sm);
 }
 
 .about-card p {
@@ -130,7 +130,7 @@
   height: 40px;
   border-radius: var(--radius);
   background: var(--color-accent-soft);
-  color: #0c7272;
+  color: var(--color-accent);
 }
 
 .about-icon--md {
@@ -220,7 +220,7 @@
   height: 48px;
   border-radius: var(--radius);
   background: rgb(255 255 255 / 12%);
-  color: #5fd4d4;
+  color: #7fd1c9;
 }
 
 .about-solution p {
@@ -257,7 +257,7 @@
   height: 56px;
   border-radius: 50%;
   background: var(--color-accent-soft);
-  color: #0c7272;
+  color: var(--color-accent);
 }
 
 .about-goal__quote blockquote {
@@ -280,9 +280,10 @@
   list-style: none;
 }
 
-/* ----- Cara kerja ----- */
+/* ----- Cara kerja: linimasa 6 langkah -----
+   Desktop: bulatan nomor berjajar, garis putus-putus hanya menyambung antar-bulatan, teks di bawah.
+   Layar sempit: linimasa vertikal (nomor & garis di kiri, teks di kanan). */
 .about-flow {
-  position: relative;
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   margin: var(--space-5) 0 0;
@@ -290,59 +291,50 @@
   list-style: none;
 }
 
-.about-flow::before {
-  content: '';
-  position: absolute;
-  top: 35px;
-  right: 8.3%;
-  left: 8.3%;
-  border-top: 3px dashed var(--color-accent-strong);
-}
-
-.about-flow li {
+.about-flow__step {
+  --node: 48px;
+  --gap-line: 10px;
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
-  padding: 0 8px;
+  gap: 16px;
+  padding: 0 12px;
   text-align: center;
+}
+
+/* Penghubung ke langkah berikutnya: dari tepi kanan bulatan ini ke tepi kiri bulatan berikutnya. */
+.about-flow__step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: calc(var(--node) / 2 - 1px);
+  left: calc(50% + var(--node) / 2 + var(--gap-line));
+  right: calc(-50% + var(--node) / 2 + var(--gap-line));
+  border-top: 2px dashed var(--color-accent-strong);
+}
+
+.about-flow__node {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--node);
+  height: var(--node);
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.about-flow__body {
+  max-width: 22ch;
 }
 
 .about-flow p {
   margin: 0;
   color: var(--color-text-body);
   line-height: 24px;
-}
-
-.about-flow__badge {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 72px;
-  height: 72px;
-  border: 3px solid var(--color-accent-strong);
-  border-radius: 50%;
-  background: #ffffff;
-  box-shadow: 0 4px 12px rgb(11 60 110 / 12%);
-  color: var(--color-primary);
-}
-
-.about-flow__number {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  display: grid;
-  place-items: center;
-  min-width: 30px;
-  height: 30px;
-  padding: 0 6px;
-  border: 2px solid #ffffff;
-  border-radius: var(--radius-pill);
-  background: var(--color-primary);
-  color: #ffffff;
-  font-size: 0.8125rem;
-  font-weight: 800;
 }
 
 .about-flow-notes {
@@ -388,9 +380,8 @@
 .about-map__figure {
   margin: 0;
   padding: 56px 24px 24px;
-  border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
-  background: #f7fbfe;
+  background: var(--color-paper);
 }
 
 .about-map__canvas {
@@ -414,9 +405,6 @@
   padding: 12px 14px;
   border-radius: var(--radius);
   background: #ffffff;
-  box-shadow:
-    0 4px 10px rgb(11 60 110 / 10%),
-    0 16px 32px rgb(11 60 110 / 14%);
 }
 
 .about-map__popup::after {
@@ -555,7 +543,9 @@
 }
 
 /* ----- CTA ----- */
+/* Jarak atas sama dengan antar-section lain agar tidak menempel ke kartu mitra. */
 .about-cta-wrap {
+  padding-top: var(--section-space);
   padding-bottom: var(--section-space);
 }
 
@@ -567,7 +557,7 @@
   overflow: hidden;
   padding: 64px 48px;
   border-radius: var(--radius-xl);
-  background: linear-gradient(120deg, #0b3c6e 0%, #0b4a72 55%, #0c7272 100%);
+  background: var(--color-primary);
   color: #ffffff;
   text-align: center;
 }
@@ -579,11 +569,7 @@
   position: absolute;
   border-radius: 50%;
   pointer-events: none;
-  background: repeating-radial-gradient(
-    circle,
-    transparent 0 58px,
-    rgb(255 255 255 / 12%) 58px 60px
-  );
+  background: none;
 }
 
 .about-cta::before {
@@ -636,21 +622,45 @@
 
 /* ----- Responsif ----- */
 @media (max-width: 1100px) {
-  .about-flow {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    row-gap: var(--space-5);
-  }
-
-  .about-flow::before {
-    display: none;
-  }
-
   .about-a11y {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 1024px) {
+  .about-flow {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 36rem;
+    margin-inline: auto;
+  }
+
+  .about-flow__step {
+    --node: 44px;
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 0 0 28px;
+    text-align: left;
+  }
+
+  .about-flow__step:last-child {
+    padding-bottom: 0;
+  }
+
+  /* Penghubung vertikal: dari bawah bulatan ini ke atas bulatan berikutnya. */
+  .about-flow__step:not(:last-child)::after {
+    top: calc(var(--node) + 6px);
+    bottom: 6px;
+    left: calc(var(--node) / 2 - 1px);
+    right: auto;
+    border-top: 0;
+    border-left: 2px dashed var(--color-accent-strong);
+  }
+
+  .about-flow__body {
+    max-width: none;
+    padding-top: 9px;
+  }
+
   .about-hero__inner,
   .about-split,
   .about-map,
@@ -667,8 +677,21 @@
 }
 
 @media (max-width: 640px) {
-  .about-flow {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  /* Status pesanan menurun satu per baris, panah menunjuk ke bawah. */
+  .about-status {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .about-status li {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .about-status__arrow {
+    margin-left: 14px;
+    transform: rotate(90deg);
   }
 
   .about-checklist,
@@ -695,4 +718,28 @@
   .about-cta {
     padding: 48px 20px;
   }
+}
+
+/* ===== Arah "One motif": tanpa ikon berkotak, label kecil, atau nomor; foto di siluet ===== */
+.about-icon,
+.about-icon--lg,
+.about-icon--md,
+.about-solution__icon,
+.about-partners__icon {
+  display: none;
+}
+
+.about-hero__lead,
+.about-lead {
+  max-width: 44ch;
+  font-size: var(--step-lead);
+  line-height: 1.38;
+}
+
+.about-hero__visual {
+  max-width: 520px;
+}
+
+.about-goal__title {
+  text-align: center;
 }

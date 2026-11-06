@@ -67,7 +67,7 @@
   border: 0;
   border-radius: var(--radius);
   background: transparent;
-  color: #374151;
+  color: var(--color-text-body);
   cursor: pointer;
 }
 
@@ -85,7 +85,7 @@
 }
 
 .dialog__icon--danger {
-  background: #fee2e2;
+  background: #fdecec;
   color: #b91c1c;
 }
 

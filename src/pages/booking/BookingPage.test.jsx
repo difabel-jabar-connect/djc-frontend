@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 import { DEMO_ACCOUNTS } from '@/features/auth/session';
 import { renderAt } from '@/test/renderWithRouter';
+import { fakeApi } from '@/test/fakeApi';
 
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ['Date'] });
@@ -15,6 +16,20 @@ const customer = { user: DEMO_ACCOUNTS.customer };
 const summary = () => screen.getByRole('region', { name: /ringkasan pesanan/i });
 const stepper = () => screen.getByRole('navigation', { name: /langkah pemesanan/i });
 const next = (user) => user.click(screen.getByRole('button', { name: 'Lanjut' }));
+/** Tunggu profil penyedia (GET /providers/:id, backend tiruan) selesai dimuat. */
+const loaded = () => screen.findByRole('heading', { level: 1, name: 'Pesan Layanan' });
+const bookingRequests = () =>
+  fakeApi.calls.filter((call) => call.method === 'POST' && call.path === '/bookings');
+
+/** Isi langkah 1–4 dengan jadwal Rabu 21 Okt 10.00 lalu kirim. */
+async function fillAndSend(user) {
+  await next(user);
+  await user.click(await screen.findByRole('button', { name: '10.00 WIB' }));
+  await next(user);
+  await next(user);
+  await user.click(await screen.findByRole('checkbox', { name: /saya menyetujui/i }));
+  await user.click(screen.getByRole('button', { name: /kirim pesanan/i }));
+}
 
 describe('Pesan Layanan', () => {
   it('tamu bisa memilih layanan & jadwal, lalu masuk dan lanjut ke Detail Pesanan', async () => {
@@ -23,7 +38,7 @@ describe('Pesan Layanan', () => {
     const { router } = renderAt('/pesan/rizki-maulana?tanggal=2026-10-21');
 
     // Langkah 1 & 2 terbuka untuk tamu.
-    expect(screen.getByRole('heading', { level: 1, name: 'Pesan Layanan' })).toBeVisible();
+    expect(await loaded()).toBeVisible();
     await next(user);
     await user.click(await screen.findByRole('button', { name: '10.00 WIB' }));
     expect(screen.getByRole('note')).toHaveTextContent(/masuk untuk melanjutkan/i);
@@ -51,17 +66,20 @@ describe('Pesan Layanan', () => {
     expect(within(summary()).getByText(/10\.00–12\.00 WIB/)).toBeInTheDocument();
   });
 
-  it('tamu yang membuka langkah 3 lewat URL tetap di langkah Jadwal', () => {
+  it('tamu yang membuka langkah 3 lewat URL tetap di langkah Jadwal', async () => {
     renderAt('/pesan/rizki-maulana?tanggal=2026-10-21&langkah=3');
-    expect(screen.getByRole('heading', { level: 2, name: /pilih jadwal/i })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { level: 2, name: /pilih jadwal/i }),
+    ).toBeInTheDocument();
   });
 
   it('alur lengkap 4 langkah → pesanan terkirim dan muncul di Pesanan Saya', async () => {
     const user = userEvent.setup();
     const { router } = renderAt('/pesan/rizki-maulana', customer);
 
-    // Langkah 1 — Pilih Layanan
-    expect(screen.getByRole('heading', { level: 1, name: 'Pesan Layanan' })).toBeVisible();
+    // Langkah 1 — Pilih Layanan (paket = layanan penyedia dari GET /providers/:id)
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Memuat profil');
+    expect(await loaded()).toBeVisible();
     expect(stepper()).toHaveTextContent('Pilih LayananSedang diisi');
     expect(screen.getByRole('radio', { name: /layanan kebersihan rumah/i })).toBeChecked();
     await next(user);
@@ -80,9 +98,15 @@ describe('Pesan Layanan', () => {
       '#booking-time',
     );
 
+    // Jam mulai dari jadwal penyedia (08.00–12.00 & 13.00–17.00): tanpa 12.00 & 17.00.
+    expect(screen.getByText(/pilih tanggal terlebih dahulu/i)).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: /selasa, 20 oktober 2026/i }));
     expect(screen.getByRole('button', { name: /minggu, 25 oktober 2026, libur/i })).toBeDisabled();
-    expect(screen.getByRole('button', { name: '13.00 WIB, penuh' })).toBeDisabled();
+    expect(
+      within(screen.getByRole('group', { name: /pilih waktu mulai/i }))
+        .getAllByRole('button')
+        .map((button) => button.textContent),
+    ).toEqual(['08.00', '09.00', '10.00', '11.00', '13.00', '14.00', '15.00', '16.00']);
     await user.click(screen.getByRole('button', { name: '09.00 WIB' }));
     expect(screen.getByRole('button', { name: '09.00 WIB' })).toHaveAttribute(
       'aria-pressed',
@@ -90,7 +114,7 @@ describe('Pesan Layanan', () => {
     );
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 
-    // Durasi: default 2 jam, dari 09.00 maksimal 3 jam (jeda istirahat 12.00).
+    // Durasi: default 2 jam, dari 09.00 maksimal 3 jam (slot pagi tutup 12.00).
     expect(screen.getByText('2 jam', { selector: 'output' })).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Tambah durasi' }));
     expect(screen.getByRole('button', { name: 'Tambah durasi' })).toBeDisabled();
@@ -133,21 +157,34 @@ describe('Pesan Layanan', () => {
 
     // Sukses: pop-up di atas langkah 4
     const dialog = await screen.findByRole('dialog', { name: 'Pesanan Berhasil Dikirim!' });
+    // Body POST /bookings mengikuti kontrak backend (B1).
+    expect(bookingRequests()).toHaveLength(1);
+    expect(bookingRequests()[0].body).toEqual({
+      service_id: 'rizki-maulana--kebersihan-rumah',
+      scheduled_date: '2026-10-20',
+      start_time: '09:00',
+      service_mode: 'at_customer',
+      quantity: 2,
+      location_area: 'Bandung',
+      location_address: 'Jl. Dago No. 5, Bandung',
+      customer_note: 'Ada kucing',
+    });
     await vi.waitFor(() => expect(within(dialog).getByRole('heading', { level: 2 })).toHaveFocus());
     expect(dialog).toHaveAccessibleDescription(/batas respons 24 jam/i);
     expect(router.state.location.search).toBe('?langkah=4');
     expect(stepper()).toHaveTextContent('Kirim PesananSelesai');
-    expect(within(dialog).getByText('BK-0013')).toBeInTheDocument();
+    // Kode pesanan dari respons backend.
+    expect(within(dialog).getByText('DJC-TEST0001')).toBeInTheDocument();
     expect(dialog).toHaveTextContent('Status: Menunggu');
     expect(within(dialog).getByText('Sel, 20 Okt 2026 · 09.00–11.00 WIB')).toBeInTheDocument();
     expect(within(dialog).getByRole('link', { name: 'Chat dengan Rizki Maulana' })).toHaveAttribute(
       'href',
-      '/bookings/BK-0013/chat',
+      '/bookings/DJC-TEST0001/chat',
     );
     expect(within(dialog).queryByText(/whatsapp/i)).not.toBeInTheDocument();
 
     await user.click(within(dialog).getByRole('link', { name: /lihat detail pesanan/i }));
-    expect(await screen.findByRole('heading', { level: 1, name: /BK-0013/ })).toBeVisible();
+    expect(await screen.findByRole('heading', { level: 1, name: /DJC-TEST0001/ })).toBeVisible();
     expect(screen.getByLabelText('Status pesanan')).toHaveTextContent('Menunggu respons penyedia');
     expect(screen.getByText('“Ada kucing”')).toBeInTheDocument();
   });
@@ -155,19 +192,15 @@ describe('Pesan Layanan', () => {
   it('menutup pop-up sukses membuka Pesanan Saya dengan pesanan baru', async () => {
     const user = userEvent.setup();
     const { router } = renderAt('/pesan/rizki-maulana?tanggal=2026-10-21', customer);
-    await next(user);
-    await user.click(await screen.findByRole('button', { name: '10.00 WIB' }));
-    await next(user);
-    await next(user);
-    await user.click(await screen.findByRole('checkbox', { name: /saya menyetujui/i }));
-    await user.click(screen.getByRole('button', { name: /kirim pesanan/i }));
+    await loaded();
+    await fillAndSend(user);
 
     const dialog = await screen.findByRole('dialog', { name: 'Pesanan Berhasil Dikirim!' });
     await user.click(within(dialog).getByRole('button', { name: 'Tutup' }));
     await vi.waitFor(() => expect(router.state.location.pathname).toBe('/bookings'));
     expect(
       await screen.findByRole('link', {
-        name: /BK-0013.*menunggu/i,
+        name: /DJC-TEST0001.*menunggu/i,
       }),
     ).toBeInTheDocument();
   });
@@ -175,6 +208,7 @@ describe('Pesan Layanan', () => {
   it('Ubah di langkah 4 kembali ke langkah terkait', async () => {
     const user = userEvent.setup();
     const { router } = renderAt('/pesan/rizki-maulana?tanggal=2026-10-21', customer);
+    await loaded();
     await next(user);
     await user.click(await screen.findByRole('button', { name: '10.00 WIB' }));
     await next(user);
@@ -184,14 +218,19 @@ describe('Pesan Layanan', () => {
     expect(router.state.location.search).toBe('?tanggal=2026-10-21&langkah=2');
   });
 
-  it('langkah yang prasyaratnya belum lengkap dikembalikan ke langkah pertama yang kurang', () => {
+  it('langkah yang prasyaratnya belum lengkap dikembalikan ke langkah pertama yang kurang', async () => {
     renderAt('/pesan/rizki-maulana?langkah=4', customer);
-    expect(screen.getByRole('heading', { level: 2, name: /pilih jadwal/i })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { level: 2, name: /pilih jadwal/i }),
+    ).toBeInTheDocument();
   });
 
-  it('membaca paket & tanggal dari query (tautan profil penyedia)', () => {
-    renderAt('/pesan/siti-nurjanah?paket=busana-muslim&tanggal=2026-10-21', customer);
-    expect(screen.getByRole('radio', { name: /jahit busana muslim/i })).toBeChecked();
+  it('membaca paket & tanggal dari query (tautan profil penyedia)', async () => {
+    renderAt(
+      '/pesan/siti-nurjanah?paket=siti-nurjanah--busana-muslim&tanggal=2026-10-21',
+      customer,
+    );
+    expect(await screen.findByRole('radio', { name: /jahit busana muslim/i })).toBeChecked();
     expect(within(summary()).getByText('Jahit Busana Muslim')).toBeInTheDocument();
     expect(within(summary()).getByText('Rabu, 21 Oktober 2026')).toBeInTheDocument();
   });
@@ -201,6 +240,7 @@ describe('Pesan Layanan', () => {
     renderAt('/pesan/rizki-maulana?tanggal=2026-10-21', {
       user: { name: 'Rina Amalia', email: 'rina@gmail.com', role: 'customer' },
     });
+    await loaded();
     await next(user);
     await user.click(await screen.findByRole('button', { name: '08.00 WIB' }));
     await next(user);
@@ -214,5 +254,55 @@ describe('Pesan Layanan', () => {
     expect(await screen.findByRole('region', { name: 'Ringkasan pesanan' })).toHaveTextContent(
       'Rina Amalia · +62 81299991111',
     );
+  });
+
+  it('error validasi dari backend ditampilkan beserta tombol menuju langkah terkait', async () => {
+    const user = userEvent.setup();
+    fakeApi.bookingResponse = [
+      {
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Data yang dikirim belum valid.',
+          details: [{ field: 'start_time', message: 'Jam yang dipilih sudah lewat.' }],
+        },
+      },
+      400,
+    ];
+    const { router } = renderAt('/pesan/rizki-maulana?tanggal=2026-10-21', customer);
+    await loaded();
+    await fillAndSend(user);
+
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('Pesanan belum terkirim');
+    expect(alert).toHaveTextContent('Jam yang dipilih sudah lewat.');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    await user.click(within(alert).getByRole('button', { name: 'Ubah jadwal' }));
+    expect(await screen.findByRole('heading', { level: 2, name: /pilih jadwal/i })).toBeVisible();
+    expect(new URLSearchParams(router.state.location.search).get('langkah')).toBe('2');
+  });
+
+  it('sesi server habis (401) → ke halaman Masuk lalu kembali ke langkah 4', async () => {
+    const user = userEvent.setup();
+    fakeApi.bookingResponse = [{ error: { code: 'UNAUTHORIZED', message: 'Sesi habis.' } }, 401];
+    const { router } = renderAt('/pesan/rizki-maulana?tanggal=2026-10-21', customer);
+    await loaded();
+    await fillAndSend(user);
+
+    await vi.waitFor(() => expect(router.state.location.pathname).toBe('/login'));
+    expect(new URLSearchParams(router.state.location.search).get('next')).toBe(
+      '/pesan/rizki-maulana?langkah=4',
+    );
+  });
+
+  it('server tidak bisa dihubungi saat memuat profil → Coba Lagi', async () => {
+    const user = userEvent.setup();
+    fakeApi.offline = true;
+    renderAt('/pesan/rizki-maulana', customer);
+    expect(
+      await screen.findByRole('heading', { level: 1, name: /belum bisa dimuat/i }),
+    ).toBeVisible();
+    fakeApi.offline = false;
+    await user.click(screen.getByRole('button', { name: 'Coba Lagi' }));
+    expect(await loaded()).toBeVisible();
   });
 });

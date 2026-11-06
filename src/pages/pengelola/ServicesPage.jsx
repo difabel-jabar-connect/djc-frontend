@@ -326,7 +326,7 @@ export default function ServicesPage() {
           selected && {
             name: selected.name,
             initials: <CategoryIcon icon={categoryOf(selected.category)?.icon} size={20} />,
-            color: '#0c7272',
+            color: '#0b6b67',
             meta: `${ownerOf(selected)?.name ?? '–'} · ${formatRupiah(selected.price)}/${selected.unit}`,
           }
         }

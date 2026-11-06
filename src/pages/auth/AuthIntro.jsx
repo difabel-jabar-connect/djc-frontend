@@ -2,7 +2,6 @@ import { Link } from 'react-router';
 import logo from '@/assets/icons/logo-footer.svg';
 import { PATHS } from '@/routes/paths';
 import { ArrowLeftIcon } from '@/components/ui/icons';
-import AuthBackdrop from './AuthBackdrop';
 
 /**
  * Panel kiri halaman auth (Masuk, Daftar, Pendaftaran Berhasil).
@@ -11,7 +10,6 @@ import AuthBackdrop from './AuthBackdrop';
 export default function AuthIntro({ title, titleAs: Title = 'h1', text, highlights = [] }) {
   return (
     <aside className="auth-intro" aria-label="Tentang Difabel Jabar Connect">
-      <AuthBackdrop />
       <div className="auth-intro__content">
         <Link to={PATHS.home} className="auth-brand" aria-label="Difabel Jabar Connect, ke beranda">
           <img src={logo} alt="" width="48" height="48" />

@@ -55,7 +55,7 @@ function Pin({ color }) {
     <g>
       <path
         d="M0 0 C-3 -9 -15 -18 -15 -31 A15 15 0 1 1 15 -31 C15 -18 3 -9 0 0 Z"
-        fill="#14a3a3"
+        fill="#1a9a94"
         stroke="#fff"
         strokeWidth="2.5"
       />
@@ -166,7 +166,7 @@ export default function RegionMap({
           y={BASE.y - 200}
           width={BASE.w + 400}
           height={BASE.h + 400}
-          fill="#dceaf4"
+          fill="#d5dfea"
         />
         <path
           d="M-60 120 L33 152 L28.9 182.7 L33.7 223 L28.9 270.3 L38.4 317.6 L57.3 357.9 L-60 380 Z"
@@ -205,7 +205,7 @@ export default function RegionMap({
               d={region.shape}
               className={`pg-map__region${dimmed?.has(region.id) ? ' is-dimmed' : ''}${selected ? ' is-selected' : ''}`}
               fill={fill}
-              stroke={layer === 'densitas' ? '#fff' : '#d3dce4'}
+              stroke={layer === 'densitas' ? '#fff' : '#d5dbe4'}
               strokeWidth={layer === 'densitas' ? 2 : 1.5}
               role="button"
               tabIndex={0}
@@ -221,7 +221,7 @@ export default function RegionMap({
         <path
           d={PROVINCE_OUTLINE}
           fill="none"
-          stroke="#7e9ab0"
+          stroke="#8a9bb0"
           strokeWidth="2.5"
           pointerEvents="none"
         />
@@ -229,7 +229,7 @@ export default function RegionMap({
           <path
             d={regionById(selection.id).shape}
             fill="none"
-            stroke="#14a3a3"
+            stroke="#1a9a94"
             strokeWidth="4"
             strokeLinejoin="round"
             pointerEvents="none"

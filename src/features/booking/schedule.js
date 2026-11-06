@@ -156,6 +156,36 @@ export function maxDurationFrom(start, full = []) {
   return Math.max(hours, MIN_DURATION);
 }
 
+/**
+ * Jam mulai yang bisa dipesan pada `date` menurut jadwal penyedia (GET /providers/:id →
+ * availability: [{ day_of_week, start_time "HH:mm", end_time "HH:mm" }]).
+ * Aturan sama dengan validasi backend B1: jam mulai di dalam satu slot dan pesanan
+ * (`minHours` jam; layanan non-per-jam dihitung 1 jam) selesai paling lambat saat slot tutup.
+ * Jam yang sudah lewat pada hari ini tidak ditawarkan. Setiap slot membawa `maxHours`
+ * (durasi terpanjang dari jam itu, dibatasi MAX_DURATION).
+ */
+export function startSlotsFor(availability = [], date, { minHours = 1, now = new Date() } = {}) {
+  if (!date) return [];
+  const toMin = (time) => Number(time.slice(0, 2)) * 60 + Number(time.slice(3, 5));
+  const isToday = toISODate(date) === toISODate(now);
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  const slots = new Map();
+  for (const range of availability) {
+    if (range.day_of_week !== date.getDay()) continue;
+    const end = toMin(range.end_time);
+    for (let m = Math.ceil(toMin(range.start_time) / 60) * 60; m + minHours * 60 <= end; m += 60) {
+      if (isToday && m < nowMinutes) continue;
+      const slot = `${pad(m / 60)}.00`;
+      const maxHours = Math.max(minHours, Math.min(MAX_DURATION, Math.floor((end - m) / 60)));
+      slots.set(slot, { slot, maxHours: Math.max(slots.get(slot)?.maxHours ?? 0, maxHours) });
+    }
+  }
+  return [...slots.values()].sort((a, b) => a.slot.localeCompare(b.slot));
+}
+
+/** "09.00" → "09:00" (format jam backend). */
+export const toApiTime = (slot) => `${pad(hourOf(slot))}:00`;
+
 /** "09.00–11.00" */
 export const formatHourRange = (start, hours) =>
   `${pad(hourOf(start))}.00–${pad(hourOf(start) + hours)}.00`;

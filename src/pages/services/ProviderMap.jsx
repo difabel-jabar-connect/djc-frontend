@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { motion } from 'motion/react';
 import { Link } from 'react-router';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -85,11 +86,16 @@ const describe = (provider) =>
 function MapCard({ provider, onClose, style, below }) {
   const category = getCategory(provider.categorySlug);
   return (
-    <div
+    // Hanya opacity yang dianimasikan: posisi kartu memakai transform dari CSS.
+    <motion.div
+      key={provider.id}
       className={`pm-card${below ? ' is-below' : ''}`}
       style={style}
       role="dialog"
       aria-label={`Penyedia ${provider.name}`}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.2 }}
     >
       <div className="pm-card__banner" style={{ '--pm-accent': provider.avatarColor }}>
         <span className="pm-card__avatar" aria-hidden="true">
@@ -130,7 +136,7 @@ function MapCard({ provider, onClose, style, below }) {
           </Link>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -142,7 +148,8 @@ const noop = () => {};
  * `onAreaSearch(area | null)` dipanggil saat pengguna memilih "Cari di area ini"; tanpa
  * prop ini (mis. di Beranda) fitur cari-di-area disembunyikan. Tombol perluas peta hanya
  * tampil bila `onToggleExpand` diberikan. `scrollZoom={false}` mematikan zoom lewat scroll
- * agar halaman panjang tetap bisa di-scroll melewati peta.
+ * agar halaman panjang tetap bisa di-scroll melewati peta. `focus` = batas [[s, w], [n, e]]
+ * yang ingin ditampilkan (berubah → peta dipaskan ulang).
  */
 export default function ProviderMap({
   providers,
@@ -155,6 +162,7 @@ export default function ProviderMap({
   expanded = false,
   onToggleExpand,
   scrollZoom = true,
+  focus,
   label = 'Peta SIG penyedia layanan di Jawa Barat',
 }) {
   const areaSearch = Boolean(onAreaSearch);
@@ -391,6 +399,14 @@ export default function ProviderMap({
     highlight();
   });
 
+  // Wilayah yang dipilih dari luar (mis. tab wilayah di Beranda) → paskan peta ke batasnya.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !focus) return;
+    programmaticRef.current = true;
+    map.fitBounds(focus, { padding: [24, 24] });
+  }, [focus]);
+
   // Bawa pin terpilih ke dalam pandangan.
   useEffect(() => {
     const map = mapRef.current;
@@ -425,7 +441,7 @@ export default function ProviderMap({
   }
 
   return (
-    <div className="pm" role="region" aria-label={label}>
+    <div className="pm" role="region" aria-label={label} data-ui>
       <div ref={containerRef} className="pm__canvas" />
 
       {areaSearch && (

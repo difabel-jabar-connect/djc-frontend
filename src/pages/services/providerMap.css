@@ -117,7 +117,7 @@
 }
 
 .pm__btn:hover {
-  background: #f3f4f6;
+  background: var(--color-surface);
 }
 
 .pm__btn:focus-visible {
@@ -204,7 +204,7 @@
   padding: 12px;
   background:
     radial-gradient(circle at 85% 20%, rgb(255 255 255 / 22%), transparent 45%),
-    linear-gradient(135deg, var(--pm-accent, #0b3c6e), #14a3a3);
+    linear-gradient(135deg, var(--pm-accent, var(--color-primary)), var(--color-accent-strong));
 }
 
 .pm-card__avatar {
@@ -214,7 +214,7 @@
   height: 56px;
   border: 3px solid #fff;
   border-radius: 50%;
-  background: var(--pm-accent, #0b3c6e);
+  background: var(--pm-accent, var(--color-primary));
   color: #fff;
   font-size: 1.125rem;
   font-weight: 800;
@@ -297,7 +297,7 @@
 .pm-card__address svg {
   flex: none;
   margin-top: 2px;
-  color: #0c7272;
+  color: var(--color-accent);
 }
 
 .pm-card__price {
@@ -342,6 +342,6 @@
 .pm-marker--cluster:hover .pm-pin {
   background: #082f57;
   box-shadow:
-    0 0 0 4px #14a3a3,
+    0 0 0 4px var(--color-accent-strong),
     0 4px 10px rgb(0 0 0 / 22%);
 }

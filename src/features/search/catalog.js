@@ -100,20 +100,26 @@ export const RATING_OPTIONS = [
   { value: '4.5', label: '4,5 ke atas', min: 4.5 },
 ];
 
+/** Rentang harga → parameter min_price/max_price backend (Rupiah, inklusif). */
 export const PRICE_OPTIONS = [
-  { value: 'lt50', label: 'Di bawah Rp50.000', test: (price) => price < 50000 },
-  {
-    value: '50-100',
-    label: 'Rp50.000–Rp100.000',
-    test: (price) => price >= 50000 && price <= 100000,
-  },
-  { value: 'gt100', label: 'Di atas Rp100.000', test: (price) => price > 100000 },
+  { value: 'lt50', label: 'Di bawah Rp50.000', max: 49999 },
+  { value: '50-100', label: 'Rp50.000–Rp100.000', min: 50000, max: 100000 },
+  { value: 'gt100', label: 'Di atas Rp100.000', min: 100001 },
 ];
 
+/** Hari ketersediaan penyedia; nilai = day_of_week backend (0 = Minggu … 6 = Sabtu). */
 export const DAY_OPTIONS = [
-  { value: 'kerja', label: 'Hari kerja' },
-  { value: 'akhir-pekan', label: 'Akhir pekan' },
+  { value: '1', label: 'Senin' },
+  { value: '2', label: 'Selasa' },
+  { value: '3', label: 'Rabu' },
+  { value: '4', label: 'Kamis' },
+  { value: '5', label: 'Jumat' },
+  { value: '6', label: 'Sabtu' },
+  { value: '0', label: 'Minggu' },
 ];
+
+/** Urutan UI → nilai `sort` backend (newest, price_asc, price_desc, rating_desc). */
+export const SORT_TO_API = { relevan: 'newest', rating: 'rating_desc', harga: 'price_asc' };
 
 export const SORT_OPTIONS = [
   { value: 'relevan', label: 'Paling Relevan' },

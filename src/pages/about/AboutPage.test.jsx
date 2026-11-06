@@ -5,18 +5,18 @@ describe('Halaman Tentang', () => {
   it('menampilkan seluruh bagian sesuai desain', () => {
     renderAt('/tentang');
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
-      'Menghubungkan Keterampilan dengan Kebutuhan',
+      'Tentang Difabel Jabar Connect',
     );
     const headings = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent);
     expect(headings).toEqual(
       expect.arrayContaining([
-        'Keterampilan Sudah Ada, Aksesnya yang Belum',
+        'Keterampilan ada, akses belum',
         'Tujuan kami',
         'Satu Alur dari Cari hingga Ulasan',
         'Lokasi adalah Inti Platform',
-        'Dibuat untuk dan oleh Penyandang Disabilitas',
+        'Dibuat bersama difabel',
         'Bekerja Sama dengan',
-        'Mari Wujudkan Jawa Barat yang Lebih Inklusif',
+        'Jawa Barat yang lebih inklusif',
       ]),
     );
     expect(
@@ -52,6 +52,14 @@ describe('Halaman Tentang', () => {
     );
     expect(screen.getByRole('link', { name: /hubungi kami/i })).toHaveAttribute('href', '#kontak');
     expect(document.getElementById('kontak')).toHaveTextContent('UPTD PPSGHD Jawa Barat');
+  });
+
+  it('peta 3D hero menampilkan titik lokasi yang sama dengan Beranda', () => {
+    renderAt('/tentang');
+    const labels = [...document.querySelectorAll('.about-hero__visual .topo__label')].map(
+      (label) => label.textContent,
+    );
+    expect(labels).toEqual(['Purwakarta', 'Bandung', 'Indramayu', 'Cirebon', 'Tasikmalaya']);
   });
 
   it('header menandai menu Tentang sebagai halaman aktif', () => {

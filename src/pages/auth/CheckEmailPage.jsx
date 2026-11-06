@@ -24,7 +24,7 @@ const formatCountdown = (seconds) => `00:${String(seconds).padStart(2, '0')}`;
 function MailCheckArt() {
   return (
     <svg width="168" height="128" viewBox="0 0 168 128" aria-hidden="true" focusable="false">
-      <circle cx="84" cy="68" r="58" fill="#e8f3fa" />
+      <circle cx="84" cy="68" r="58" fill="#eaeff5" />
       <path
         d="M30 58 L84 24 L138 58 V112 a6 6 0 0 1 -6 6 H36 a6 6 0 0 1 -6 -6 Z"
         fill="#fff"
@@ -39,12 +39,12 @@ function MailCheckArt() {
         height="52"
         rx="6"
         fill="#fff"
-        stroke="#c9e3f2"
+        stroke="#d5dfea"
         strokeWidth="2.5"
       />
       <path
         d="M58 54 H96 M58 64 H110 M58 74 H88"
-        stroke="#b6d4e8"
+        stroke="#b4c5d8"
         strokeWidth="4"
         strokeLinecap="round"
       />
@@ -55,7 +55,7 @@ function MailCheckArt() {
         strokeWidth="3"
         strokeLinejoin="round"
       />
-      <circle cx="128" cy="34" r="20" fill="#14a3a3" stroke="#fff" strokeWidth="4" />
+      <circle cx="128" cy="34" r="20" fill="#1a9a94" stroke="#fff" strokeWidth="4" />
       <path
         d="m119 34.5 6.5 6.5 11.5-12.5"
         fill="none"
@@ -64,7 +64,7 @@ function MailCheckArt() {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <path d="M22 22 L24 28 L30 30 L24 32 L22 38 L20 32 L14 30 L20 28 Z" fill="#14a3a3" />
+      <path d="M22 22 L24 28 L30 30 L24 32 L22 38 L20 32 L14 30 L20 28 Z" fill="#1a9a94" />
     </svg>
   );
 }

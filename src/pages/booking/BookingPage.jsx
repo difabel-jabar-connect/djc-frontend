@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
+import { motion } from 'motion/react';
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router';
+import { swapIn } from '@/lib/motion';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useAuth } from '@/context/useAuth';
 import { useCustomer } from '@/context/useCustomer';
-import { getProviderProfile } from '@/features/providers/providerProfiles';
+import { useProviderProfile } from '@/features/providers/useProviderProfile';
+import { createBooking as createBookingRequest } from '@/features/booking/bookingApi';
 import {
   calculateServiceFee,
   parseISODate,
@@ -12,8 +15,10 @@ import {
 } from '@/features/booking/schedule';
 import {
   BOOKING_STEPS,
+  bookableSlots,
   clearDraft,
   createDraft,
+  draftToApiPayload,
   draftToBooking,
   effectiveDuration,
   firstIncompleteStep,
@@ -27,6 +32,7 @@ import { homePathFor } from '@/features/auth/session';
 import { ensureThread } from '@/features/chat/chatStore';
 import { PATHS, buildAuthPath, buildBookingPath, buildProviderPath } from '@/routes/paths';
 import { ArrowLeftIcon, ArrowRightIcon, LogInIcon, SendIcon } from '@/components/ui/icons';
+import ProviderStatus from '@/pages/providers/ProviderStatus';
 import BookingStepper from './BookingStepper';
 import OrderSummary from './OrderSummary';
 import StepService from './StepService';
@@ -66,27 +72,75 @@ function initialDraft(profile, user, searchParams, today) {
 /** Langkah terakhir yang boleh diisi tamu (belum masuk): Pilih Layanan & Jadwal. */
 const GUEST_LAST_STEP = 2;
 
+/** Field error backend (B1) → langkah yang perlu diubah pengguna. */
+const FIELD_STEP = {
+  service_id: 1,
+  service_mode: 1,
+  scheduled_date: 2,
+  start_time: 2,
+  quantity: 2,
+  location_area: 3,
+  location_address: 3,
+  customer_note: 3,
+};
+const STEP_LABEL = { 1: 'Ubah layanan', 2: 'Ubah jadwal', 3: 'Ubah detail pesanan' };
+
+/** Pesan gagal kirim dari respons backend: pesan utama + pesan per isian (bila ada). */
+function submitErrorOf(error) {
+  if (error?.code === 'ERR_NET_FAIL') {
+    return { message: error.message, fields: [], step: null };
+  }
+  const fields = Array.isArray(error?.details) ? error.details.filter((item) => item?.message) : [];
+  const step = fields.map((item) => FIELD_STEP[item.field]).find(Boolean) ?? null;
+  return {
+    message: error?.message || 'Pesanan belum berhasil dikirim. Coba lagi.',
+    fields: fields.map((item) => item.message),
+    step,
+  };
+}
+
 /**
  * Pesan Layanan (FR-CUST-06/07) — 4 langkah, lalu pop-up sukses (desain pesan-layanan-1…5).
  * Langkah aktif ada di URL (?langkah=2) sehingga tombol Back browser berpindah langkah;
  * langkah yang prasyaratnya belum lengkap dikembalikan ke langkah pertama yang belum lengkap.
  * Tamu hanya sampai langkah 2 (jadwal); "Lanjut" membawanya ke halaman Masuk dan, setelah
  * berhasil masuk, kembali ke langkah 3 (Detail Pesanan) dengan draf yang tersimpan.
+ * Profil, paket, dan jadwal dari GET /providers/:id; "Kirim Pesanan" = POST /bookings.
  */
 export default function BookingPage() {
   const { id } = useParams();
+  const { user } = useAuth();
+  const { status, profile, retry } = useProviderProfile(id);
+  useDocumentTitle(profile || status !== 'notfound' ? 'Pesan Layanan' : 'Penyedia tidak ditemukan');
+
+  // Akun penyedia/admin/pengelola tidak memesan layanan.
+  if (user && user.role !== 'customer') return <Navigate to={homePathFor(user.role)} replace />;
+
+  if (!profile || !profile.packages.length) {
+    return (
+      <ProviderStatus
+        status={profile ? 'notfound' : status}
+        onRetry={retry}
+        notFoundLead="Pemesanan tidak dapat dilanjutkan karena penyedia atau layanannya tidak tersedia."
+      />
+    );
+  }
+  return <BookingFlow key={profile.id} profile={profile} user={user} />;
+}
+
+function BookingFlow({ profile, user }) {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const profile = getProviderProfile(id);
-  const { user } = useAuth();
   const { bookings, createBooking } = useCustomer();
-  useDocumentTitle(profile ? 'Pesan Layanan' : 'Penyedia tidak ditemukan');
 
   const today = startOfDay(new Date());
   const [draft, setDraft] = useState(() => initialDraft(profile, user, searchParams, today));
   const [attempted, setAttempted] = useState(null);
   const [createdCode, setCreatedCode] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
   const errorRef = useRef(null);
+  const submitErrorRef = useRef(null);
   const previousStep = useRef(null);
 
   const context = { draft, profile, user, today };
@@ -94,12 +148,10 @@ export default function BookingPage() {
   const created = createdCode ? findBooking(bookings, createdCode) : null;
   const requested = Number(searchParams.get('langkah')) || 1;
   const maxStep = user ? 4 : GUEST_LAST_STEP;
-  const step = !profile
-    ? 0
-    : Math.max(1, Math.min(requested, maxStep, firstIncompleteStep(context)));
+  const step = Math.max(1, Math.min(requested, maxStep, firstIncompleteStep(context)));
 
   useEffect(() => {
-    if (profile && !createdCode && step >= 1 && step <= 4) saveDraft(profile.id, draft);
+    if (!createdCode && step >= 1 && step <= 4) saveDraft(profile.id, draft);
   }, [profile, draft, step, createdCode]);
 
   // Pindah langkah: kembali ke atas lalu fokus ke judul langkah (bukan saat halaman pertama dibuka).
@@ -111,24 +163,10 @@ export default function BookingPage() {
     previousStep.current = step;
   }, [step]);
 
-  // Akun penyedia/admin/pengelola tidak memesan layanan.
-  if (user && user.role !== 'customer') return <Navigate to={homePathFor(user.role)} replace />;
-
-  if (!profile) {
-    return (
-      <section className="container page" aria-labelledby="page-title">
-        <h1 id="page-title">Penyedia tidak ditemukan</h1>
-        <p className="lead">Pemesanan tidak dapat dilanjutkan karena penyedia tidak tersedia.</p>
-        <Link to={PATHS.services} className="btn btn--primary">
-          Kembali ke Cari Layanan
-        </Link>
-      </section>
-    );
-  }
-
   const pkg = profile.packages.find((p) => p.id === draft.packageId);
   const date = parseISODate(draft.date);
-  const hours = effectiveDuration(draft, pkg);
+  const slots = bookableSlots({ draft, profile, pkg });
+  const hours = effectiveDuration(draft, pkg, slots);
   const total = calculateServiceFee(pkg, hours);
   const address = selectedAddress(draft, user);
   const errors = attempted === step ? validateStep(step, context) : {};
@@ -143,6 +181,7 @@ export default function BookingPage() {
 
   const goTo = (target) => {
     setAttempted(null);
+    setSubmitError(null);
     setSearchParams((current) => {
       const params = new URLSearchParams(current);
       params.set('langkah', String(target));
@@ -150,8 +189,9 @@ export default function BookingPage() {
     });
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+    if (submitting) return;
     if (Object.keys(validateStep(step, context)).length) {
       setAttempted(step);
       // Tunggu ringkasan error dirender, lalu fokuskan agar dibacakan pembaca layar.
@@ -170,8 +210,26 @@ export default function BookingPage() {
       goTo(step + 1);
       return;
     }
-    // TODO(API): POST pesanan ke backend; sementara disimpan di data pesanan lokal.
-    const code = createBooking(draftToBooking(context));
+    setSubmitting(true);
+    setSubmitError(null);
+    let created;
+    try {
+      created = await createBookingRequest(draftToApiPayload(context));
+    } catch (error) {
+      setSubmitting(false);
+      if (error?.status === 401) {
+        // Sesi di server habis: masuk lagi, lalu kembali ke langkah 4 dengan draf yang sama.
+        saveDraft(profile.id, draft);
+        navigate(buildAuthPath(PATHS.login, buildBookingPath(profile.id, { langkah: '4' })));
+        return;
+      }
+      setSubmitError(submitErrorOf(error));
+      requestAnimationFrame(() => submitErrorRef.current?.focus());
+      return;
+    }
+    setSubmitting(false);
+    // Simpan juga di data pesanan lokal agar pop-up sukses & Pesanan Saya langsung menampilkannya.
+    const code = createBooking(draftToBooking(context, created));
     // Buka percakapan chat pesanan ini agar langsung muncul di kotak masuk penyedia.
     ensureThread({
       code,
@@ -187,7 +245,19 @@ export default function BookingPage() {
   // Menutup pop-up (✕ / Escape) → ke Pesanan Saya, tempat pesanan baru sudah tercantum.
   const closeSuccess = () => navigate(PATHS.customerBookings, { replace: true });
 
-  const stepProps = { profile, pkg, user, draft, date, hours, address, total, update, errors };
+  const stepProps = {
+    profile,
+    pkg,
+    user,
+    draft,
+    date,
+    hours,
+    slots,
+    address,
+    total,
+    update,
+    errors,
+  };
   const steps = BOOKING_STEPS.map((label, index) => ({
     label,
     done: Boolean(created) || index < step - 1,
@@ -196,11 +266,6 @@ export default function BookingPage() {
   return (
     <>
       <section className="booking-hero" aria-labelledby="page-title">
-        <div className="booking-hero__art" aria-hidden="true">
-          <span className="booking-hero__blob" />
-          <span className="booking-hero__ring" />
-          <span className="booking-hero__tile" />
-        </div>
         <div className="container booking-hero__content">
           <div className="booking-hero__intro">
             <h1 id="page-title" className="search-hero__title">
@@ -222,12 +287,43 @@ export default function BookingPage() {
           onSubmit={handleSubmit}
         >
           <ErrorSummary ref={errorRef} errors={errors} />
-          {step === 1 && <StepService {...stepProps} />}
-          {step === 2 && (
-            <StepSchedule {...stepProps} today={today} onChangeService={() => goTo(1)} />
+          {submitError && (
+            <div
+              ref={submitErrorRef}
+              className="error-summary"
+              role="alert"
+              tabIndex={-1}
+              aria-labelledby="submit-error-title"
+            >
+              <h3 id="submit-error-title">Pesanan belum terkirim</h3>
+              <p>{submitError.message}</p>
+              {submitError.fields.length > 0 && (
+                <ul>
+                  {submitError.fields.map((message) => (
+                    <li key={message}>{message}</li>
+                  ))}
+                </ul>
+              )}
+              {submitError.step && (
+                <button
+                  type="button"
+                  className="btn btn--outline"
+                  onClick={() => goTo(submitError.step)}
+                >
+                  {STEP_LABEL[submitError.step]}
+                </button>
+              )}
+            </div>
           )}
-          {step === 3 && <StepDetails {...stepProps} />}
-          {step === 4 && <StepReview {...stepProps} goTo={goTo} />}
+          {/* Isi langkah baru bergeser masuk dari arah "maju" (key = langkah). */}
+          <motion.div key={step} className="booking-step" {...swapIn}>
+            {step === 1 && <StepService {...stepProps} />}
+            {step === 2 && (
+              <StepSchedule {...stepProps} today={today} onChangeService={() => goTo(1)} />
+            )}
+            {step === 3 && <StepDetails {...stepProps} />}
+            {step === 4 && <StepReview {...stepProps} goTo={goTo} />}
+          </motion.div>
           {!user && step === GUEST_LAST_STEP && <GuestLoginNote />}
           {step === 1 ? (
             <StepNav
@@ -251,9 +347,14 @@ export default function BookingPage() {
                     Masuk untuk Lanjut
                   </button>
                 ) : step === 4 ? (
-                  <button type="submit" className="btn btn--primary btn--xl step-nav__send">
+                  <button
+                    type="submit"
+                    className="btn btn--primary btn--xl step-nav__send"
+                    disabled={submitting}
+                    aria-busy={submitting}
+                  >
                     <SendIcon />
-                    Kirim Pesanan
+                    {submitting ? 'Mengirim…' : 'Kirim Pesanan'}
                     <ArrowRightIcon />
                   </button>
                 ) : undefined

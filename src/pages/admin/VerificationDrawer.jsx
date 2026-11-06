@@ -32,7 +32,7 @@ const DAYS = [
 function LocationArt() {
   return (
     <svg className="ad-location-art" viewBox="0 0 480 130" aria-hidden="true" focusable="false">
-      <rect width="480" height="130" rx="12" fill="#e8f3fa" />
+      <rect width="480" height="130" rx="12" fill="#eaeff5" />
       <g fill="none" stroke="#fff" strokeWidth="9" strokeLinecap="round">
         <path d="M0 90 C120 70 240 110 480 80" />
         <path d="M150 0 C170 60 140 100 160 130" />
@@ -42,9 +42,9 @@ function LocationArt() {
         cx="250"
         cy="70"
         r="40"
-        fill="#14a3a3"
+        fill="#1a9a94"
         fillOpacity="0.1"
-        stroke="#0c7272"
+        stroke="#0b6b67"
         strokeWidth="2"
         strokeDasharray="6 6"
       />

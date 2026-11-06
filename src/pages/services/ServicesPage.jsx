@@ -1,15 +1,16 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { ClipboardListIcon, MapIcon } from '@/components/ui/icons';
 import { inArea } from '@/features/map/jabarGeo';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
-import { SAMPLE_PROVIDERS } from '@/features/providers/sampleProviders';
 import {
   FILTER_KEYS,
-  filterProviders,
+  filterByCity,
   paginate,
   readCriteria,
+  toApiCriteria,
 } from '@/features/search/searchProviders';
+import { useProviderSearch } from '@/features/search/useProviderSearch';
 import { PATHS } from '@/routes/paths';
 import SearchPageHeader from './SearchPageHeader';
 import SearchPanel from './SearchPanel';
@@ -25,7 +26,7 @@ const ProviderMap = lazy(() => import('./ProviderMap'));
  * Halaman Cari Layanan (FR-CUST-02). Seluruh kriteria disimpan di query string
  * (?q=&kategori=&lokasi=&rating=&harga=&hari=&urut=&hal=) agar hasil bisa
  * dibagikan, di-bookmark, dan tombol back browser bekerja.
- * Data sementara dari contoh lokal; nanti diganti panggilan API pencarian.
+ * Data dari GET /services (backend); kartu & pin peta = satu per penyedia.
  */
 export default function ServicesPage() {
   useDocumentTitle('Cari Layanan');
@@ -38,7 +39,12 @@ export default function ServicesPage() {
   const [expanded, setExpanded] = useState(false);
   const [mobileView, setMobileView] = useState('daftar');
 
-  const filtered = filterProviders(SAMPLE_PROVIDERS, criteria);
+  const apiCriteria = toApiCriteria(criteria);
+  const search = useProviderSearch(apiCriteria);
+  const filtered = useMemo(
+    () => filterByCity(search.providers, criteria.lokasi),
+    [search.providers, criteria.lokasi],
+  );
   const inView = filtered.filter((provider) => inArea(provider, area));
   const result = paginate(inView, criteria.page);
 
@@ -99,6 +105,8 @@ export default function ServicesPage() {
       >
         <div className="search-split__list">
           <SearchResults
+            status={search.status}
+            onRetry={search.retry}
             result={result}
             sort={criteria.urut}
             onSortChange={(urut) => updateParams({ urut: urut === 'relevan' ? '' : urut })}

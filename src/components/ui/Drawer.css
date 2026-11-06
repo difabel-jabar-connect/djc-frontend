@@ -63,7 +63,7 @@
   border: 0;
   border-radius: var(--radius);
   background: transparent;
-  color: #374151;
+  color: var(--color-text-body);
   cursor: pointer;
 }
 

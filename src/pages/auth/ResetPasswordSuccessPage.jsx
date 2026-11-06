@@ -7,7 +7,7 @@ import PasswordResetLayout from './PasswordResetLayout';
 function ShieldCheckArt() {
   return (
     <svg width="168" height="140" viewBox="0 0 168 140" aria-hidden="true" focusable="false">
-      <circle cx="84" cy="72" r="60" fill="#e8f3fa" />
+      <circle cx="84" cy="72" r="60" fill="#eaeff5" />
       <path
         d="M84 16 C100 28 118 32 132 32 V70 C132 100 110 118 84 128 C58 118 36 100 36 70 V32 C50 32 68 28 84 16 Z"
         fill="#fff"
@@ -15,8 +15,8 @@ function ShieldCheckArt() {
         strokeWidth="3.5"
         strokeLinejoin="round"
       />
-      <path d="M84 30 C96 38 108 42 120 42 V70 C120 92 104 106 84 114 Z" fill="#e3f6f6" />
-      <circle cx="84" cy="72" r="24" fill="#16a34a" />
+      <path d="M84 30 C96 38 108 42 120 42 V70 C120 92 104 106 84 114 Z" fill="#dcefec" />
+      <circle cx="84" cy="72" r="24" fill="#15803d" />
       <path
         d="m73 72.5 8 8 15-16"
         fill="none"
@@ -27,7 +27,7 @@ function ShieldCheckArt() {
       />
       <path
         d="M146 26 L148.5 33 L156 35.5 L148.5 38 L146 45 L143.5 38 L136 35.5 L143.5 33 Z"
-        fill="#14a3a3"
+        fill="#1a9a94"
       />
       <path
         d="M22 96 L23.5 100.5 L28 102 L23.5 103.5 L22 108 L20.5 103.5 L16 102 L20.5 100.5 Z"

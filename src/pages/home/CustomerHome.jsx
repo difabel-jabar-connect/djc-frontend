@@ -183,7 +183,6 @@ function NearbySection({ favorites, onToggleFavorite }) {
         <div className="featured__head">
           <SectionHeader
             id="nearby-title"
-            eyebrow="Terdekat dari Anda"
             title="Penyedia Terdekat dari Anda"
             description="Berdasarkan lokasi Anda saat ini."
           />
@@ -275,7 +274,6 @@ function ActivitySection({ bookings }) {
       <div className="container">
         <SectionHeader
           id="activity-title"
-          eyebrow="Aktivitas Anda"
           title="Lanjutkan dari pesanan sebelumnya"
           description="Pesan ulang layanan favorit atau beri ulasan untuk pesanan yang sudah selesai."
         />

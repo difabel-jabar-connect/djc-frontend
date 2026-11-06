@@ -38,8 +38,8 @@ a.pagination__item:hover {
 
 .pagination__item--disabled {
   border-color: var(--color-border);
-  background: #f9fafb;
-  color: #9ca3af;
+  background: var(--color-paper);
+  color: #8a94a3;
   cursor: not-allowed;
 }
 

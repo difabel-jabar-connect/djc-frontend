@@ -8,7 +8,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   min-height: 100vh;
-  background: #f7fafc;
+  background: var(--color-paper);
 }
 
 /* ----- Panel kiri ----- */
@@ -26,7 +26,7 @@
   min-height: 640px;
   overflow: hidden;
   padding: 80px;
-  background: linear-gradient(140deg, #0b3c6e 0%, #0b4a72 45%, #0c7272 100%);
+  background: var(--color-primary);
   color: #ffffff;
 }
 
@@ -85,10 +85,10 @@
 
 .auth-intro__text .auth-intro__title {
   margin: 0;
-  font-size: clamp(1.75rem, 1.2rem + 1.5vw, 2.25rem);
-  font-weight: 700;
-  line-height: 1.28;
-  letter-spacing: -0.4px;
+  font-size: clamp(1.5rem, 1.2rem + 0.9vw, 2rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
 }
 
 .auth-intro__text p:not(.auth-intro__title) {
@@ -118,11 +118,8 @@
   display: grid;
   flex: none;
   place-items: center;
-  width: 40px;
-  height: 40px;
-  border: 1px solid rgb(255 255 255 / 24%);
-  border-radius: 50%;
-  background: rgb(255 255 255 / 14%);
+  width: 24px;
+  height: 24px;
 }
 
 .auth-intro__motto {
@@ -160,9 +157,6 @@
   border: 1px solid var(--color-border);
   border-radius: 20px;
   background: var(--color-bg);
-  box-shadow:
-    0 4px 10px rgb(11 60 110 / 6%),
-    0 16px 40px rgb(11 60 110 / 8%);
 }
 
 .auth-demo {
@@ -173,7 +167,7 @@
   padding: 20px 24px;
   border: 1px dashed var(--color-border-strong);
   border-radius: var(--radius-lg);
-  background: #f7fafc;
+  background: var(--color-paper);
 }
 
 .auth-demo h2 {
@@ -247,7 +241,7 @@
   padding: 12px 14px;
   border: 1px solid var(--color-primary);
   border-radius: var(--radius);
-  background: #e8f0f8;
+  background: #eaeff5;
   color: var(--color-primary);
   font-weight: 600;
   line-height: 1.5;
@@ -259,7 +253,7 @@
 }
 
 .auth-required {
-  color: #dc2626;
+  color: #b91c1c;
 }
 
 .auth-input {
@@ -360,7 +354,7 @@
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  color: #0c7272;
+  color: var(--color-accent);
   font-size: 0.9375rem;
   font-weight: 600;
   text-underline-offset: 3px;
@@ -421,7 +415,7 @@
 
 .auth-google:hover {
   border-color: var(--color-primary);
-  background: #f7fafc;
+  background: var(--color-paper);
 }
 
 .auth-info {
@@ -581,7 +575,7 @@
   min-height: 44px;
   padding: 4px 8px;
   border-radius: var(--radius-sm);
-  color: #374151;
+  color: var(--color-text-body);
   font-size: 0.9375rem;
   font-weight: 600;
   text-align: center;
@@ -612,7 +606,7 @@
 .role-switch__help svg {
   flex: none;
   margin-top: 2px;
-  color: #0c7272;
+  color: var(--color-accent);
 }
 
 /* Prefix +62 & select */
@@ -626,8 +620,8 @@
   align-items: center;
   align-self: stretch;
   padding: 0 12px 0 14px;
-  border-right: 1px solid #d1d5db;
-  background: #f3f4f6;
+  border-right: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
   font-weight: 600;
 }
 
@@ -686,15 +680,15 @@
 }
 
 .strength__bars--weak .is-on {
-  background: #dc2626;
+  background: #b91c1c;
 }
 
 .strength__bars--medium .is-on {
-  background: #d97706;
+  background: #b45309;
 }
 
 .strength__bars--strong .is-on {
-  background: #16a34a;
+  background: #15803d;
 }
 
 .strength__text {
@@ -727,7 +721,7 @@
 }
 
 .auth-agree a {
-  color: #0c7272;
+  color: var(--color-accent);
   font-weight: 700;
   text-underline-offset: 3px;
 }
@@ -790,9 +784,9 @@
   gap: 12px;
   width: 100%;
   padding: 14px var(--space-3);
-  border: 1px solid #fde68a;
+  border: 1px solid #f0d9a8;
   border-radius: var(--radius);
-  background: #fffbeb;
+  background: #fdf6e7;
   font-size: 0.9375rem;
   line-height: 22px;
   text-align: left;
@@ -826,7 +820,7 @@
   padding: 0 4px;
   border: 0;
   background: transparent;
-  color: #0c7272;
+  color: var(--color-accent);
   font-weight: 700;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -950,7 +944,7 @@
   margin: 2px 0 0;
   padding: 10px 12px;
   border-radius: var(--radius-sm);
-  background: #f7fafc;
+  background: var(--color-paper);
   font-size: var(--font-size-sm);
   line-height: 20px;
   list-style: none;
@@ -1002,10 +996,10 @@
   display: grid;
   gap: 12px;
   padding: 14px;
-  border: 1px solid #fecaca;
-  border-left: 4px solid #dc2626;
+  border: 1px solid #f2c4c4;
+  border-left: 4px solid #b91c1c;
   border-radius: var(--radius);
-  background: #fef2f2;
+  background: #fdecec;
 }
 
 .auth-expired__text {
@@ -1022,7 +1016,7 @@
 .auth-expired__text span {
   display: grid;
   gap: 2px;
-  color: #7f1d1d;
+  color: #a4161a;
   font-size: var(--font-size-sm);
   line-height: 20px;
 }
@@ -1085,7 +1079,7 @@
   padding: 10px 12px;
   border: 1px dashed var(--color-border-strong);
   border-radius: var(--radius);
-  background: #f7fafc;
+  background: var(--color-paper);
   color: var(--color-text-body);
   font-size: var(--font-size-sm);
 }

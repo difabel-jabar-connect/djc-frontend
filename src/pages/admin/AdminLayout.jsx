@@ -41,10 +41,10 @@ function SkylineArt() {
         <path d="M120 76 V50 L136 42 L152 50 V76" />
         <path d="M158 76 V58 H170 V48 H184 V76" />
       </g>
-      <path d="M0 75 H196" stroke="#14a3a3" strokeWidth="3" />
+      <path d="M0 75 H196" stroke="#1a9a94" strokeWidth="3" />
       <path
         d="M96 18 L97.5 22.5 L102 24 L97.5 25.5 L96 30 L94.5 25.5 L90 24 L94.5 22.5 Z"
-        fill="#14a3a3"
+        fill="#1a9a94"
       />
     </svg>
   );
