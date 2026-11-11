@@ -70,6 +70,75 @@ describe('Masuk dengan Google', () => {
     );
   });
 
+  it('akun Google belum terdaftar: cukup isi nomor HP lalu langsung masuk', async () => {
+    mockGoogle();
+    const fetchMock = vi.fn(async (url) => {
+      if (String(url).endsWith('/auth/google')) {
+        return jsonResponse(
+          {
+            error: {
+              code: 'NOT_FOUND',
+              message: 'Akun Google ini belum terdaftar. Silakan daftar.',
+              details: { signup_token: 'token-daftar', name: 'Budi Baru', email: 'budi@gmail.com' },
+            },
+          },
+          404,
+        );
+      }
+      if (String(url).endsWith('/auth/google/complete')) {
+        return jsonResponse({ data: { user: { name: 'Budi Baru', role: 'customer' } } }, 201);
+      }
+      return jsonResponse({ data: { status: 'ok' } });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    const user = userEvent.setup();
+    const { router } = renderAt('/login');
+
+    await user.click(screen.getByRole('button', { name: 'Masuk dengan Google' }));
+    expect(
+      await screen.findByRole('heading', { name: 'Lengkapi Pendaftaran' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('budi@gmail.com')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Daftar dan Masuk' }));
+    expect(await screen.findByText('Nomor HP wajib diisi.')).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText(/nomor hp/i), '081234567890');
+    await user.click(screen.getByRole('button', { name: 'Daftar dan Masuk' }));
+
+    const complete = fetchMock.mock.calls.find(([url]) =>
+      String(url).endsWith('/auth/google/complete'),
+    );
+    expect(JSON.parse(complete[1].body)).toEqual({
+      signup_token: 'token-daftar',
+      phone: '+6281234567890',
+    });
+    await vi.waitFor(() => expect(router.state.location.pathname).toBe('/'));
+  });
+
+  it('batal melengkapi pendaftaran Google kembali ke form Masuk', async () => {
+    mockGoogle();
+    vi.stubGlobal(
+      'fetch',
+      respond(
+        {
+          error: {
+            code: 'NOT_FOUND',
+            message: 'x',
+            details: { signup_token: 't', name: 'A', email: 'a@b.co' },
+          },
+        },
+        404,
+      ),
+    );
+    const user = userEvent.setup();
+    renderAt('/login');
+
+    await user.click(screen.getByRole('button', { name: 'Masuk dengan Google' }));
+    await user.click(await screen.findByRole('button', { name: 'Batal' }));
+    expect(screen.getByRole('heading', { name: 'Masuk ke Akun Anda' })).toBeInTheDocument();
+  });
+
   it('popup ditutup tidak memanggil backend dan memberi info', async () => {
     mockGoogle({ popupError: 'popup_closed' });
     const fetchMock = vi.fn();

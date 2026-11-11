@@ -6,6 +6,7 @@ import { homePathFor } from '@/features/auth/session';
 import { useGoogleAuth } from '@/features/auth/useGoogleAuth';
 import { register } from '@/features/auth/authApi';
 import { PASSWORD_MIN, passwordStrength } from '@/features/auth/password';
+import { PHONE_PATTERN, normalizePhone } from '@/features/auth/phone';
 import { DOMICILE_OPTIONS } from '@/features/auth/registerOptions';
 import { CATEGORIES } from '@/features/search/catalog';
 import { PATHS, buildAuthPath, isBookingNext } from '@/routes/paths';
@@ -29,8 +30,6 @@ import { AuthField, PasswordField } from './AuthFields';
 import './auth.css';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-/** Nomor seluler Indonesia tanpa 0/+62 di depan: 8xx, total 9–13 digit. */
-const PHONE_PATTERN = /^8\d{8,12}$/;
 
 const HIGHLIGHTS = [
   { text: 'Gratis dan mudah didaftarkan', icon: CircleCheckIcon },
@@ -54,9 +53,6 @@ const ROLES = {
 };
 
 const FIELD_ORDER = ['nama', 'email', 'wa', 'kota', 'kategori', 'sandi', 'sandi2', 'setuju'];
-
-/** Hapus 0 / 62 / +62 di depan dan karakter non-angka. */
-const normalizePhone = (value) => value.replace(/\D/g, '').replace(/^(62|0)/, '');
 
 function validate(form) {
   const errors = {};
