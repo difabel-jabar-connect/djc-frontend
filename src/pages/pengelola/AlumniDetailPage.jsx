@@ -90,15 +90,15 @@ function LocationMap({ name, city }) {
       role="img"
       aria-label={`Peta lokasi ${name} di ${city}, radius layanan 10 kilometer`}
     >
-      <rect width="480" height="200" fill="#f1f4f7" />
+      <rect width="480" height="200" fill="#f1f3f6" />
       <path
         d="M0 144 C90 120 160 180 250 156 S420 120 480 140"
         fill="none"
-        stroke="#c9dceb"
+        stroke="#d5dfea"
         strokeWidth="16"
       />
-      <rect x="300" y="18" width="120" height="70" rx="10" fill="#e3efe3" />
-      <rect x="40" y="26" width="90" height="56" rx="10" fill="#e3efe3" />
+      <rect x="300" y="18" width="120" height="70" rx="10" fill="#e8f5ec" />
+      <rect x="40" y="26" width="90" height="56" rx="10" fill="#e8f5ec" />
       <g fill="none" stroke="#fff" strokeWidth="10" strokeLinecap="round">
         <path d="M0 90 H480" />
         <path d="M180 0 C190 80 170 140 200 200" />
@@ -109,22 +109,22 @@ function LocationMap({ name, city }) {
         cx="240"
         cy="96"
         r="70"
-        fill="#14a3a3"
+        fill="#1a9a94"
         fillOpacity="0.1"
-        stroke="#0c7272"
+        stroke="#0b6b67"
         strokeWidth="2"
         strokeDasharray="7 6"
       />
       <g transform="translate(240 104)">
         <path
           d="M0 0 C-3 -9 -16 -18 -16 -32 A16 16 0 1 1 16 -32 C16 -18 3 -9 0 0 Z"
-          fill="#14a3a3"
+          fill="#1a9a94"
           stroke="#fff"
           strokeWidth="3"
         />
         <circle cx="0" cy="-32" r="6" fill="#fff" />
       </g>
-      <text x="470" y="192" textAnchor="end" fontSize="11" fill="#4b5563">
+      <text x="470" y="192" textAnchor="end" fontSize="11" fill="#4a5566">
         © OpenStreetMap contributors
       </text>
     </svg>

@@ -35,7 +35,7 @@
 }
 
 .st-nav__item:hover {
-  background: #f3f4f6;
+  background: var(--color-surface);
   color: var(--color-text);
 }
 
@@ -43,7 +43,6 @@
   background: var(--color-surface);
   color: var(--color-primary);
   font-weight: 700;
-  box-shadow: inset 3px 0 0 var(--color-primary);
 }
 
 .st-content {
@@ -107,10 +106,10 @@
   gap: 10px;
   margin: 0;
   padding: 12px 16px;
-  border: 1px solid #bbf7d0;
+  border: 1px solid #b9dfc4;
   border-radius: var(--radius);
-  background: #f0fdf4;
-  color: #166534;
+  background: #e8f5ec;
+  color: #1e6b3a;
   font-size: var(--font-size-sm);
   font-weight: 600;
   line-height: 20px;
@@ -122,26 +121,26 @@
 }
 
 .st-note--info {
-  border-color: #bfdbfe;
-  background: #eff6ff;
-  color: #1e3a8a;
+  border-color: #c5d2e0;
+  background: #eaeff5;
+  color: #0b3c6e;
 }
 
 .st-note--muted {
-  border-color: #e5e7eb;
-  background: #f9fafb;
-  color: #374151;
+  border-color: var(--color-border);
+  background: var(--color-paper);
+  color: var(--color-text-body);
   font-weight: 500;
 }
 
 /* ----- Input tambahan ----- */
 .ad-input.ad-input--readonly {
-  border-color: #d1d5db;
-  background: #f3f4f6;
+  border-color: var(--color-border-strong);
+  background: var(--color-surface);
 }
 
 .ad-input.ad-input--readonly input {
-  color: #374151;
+  color: var(--color-text-body);
   cursor: default;
 }
 
@@ -169,7 +168,7 @@
 }
 
 .ad-input__toggle:hover {
-  background: #f3f4f6;
+  background: var(--color-surface);
   color: var(--color-text);
 }
 
@@ -179,8 +178,8 @@
 }
 
 .dialog__icon--info {
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: #eaeff5;
+  color: #0b3c6e;
 }
 
 /* ----- Profil ----- */
@@ -294,7 +293,7 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #16a34a;
+  background: #15803d;
 }
 
 .st-savebar__status.is-dirty {
@@ -302,7 +301,7 @@
 }
 
 .st-savebar__status.is-dirty .st-savebar__dot {
-  background: #d97706;
+  background: #b45309;
 }
 
 .st-savebar__actions {
@@ -339,7 +338,7 @@
   padding: 14px 16px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  background: #f9fafb;
+  background: var(--color-paper);
 }
 
 .st-strength__head {
@@ -364,7 +363,7 @@
 .st-strength__bars span {
   height: 6px;
   border-radius: var(--radius-pill);
-  background: #e5e7eb;
+  background: var(--color-border);
 }
 
 .st-strength__bars span.is-on {
@@ -389,16 +388,16 @@
 
 .st-rules li svg {
   flex: none;
-  color: #9ca3af;
+  color: #8a94a3;
 }
 
 .st-rules li.is-met {
-  color: #166534;
+  color: #1e6b3a;
   font-weight: 600;
 }
 
 .st-rules li.is-met svg {
-  color: #16a34a;
+  color: #15803d;
 }
 
 .st-match {
@@ -419,7 +418,7 @@
 }
 
 .st-match__ok {
-  color: #166534;
+  color: #1e6b3a;
 }
 
 .st-match__no {
@@ -489,12 +488,12 @@
 
 .btn.st-danger-outline {
   justify-self: start;
-  border-color: #dc2626;
+  border-color: #b91c1c;
   color: #b91c1c;
 }
 
 .btn.st-danger-outline:hover {
-  background: #fef2f2;
+  background: #fdecec;
 }
 
 .btn.st-add {
@@ -520,8 +519,6 @@
   color: var(--color-text-body);
   font-size: 0.8125rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
 }
 
 .st-notif tbody th {
@@ -558,7 +555,7 @@
   padding: 0;
   border: 1.5px solid var(--color-input-border);
   border-radius: var(--radius-pill);
-  background: #e5e7eb;
+  background: var(--color-border);
   cursor: pointer;
   transition: background-color 0.15s ease;
 }
@@ -600,7 +597,7 @@
 .st-preview__caption {
   padding: 8px 14px;
   border-bottom: 1px solid var(--color-border);
-  background: #f9fafb;
+  background: var(--color-paper);
   color: var(--color-text-body);
   font-size: 0.8125rem;
   font-weight: 700;
@@ -676,14 +673,14 @@
   display: grid;
   gap: 8px;
   padding: 14px 16px;
-  border: 1px solid #bfdbfe;
+  border: 1px solid #c5d2e0;
   border-radius: var(--radius);
-  background: #eff6ff;
+  background: #eaeff5;
 }
 
 .st-summary__count {
   margin: 0;
-  color: #1e3a8a;
+  color: #0b3c6e;
   font-size: var(--font-size-sm);
   font-weight: 700;
 }
@@ -725,7 +722,7 @@
 }
 
 .st-summary ins {
-  color: #166534;
+  color: #1e6b3a;
   font-weight: 700;
   text-decoration: none;
 }
@@ -795,7 +792,6 @@
   }
 
   .st-nav__item.active {
-    box-shadow: inset 0 -3px 0 var(--color-primary);
   }
 }
 

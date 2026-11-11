@@ -27,10 +27,10 @@ function HillsArt() {
   return (
     <svg width="196" height="76" viewBox="0 0 196 76" aria-hidden="true" focusable="false">
       <circle cx="40" cy="24" r="12" fill="#fff" />
-      <path d="M0 76 C30 48 60 56 90 40 C120 24 160 34 196 18 V76 Z" fill="#c9e3f2" />
+      <path d="M0 76 C30 48 60 56 90 40 C120 24 160 34 196 18 V76 Z" fill="#d5dfea" />
       <path
         d="M0 76 C40 60 80 66 120 52 C150 42 176 46 196 40 V76 Z"
-        fill="#14a3a3"
+        fill="#1a9a94"
         opacity="0.35"
       />
       <g
@@ -49,7 +49,7 @@ function HillsArt() {
       <path d="M0 75 H196" stroke="#0b3c6e" strokeWidth="2" />
       <path
         d="M78 14 L79.5 18.5 L84 20 L79.5 21.5 L78 26 L76.5 21.5 L72 20 L76.5 18.5 Z"
-        fill="#14a3a3"
+        fill="#1a9a94"
       />
     </svg>
   );

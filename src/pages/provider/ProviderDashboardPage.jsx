@@ -88,10 +88,10 @@ function SidebarArt() {
         <path d="M120 76 V50 L136 42 L152 50 V76" />
         <path d="M158 76 V58 H170 V48 H184 V76" />
       </g>
-      <path d="M0 75 H196" stroke="#14a3a3" strokeWidth="3" />
+      <path d="M0 75 H196" stroke="#1a9a94" strokeWidth="3" />
       <path
         d="M96 18 L97.5 22.5 L102 24 L97.5 25.5 L96 30 L94.5 25.5 L90 24 L94.5 22.5 Z"
-        fill="#14a3a3"
+        fill="#1a9a94"
       />
     </svg>
   );
@@ -121,7 +121,7 @@ function BannerArt() {
       <path
         d="M70 96 L92 76 L108 86 L140 54"
         fill="none"
-        stroke="#14a3a3"
+        stroke="#1a9a94"
         strokeWidth="4"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -129,27 +129,27 @@ function BannerArt() {
       <path
         d="M130 54 H140 V64"
         fill="none"
-        stroke="#14a3a3"
+        stroke="#1a9a94"
         strokeWidth="4"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <rect x="70" y="100" width="10" height="6" rx="2" fill="#c9e3f2" />
-      <rect x="86" y="96" width="10" height="10" rx="2" fill="#c9e3f2" />
-      <rect x="102" y="92" width="10" height="14" rx="2" fill="#c9e3f2" />
+      <rect x="70" y="100" width="10" height="6" rx="2" fill="#d5dfea" />
+      <rect x="86" y="96" width="10" height="10" rx="2" fill="#d5dfea" />
+      <rect x="102" y="92" width="10" height="14" rx="2" fill="#d5dfea" />
       <g transform="translate(22 92) rotate(-35)">
         <rect x="0" y="-5" width="46" height="10" rx="5" fill="#0b3c6e" />
         <circle cx="48" cy="0" r="9" fill="none" stroke="#0b3c6e" strokeWidth="4" />
       </g>
       <path
         d="M178 22 L182 32 L192 34 L184 40 L186 50 L178 45 L170 50 L172 40 L164 34 L174 32 Z"
-        fill="#14a3a3"
+        fill="#1a9a94"
       />
       <path
         d="M30 20 L31.5 25 L36.5 26.5 L31.5 28 L30 33 L28.5 28 L23.5 26.5 L28.5 25 Z"
         fill="#0b3c6e"
       />
-      <circle cx="190" cy="110" r="5" fill="#b6d4e8" />
+      <circle cx="190" cy="110" r="5" fill="#b4c5d8" />
     </svg>
   );
 }

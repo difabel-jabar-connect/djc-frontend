@@ -11,7 +11,7 @@ import { buildProviderChatPath, buildProviderPath } from '@/routes/paths';
 import { providerNavItems } from './providerNav';
 import './providerChat.css';
 
-const COLORS = ['#0b3c6e', '#0c7272', '#6d28d9', '#9a3412', '#be185d', '#1d4ed8'];
+const COLORS = ['#0b3c6e', '#0b6b67', '#26324a', '#3d5a80', '#3d5a80', '#0b3c6e'];
 const TIME = new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit' });
 const DAY = new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short' });
 

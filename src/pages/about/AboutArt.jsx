@@ -7,26 +7,26 @@ const PIN_PATH = 'M0 0 C-2 -6 -12 -12 -12 -22 A12 12 0 1 1 12 -22 C12 -12 2 -6 0
 function Pin({ x, y, scale = 1.15 }) {
   return (
     <g transform={`translate(${x} ${y}) scale(${scale})`}>
-      <path d={PIN_PATH} fill="#14a3a3" stroke="#fff" strokeWidth="2.5" />
+      <path d={PIN_PATH} fill="#1a9a94" stroke="#fff" strokeWidth="2.5" />
       <circle cx="0" cy="-22" r="4.5" fill="#fff" />
     </g>
   );
 }
 
-function JabarMap({ fill = '#e8f3fa', outline = false }) {
+function JabarMap({ fill = '#eaeff5', outline = false }) {
   return (
     <>
       <path
         d={JABAR_OUTLINE}
         transform="translate(6 10)"
-        fill="#c9e3f2"
-        stroke="#c9e3f2"
+        fill="#d5dfea"
+        stroke="#d5dfea"
         strokeWidth="10"
         strokeLinejoin="round"
       />
       <path d={JABAR_OUTLINE} fill={fill} stroke={fill} strokeWidth="10" strokeLinejoin="round" />
-      {outline && <path d={JABAR_OUTLINE} fill="none" stroke="#b6d4e8" strokeWidth="2" />}
-      <g fill="none" stroke="#b6d4e8" strokeWidth="1.5" strokeDasharray="5 6" strokeLinecap="round">
+      {outline && <path d={JABAR_OUTLINE} fill="none" stroke="#b4c5d8" strokeWidth="2" />}
+      <g fill="none" stroke="#b4c5d8" strokeWidth="1.5" strokeDasharray="5 6" strokeLinecap="round">
         {BORDERS.map((d) => (
           <path key={d} d={d} />
         ))}
@@ -90,11 +90,11 @@ export function AboutHeroArt() {
         cy="250"
         r="236"
         fill="none"
-        stroke="#c9e3f2"
+        stroke="#d5dfea"
         strokeWidth="2"
         strokeDasharray="8 9"
       />
-      <g fill="#cfe3f1">
+      <g fill="#d5dfea">
         {[560, 578, 596, 614, 632].flatMap((x) =>
           [170, 188, 206].map((y) => <circle key={`${x}-${y}`} cx={x} cy={y} r="3" />),
         )}
@@ -108,7 +108,7 @@ export function AboutHeroArt() {
             key={pin.curve}
             d={pin.curve}
             fill="none"
-            stroke="#14a3a3"
+            stroke="#1a9a94"
             strokeWidth="2.5"
             strokeDasharray="6 7"
             strokeLinecap="round"
@@ -120,12 +120,12 @@ export function AboutHeroArt() {
       </g>
       {SKILLS.map((skill) => (
         <g key={`${skill.x}-${skill.y}`}>
-          <circle cx={skill.x} cy={skill.y} r="38" fill="#fff" stroke="#e5e7eb" strokeWidth="1.5" />
-          <circle cx={skill.x} cy={skill.y} r="28" fill="#e3f6f6" />
+          <circle cx={skill.x} cy={skill.y} r="38" fill="#fff" stroke="#e4e8ee" strokeWidth="1.5" />
+          <circle cx={skill.x} cy={skill.y} r="28" fill="#dcefec" />
           <g
             transform={`translate(${skill.x - 14} ${skill.y - 14}) scale(1.167)`}
             fill="none"
-            stroke="#0c7272"
+            stroke="#0b6b67"
             strokeWidth="2.2"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -139,8 +139,8 @@ export function AboutHeroArt() {
           </g>
         </g>
       ))}
-      <path d="M640 330 l3 10 10 3 -10 3 -3 10 -3 -10 -10 -3 10 -3 Z" fill="#14a3a3" />
-      <path d="M10 250 l2 7 7 2 -7 2 -2 7 -2 -7 -7 -2 7 -2 Z" fill="#14a3a3" opacity="0.7" />
+      <path d="M640 330 l3 10 10 3 -10 3 -3 10 -3 -10 -10 -3 10 -3 Z" fill="#1a9a94" />
+      <path d="M10 250 l2 7 7 2 -7 2 -2 7 -2 -7 -7 -2 7 -2 Z" fill="#1a9a94" opacity="0.7" />
     </svg>
   );
 }
@@ -162,12 +162,12 @@ export function AboutServiceMap() {
       {MAP_POINTS.map(({ name, x, y, label: [lx, ly, lw] }) => (
         <g key={name}>
           <Pin x={x} y={y} />
-          <rect x={lx} y={ly} width={lw} height="26" rx="8" fill="#fff" stroke="#b6d4e8" />
+          <rect x={lx} y={ly} width={lw} height="26" rx="8" fill="#fff" stroke="#b4c5d8" />
           <text
             x={lx + lw / 2}
             y={ly + 18}
             textAnchor="middle"
-            fontFamily="Plus Jakarta Sans, system-ui, sans-serif"
+            fontFamily="Atkinson Hyperlegible Next, system-ui, sans-serif"
             fontSize="14"
             fontWeight="700"
             fill="#0b3c6e"

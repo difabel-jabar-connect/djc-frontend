@@ -182,7 +182,7 @@ describe('Header setelah masuk', () => {
     await user.click(screen.getByRole('button', { name: 'Keluar' }));
 
     expect(
-      await screen.findByRole('heading', { level: 1, name: /temukan layanan terpercaya/i }),
+      await screen.findByRole('heading', { level: 1, name: /jasa alumni difabel jabar/i }),
     ).toBeVisible();
     expect(screen.getByRole('link', { name: 'Masuk' })).toBeInTheDocument();
   });

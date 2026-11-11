@@ -7,9 +7,6 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-bg);
-  box-shadow:
-    0 1px 3px rgb(11 60 110 / 6%),
-    0 4px 12px rgb(11 60 110 / 6%);
   transition:
     border-color 0.15s,
     box-shadow 0.15s;
@@ -17,9 +14,6 @@
 
 .service-card:hover {
   border-color: var(--color-accent-strong);
-  box-shadow:
-    0 4px 10px rgb(11 60 110 / 8%),
-    0 16px 40px rgb(11 60 110 / 12%);
 }
 
 .service-card__top {

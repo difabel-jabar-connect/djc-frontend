@@ -114,7 +114,7 @@ export function initialsOf(name) {
   return (words[0][0] + (words[1]?.[0] ?? '')).toUpperCase();
 }
 
-const AVATAR_COLORS = ['#0e7490', '#0b3c6e', '#0c7272', '#9a3412', '#6d28d9', '#be185d', '#1d4ed8'];
+const AVATAR_COLORS = ['#0b6b67', '#0b3c6e', '#0b6b67', '#3d5a80', '#26324a', '#3d5a80', '#0b3c6e'];
 
 /** Warna avatar yang stabil untuk sebuah nama. */
 export function avatarColor(name) {

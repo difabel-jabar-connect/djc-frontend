@@ -1,51 +1,46 @@
-import textIcon from '@/assets/icons/a11y-text.svg';
-import navIcon from '@/assets/icons/a11y-nav.svg';
-import contrastIcon from '@/assets/icons/a11y-contrast.svg';
-import SectionHeader from './SectionHeader';
+import { Link } from 'react-router';
+import { useInViewClass } from '@/hooks/useInViewClass';
+import { PATHS } from '@/routes/paths';
 
 const FEATURES = [
   {
     title: 'Teks mudah dibaca',
-    description: 'Font jelas dengan ukuran yang nyaman di mata.',
-    icon: textIcon,
+    description:
+      'Huruf besar dengan jarak lega, isi minimal 17 piksel, dan bisa diperbesar sampai 200% tanpa terpotong.',
   },
   {
     title: 'Navigasi sederhana',
-    description: 'Menu mudah dipahami dan bisa dijelajahi dengan keyboard.',
-    icon: navIcon,
+    description:
+      'Semua tombol, peta, dan formulir bisa dipakai dengan keyboard dan pembaca layar, dengan fokus yang selalu terlihat.',
   },
   {
     title: 'Kontras baik',
-    description: 'Warna teks dan latar kontras, nyaman untuk semua pengguna.',
-    icon: contrastIcon,
+    description:
+      'Teks dan latar memenuhi kontras WCAG AA, dan gerakan halaman berhenti bila Anda memilih kurangi animasi.',
   },
 ];
 
-/** Section 6. AKSESIBILITAS */
+/** Section AKSESIBILITAS — judul di kiri, tiga penjelasan di kanan, dalam satu panel putih. */
 export default function AccessibilitySection() {
+  const ref = useInViewClass();
   return (
-    <section className="home-section" aria-labelledby="a11y-title">
-      <div className="container a11y">
-        <SectionHeader
-          id="a11y-title"
-          eyebrow="Aksesibilitas"
-          title="Ramah & Aksesibel untuk Semua"
-          description="Dirancang bersama prinsip desain inklusif agar setiap orang, termasuk pengguna difabel, dapat memakai platform ini dengan nyaman."
-        />
-        <ul className="a11y__list">
-          {FEATURES.map((feature) => (
-            <li key={feature.title} className="a11y__item">
-              <span className="a11y__icon">
-                <img src={feature.icon} alt="" width="26" height="26" />
-              </span>
-              <div>
-                <h3 className="a11y__title">{feature.title}</h3>
-                <p className="a11y__desc">{feature.description}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
+    <section ref={ref} className="a11y-panel" aria-labelledby="a11y-title">
+      <div className="a11y-panel__lead">
+        <h2 id="a11y-title" className="section-title a11y-panel__title">
+          Ramah &amp; Aksesibel untuk Semua
+        </h2>
+        <Link to={PATHS.about} className="btn btn--outline a11y-panel__action">
+          Tentang aksesibilitas kami
+        </Link>
       </div>
+      <ul className="a11y-panel__list">
+        {FEATURES.map((feature, i) => (
+          <li key={feature.title} style={{ '--i': i }}>
+            <h3 className="a11y-panel__name">{feature.title}</h3>
+            <p className="a11y-panel__desc">{feature.description}</p>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }

@@ -1,19 +1,19 @@
 import { formatRupiah } from '@/lib/format';
 import {
   MAX_DURATION,
+  MIN_DURATION,
   formatHourRange,
-  SAMPLE_FULL_SLOTS,
-  START_SLOTS,
-  maxDurationFrom,
   parseISODate,
   startHourOf,
+  startSlotsFor,
+  toApiTime,
   toISODate,
 } from './schedule';
 
 /**
  * Alur Pesan Layanan 4 langkah (desain HTML pesan-layanan-1…5).
  * Draf disimpan di sessionStorage per penyedia agar tidak hilang saat halaman dimuat ulang
- * di tengah alur. TODO(API): kirim ke endpoint booking backend saat tersedia.
+ * di tengah alur. Langkah 4 mengirim POST /bookings (lihat draftToApiPayload).
  */
 export const BOOKING_STEPS = ['Pilih Layanan', 'Jadwal', 'Detail Pesanan', 'Kirim Pesanan'];
 
@@ -32,6 +32,17 @@ export const normalizePhone = (value) =>
     .replace(/^(62|0)/, '');
 
 export const isHourly = (pkg) => pkg?.priceUnit === 'jam';
+
+/** Durasi minimal paket: `min_hours` layanan per jam, selain itu 1. */
+export const minHoursOf = (pkg) => (isHourly(pkg) ? Math.max(pkg.minHours ?? 1, MIN_DURATION) : 1);
+
+/** Jam mulai yang tersedia untuk tanggal & paket di draf (dari jadwal penyedia). */
+export function bookableSlots({ draft, profile, pkg, now }) {
+  return startSlotsFor(profile.availability, parseISODate(draft.date), {
+    minHours: minHoursOf(pkg),
+    ...(now ? { now } : {}),
+  });
+}
 
 export const priceLabel = (pkg) =>
   `${formatRupiah(pkg.priceFrom)}${pkg.priceUnit ? `/${pkg.priceUnit}` : ''}`;
@@ -90,17 +101,21 @@ export function selectedAddress(draft, user) {
   return (user?.addresses ?? []).find((a) => a.id === draft.addressId) ?? null;
 }
 
-/** Durasi efektif: paket per jam memakai durasi terpilih (dibatasi slot), selain itu 1. */
-export function effectiveDuration(draft, pkg) {
+/**
+ * Durasi efektif: paket per jam memakai durasi terpilih, dijepit antara minimal paket dan
+ * batas slot jam mulai (jam tutup penyedia); selain per jam selalu 1.
+ */
+export function effectiveDuration(draft, pkg, slots = []) {
   if (!isHourly(pkg)) return 1;
-  return Math.min(draft.duration, maxDurationFrom(draft.start, SAMPLE_FULL_SLOTS), MAX_DURATION);
+  const limit = slots.find((s) => s.slot === draft.start)?.maxHours ?? MAX_DURATION;
+  return Math.max(minHoursOf(pkg), Math.min(draft.duration, limit));
 }
 
 /**
  * Error per langkah. Kunci = id elemen yang dituju tautan ringkasan error.
  * Langkah 1 selalu valid selama paket ada.
  */
-export function validateStep(step, { draft, profile, user, today }) {
+export function validateStep(step, { draft, profile, user, today, now }) {
   const errors = {};
   if (step === 1 && !profile.packages.some((p) => p.id === draft.packageId)) {
     errors['booking-package'] = 'Pilih paket layanan.';
@@ -109,7 +124,8 @@ export function validateStep(step, { draft, profile, user, today }) {
     const date = parseISODate(draft.date);
     const bookable = date && (!today || date >= today) && profile.workDays.includes(date.getDay());
     if (!bookable) errors['booking-date'] = 'Pilih tanggal layanan.';
-    if (!START_SLOTS.includes(draft.start) || SAMPLE_FULL_SLOTS.includes(draft.start)) {
+    const pkg = profile.packages.find((p) => p.id === draft.packageId);
+    if (!bookableSlots({ draft, profile, pkg, now }).some((s) => s.slot === draft.start)) {
       errors['booking-time'] = 'Pilih jam mulai layanan.';
     }
   }
@@ -139,23 +155,68 @@ export function firstIncompleteStep(context) {
   return 4;
 }
 
-/** Draf → data pesanan untuk CustomerContext.createBooking (bentuk sama dengan SAMPLE_BOOKINGS). */
-export function draftToBooking({ draft, profile, user }) {
+/** Mode layanan untuk dikirim: datang ke lokasi pelanggan bila tersedia. */
+export const serviceModeOf = (pkg) =>
+  pkg?.serviceMode === 'at_provider' ? 'at_provider' : 'at_customer';
+
+/** Area singkat lokasi (min. 3 karakter di backend): kota pengguna atau bagian akhir alamat. */
+function areaOf(address, user) {
+  const fromAddress = address?.text
+    ?.split(',')
+    .map((part) => part.trim())
+    .filter((part) => part.length >= 3)
+    .at(-1);
+  return (user?.city || fromAddress || 'Jawa Barat').slice(0, 100);
+}
+
+/**
+ * Draf → body POST /bookings (djc-backend B1). `quantity` hanya untuk layanan per jam;
+ * lokasi wajib bila penyedia datang ke lokasi pelanggan.
+ */
+export function draftToApiPayload({ draft, profile, user }) {
   const pkg = profile.packages.find((p) => p.id === draft.packageId);
-  const hours = effectiveDuration(draft, pkg);
+  const slots = bookableSlots({ draft, profile, pkg });
+  const mode = serviceModeOf(pkg);
+  const address = selectedAddress(draft, user);
+  const note = draft.note.trim();
+  return {
+    service_id: pkg.id,
+    scheduled_date: draft.date,
+    start_time: toApiTime(draft.start),
+    service_mode: mode,
+    ...(isHourly(pkg) ? { quantity: effectiveDuration(draft, pkg, slots) } : {}),
+    ...(mode === 'at_customer'
+      ? { location_area: areaOf(address, user), location_address: address?.text ?? '' }
+      : {}),
+    ...(note ? { customer_note: note } : {}),
+  };
+}
+
+/**
+ * Pesanan dari respons POST /bookings → data pesanan lokal (bentuk SAMPLE_BOOKINGS) agar
+ * pop-up sukses dan Pesanan Saya langsung menampilkannya.
+ */
+export function draftToBooking({ draft, profile, user }, created = {}) {
+  const pkg = profile.packages.find((p) => p.id === draft.packageId);
+  const hours = effectiveDuration(draft, pkg, bookableSlots({ draft, profile, pkg }));
   const address = selectedAddress(draft, user);
   return {
+    id: created.id,
+    code: created.code,
     providerId: profile.id,
     service: pkg.title,
-    mode: 'Penyedia datang ke lokasi Anda',
+    mode:
+      serviceModeOf(pkg) === 'at_provider'
+        ? 'Anda datang ke lokasi penyedia'
+        : 'Penyedia datang ke lokasi Anda',
     date: draft.date,
     start: startHourOf(draft.start),
     hours,
-    unitPrice: pkg.priceFrom,
+    unitPrice: created.unit_price_snapshot ?? pkg.priceFrom,
     unit: pkg.priceUnit ?? 'layanan',
-    quantity: isHourly(pkg) ? hours : 1,
+    quantity: created.quantity ?? (isHourly(pkg) ? hours : 1),
     note: draft.note.trim(),
-    address: address.text,
+    address: address?.text ?? '',
     customerPhone: user?.phone ?? `+62${normalizePhone(draft.phone)}`,
     autoCancelHours: RESPONSE_HOURS,
   };

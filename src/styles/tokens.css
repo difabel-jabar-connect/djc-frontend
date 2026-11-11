@@ -1,73 +1,110 @@
 /*
- * Design tokens — diselaraskan dengan desain Figma "difabel-jabar-connect".
- * Kombinasi warna teks/latar sudah memenuhi kontras WCAG AA (≥ 4.5:1).
+ * Design tokens — arah "One motif" (tasteskill v2, seed 1023298568), palet merek dipertahankan.
+ * Sumber: design-system/difabel-jabar-connect/MASTER.md. Kontras teks ≥ 4.5:1 (angka di komentar).
+ *
+ * Satu latar (batu dingin), satu tinta (navy gelap), satu aksen (navy merek). Permukaan dibedakan
+ * dengan beda nada, bukan garis tipis atau bayangan; bayangan hanya untuk yang benar-benar melayang.
  */
 :root {
-  /* Warna merek */
-  --color-primary: #0b3c6e; /* navy — tombol & aksen utama, ~11:1 terhadap putih */
-  --color-primary-hover: #082f57;
+  /* Merek */
+  --color-primary: #0b3c6e; /* aksen: tombol utama & motif siluet, 11:1 terhadap putih */
+  --color-primary-hover: #082c52;
   --color-primary-contrast: #ffffff;
-  --color-primary-dark: #072a4d; /* latar footer */
-  --color-accent: #0e7c7c; /* teal — eyebrow & teks sorotan, ~5:1 */
-  --color-accent-strong: #14a3a3; /* garis/indikator aktif (bukan teks) */
-  --color-accent-soft: #e3f6f6; /* latar ikon & badge */
-  --color-accent-line: #9ed8d8;
+  --color-primary-dark: #0f1a2a; /* field gelap (footer, panel aksesibilitas) */
+  --color-accent: #0b6b67; /* teal merek untuk teks/ikon sorotan, 5.9:1 pada latar */
+  --color-accent-strong: #1a9a94; /* indikator non-teks */
+  --color-accent-soft: #dcefec; /* field teal muda */
+  --color-accent-line: #9fd2cd;
+  --color-signal: #0b6b67; /* (dulu oranye) — kini mengikuti teal merek */
+  --color-signal-soft: #dcefec;
 
-  /* Netral */
-  --color-bg: #ffffff;
-  --color-surface: #e8f3fa; /* latar section berwarna */
-  --color-text: #1f2937; /* ~15:1 */
-  --color-text-body: #4b5563; /* ~7.6:1 */
-  --color-text-muted: #6b7280; /* ~4.8:1 */
-  --color-text-on-dark: #cbd5e1;
-  --color-border: #e5e7eb; /* garis dekoratif kartu */
-  --color-border-strong: #cbd5e1;
-  --color-input-border: #6b7280; /* batas input, kontras ≥ 3:1 */
+  /* Latar & tinta */
+  --color-paper: #f1f3f6; /* latar halaman: batu dingin */
+  --color-bg: #ffffff; /* panel, kartu, kolom isian (satu nada di atas latar) */
+  --color-surface: #e4e8ee; /* satu nada di bawah latar: field, hover */
+  --color-text: #0f1a2a; /* 16:1 pada latar */
+  --color-text-body: #26324a; /* 11:1 */
+  --color-text-muted: #4a5566; /* 6.9:1 */
+  --color-text-on-dark: #b9c3d1; /* 9.6:1 pada field gelap */
+  --color-border: transparent; /* tanpa garis dekoratif: beda nada yang memisahkan */
+  --color-border-strong: #c3cad4; /* batas chip/kontrol sekunder */
+  --color-input-border: #6b7280; /* batas input & kontrol, 4.8:1 */
 
-  /* Status */
+  /* Field gelap */
+  --color-night: #0f1a2a;
+  --color-night-raised: #1b2a40;
+  --color-on-night: #eef1f5; /* 16:1 */
+  --color-on-night-muted: #b9c3d1; /* 9.6:1 */
+  --color-contour: transparent;
+  --color-contour-night: transparent;
+
+  /* Status (selalu disertai ikon/teks) */
   --color-success: #1e6b3a;
   --color-success-bg: #e8f5ec;
   --color-danger: #a4161a;
   --color-danger-bg: #fdecec;
-  --color-star: #b7791f;
+  --color-star: #a86a12;
 
-  /* Fokus */
-  --color-focus: #ffbf47; /* ring fokus, kontras ≥ 3:1 terhadap latar */
-  --color-focus-outline: #1f2937;
+  /* Fokus: garis tinta + halo kuning (terlihat di latar terang & gelap) */
+  --color-focus: #ffbf47;
+  --color-focus-outline: #0f1a2a;
 
-  /* Tipografi — NFR-A11Y-04: min 16px, line-height ≥ 1.5 */
-  --font-family:
-    'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
-    sans-serif;
-  --font-family-alt: 'Inter', var(--font-family);
-  --font-size-sm: 0.875rem; /* 14px — hanya label pendukung */
+  /* Tipografi — satu keluarga (Albert Sans); isi ≥ 16px */
+  --font-family: 'Albert Sans', 'Helvetica Neue', Arial, system-ui, sans-serif;
+  --font-family-alt: var(--font-family);
+  --font-display: var(--font-family);
+  --step-small: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem); /* 13–14px */
+  --step-body: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem); /* 17–19px */
+  --step-lead: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem); /* 20–26px */
+  --step-head: clamp(1.75rem, 1.2rem + 1.9vw, 3rem); /* 28–48px: judul section yang tenang */
+  --step-display: clamp(2.75rem, 1rem + 5.6vw, 6.5rem); /* judul hero */
+  --font-size-xs: 0.8125rem;
+  --font-size-sm: 0.875rem;
   --font-size-base: 1rem;
-  --font-size-md: 1.125rem;
-  --font-size-lg: 1.25rem;
+  --font-size-md: var(--step-body); /* disatukan ke skala 5 langkah */
+  --font-size-lg: var(--step-lead);
   --font-size-xl: 2rem;
-  --font-size-display: clamp(2rem, 1.2rem + 2.6vw, 3rem);
-  --line-height-base: 1.6;
+  --font-size-display: var(--step-display);
+  --line-height-base: 1.5;
 
-  /* Spasi & bentuk */
+  /* Spasi (basis 4px) & bingkai */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 1rem;
   --space-4: 1.5rem;
   --space-5: 2.5rem;
-  --section-space: clamp(3.5rem, 2rem + 4.5vw, 6rem);
-  --radius-sm: 0.625rem;
-  --radius: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
+  --space-6: 4rem;
+  --space-7: 6rem;
+  --section-space: clamp(4.5rem, 2rem + 8vw, 10rem); /* 72–160px antar-section */
+  --margin: clamp(1rem, 2.2vw, 2rem); /* margin luar halaman, kiri = kanan */
+
+  /* Bentuk: panel & foto persegi; tombol & chip bulat penuh (bentuk pin harga di peta) */
+  --radius-sm: 0;
+  --radius: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
   --radius-pill: 999px;
-  --container-max: 75rem; /* 1200px */
-  --gutter: clamp(1rem, 0.5rem + 2vw, 1.5rem);
-  --header-height: 89px; /* tinggi header situs yang sticky */
+  --container-max: 110rem; /* 1760px: di layar biasa isi memakai margin halaman yang sama */
+  --gutter: var(--margin);
+  --header-height: 81px;
 
-  /* Bayangan */
-  --shadow-sm: 0 1px 1.5px rgb(11 60 110 / 6%), 0 4px 6px rgb(11 60 110 / 6%);
-  --shadow-md: 0 4px 5px rgb(11 60 110 / 8%), 0 16px 20px rgb(11 60 110 / 10%);
+  /* Bayangan: tidak ada pada elemen diam; hanya menu & dialog yang melayang */
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-float: 0 18px 40px -12px rgb(15 26 42 / 28%);
 
-  /* Breakpoint (NFR-RESP-01) — dipakai sebagai acuan media query:
-     mobile ≤ 640px, tablet 641–1024px, desktop ≥ 1025px */
+  /* Gerak (tasteskill motion.md §4) */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1);
+  --ease-soft: cubic-bezier(0.33, 1, 0.68, 1);
+  --t-press: 140ms;
+  --t-hover: 180ms;
+  --t-ui: 240ms;
+  --t-reveal: 800ms;
+  --t-open: 1200ms;
+  --duration-fast: var(--t-hover);
+  --duration-base: 320ms;
+
+  /* Breakpoint: 390 · 640 · 768 · 1024 · 1180 · 1440 (mobile-first) */
 }

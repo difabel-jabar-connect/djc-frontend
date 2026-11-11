@@ -16,7 +16,8 @@ function bookingsReducer(bookings, action) {
       return [
         {
           ...action.booking,
-          code: nextBookingCode(bookings),
+          // Kode dari backend (POST /bookings) bila ada; selain itu kode lokal berikutnya.
+          code: action.booking.code ?? nextBookingCode(bookings),
           status: 'menunggu',
           unread: false,
           history: [{ status: 'menunggu', by: 'Anda', at: nowStamp() }],
@@ -74,7 +75,7 @@ export function CustomerProvider({ children, initialBookings = SAMPLE_BOOKINGS }
   // Kode dihitung di sini juga agar halaman sukses langsung tahu kode pesanan baru.
   const createBooking = useCallback(
     (booking) => {
-      const code = nextBookingCode(bookings);
+      const code = booking.code ?? nextBookingCode(bookings);
       dispatch({ type: 'create', booking });
       return code;
     },

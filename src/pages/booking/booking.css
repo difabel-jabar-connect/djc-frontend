@@ -8,38 +8,6 @@
   background: var(--color-surface);
 }
 
-.booking-hero__art > * {
-  position: absolute;
-}
-
-.booking-hero__blob {
-  top: -140px;
-  right: -80px;
-  width: 420px;
-  height: 420px;
-  border-radius: 50%;
-  background: #d6eaf6;
-}
-
-.booking-hero__ring {
-  top: 30px;
-  right: 300px;
-  width: 120px;
-  height: 120px;
-  border: 2px dashed var(--color-accent-line);
-  border-radius: 50%;
-}
-
-.booking-hero__tile {
-  top: 120px;
-  right: 180px;
-  width: 64px;
-  height: 64px;
-  border-radius: 18px;
-  background: var(--color-accent-soft);
-  transform: rotate(12deg);
-}
-
 .booking-hero__content {
   position: relative;
   display: grid;
@@ -56,9 +24,6 @@
   padding: 20px 32px;
   border-radius: var(--radius-lg);
   background: var(--color-bg);
-  box-shadow:
-    0 1px 3px rgb(11 60 110 / 6%),
-    0 4px 12px rgb(11 60 110 / 6%);
 }
 
 .stepper__list {
@@ -101,7 +66,7 @@
   place-items: center;
   width: 44px;
   height: 44px;
-  border: 2px solid #9ca3af;
+  border: 2px solid #8a94a3;
   border-radius: 50%;
   color: var(--color-text-body);
   font-size: var(--font-size-md);
@@ -111,7 +76,7 @@
 .stepper__step--current .stepper__marker {
   border-color: var(--color-primary);
   background: var(--color-primary);
-  box-shadow: 0 0 0 5px #d6eaf6;
+  box-shadow: 0 0 0 5px #d5dfea;
   color: #ffffff;
   font-weight: 800;
 }
@@ -143,7 +108,7 @@
 
 .stepper__step--current .stepper__status,
 .stepper__step--done .stepper__status {
-  color: #0c7272;
+  color: var(--color-accent);
   font-weight: 600;
 }
 
@@ -170,9 +135,6 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-bg);
-  box-shadow:
-    0 1px 3px rgb(11 60 110 / 6%),
-    0 4px 12px rgb(11 60 110 / 6%);
   scroll-margin-top: var(--space-4);
 }
 
@@ -213,7 +175,7 @@
   height: 64px;
   border-radius: 50%;
   color: #ffffff;
-  font-size: 1.375rem;
+  font-size: var(--font-size-md);
   font-weight: 800;
 }
 
@@ -261,7 +223,7 @@
 
 .booking-provider__highlights svg {
   flex: none;
-  color: #16a34a;
+  color: #15803d;
 }
 
 /* b. Pilihan paket */
@@ -286,7 +248,7 @@
 
 .option-card:has(input:checked) {
   border: 2px solid var(--color-primary);
-  background: #f7fbfe;
+  background: var(--color-paper);
 }
 
 .option-card input {
@@ -343,7 +305,7 @@
 }
 
 .calendar__nav:disabled {
-  color: #9ca3af;
+  color: #8a94a3;
   cursor: not-allowed;
 }
 
@@ -391,7 +353,7 @@
 }
 
 .calendar__day:disabled {
-  color: #9ca3af;
+  color: #8a94a3;
   cursor: not-allowed;
 }
 
@@ -466,8 +428,8 @@
 
 .time-slot:disabled {
   border-style: dashed;
-  border-color: #d1d5db;
-  background: #f3f4f6;
+  border-color: var(--color-border-strong);
+  background: var(--color-surface);
   color: var(--color-text-muted);
   cursor: not-allowed;
 }
@@ -516,9 +478,6 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-bg);
-  box-shadow:
-    0 4px 10px rgb(11 60 110 / 8%),
-    0 16px 40px rgb(11 60 110 / 10%);
 }
 
 .order-summary__provider,
@@ -532,7 +491,7 @@
   padding: 12px 14px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  background: #f7fbfe;
+  background: var(--color-paper);
 }
 
 .order-summary__avatar {
@@ -578,7 +537,7 @@
 .order-summary__icon {
   flex: none;
   margin-top: 2px;
-  color: #0c7272;
+  color: var(--color-accent);
 }
 
 .order-summary__details dt {
@@ -614,8 +573,8 @@
 
 .booking-note--guest {
   align-items: flex-start;
-  border: 1px solid #bcd3ea;
-  background: #eef4fa;
+  border: 1px solid #b4c5d8;
+  background: #eaeff5;
 }
 
 .booking-perks {
@@ -656,10 +615,6 @@
 }
 
 @media (max-width: 900px) {
-  .booking-hero__art {
-    display: none;
-  }
-
   .stepper {
     padding: var(--space-3);
   }
@@ -695,4 +650,11 @@
   .booking-perks {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+/* Pembungkus isi langkah (animasi pergantian langkah) — jarak sama dengan form. */
+.booking-step {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
 }

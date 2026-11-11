@@ -50,15 +50,15 @@ export default function DistributionMapCard({ stats = SAMPLE_CITY_STATS }) {
             <path
               d={OUTLINE}
               transform="translate(6 10)"
-              fill="#c9e3f2"
-              stroke="#c9e3f2"
+              fill="#d5dfea"
+              stroke="#d5dfea"
               strokeWidth="10"
               strokeLinejoin="round"
             />
             <path d={OUTLINE} fill="#fff" stroke="#fff" strokeWidth="10" strokeLinejoin="round" />
             <g
               fill="none"
-              stroke="#b6d4e8"
+              stroke="#b4c5d8"
               strokeWidth="2.5"
               strokeDasharray="8 9"
               strokeLinecap="round"
@@ -75,7 +75,7 @@ export default function DistributionMapCard({ stats = SAMPLE_CITY_STATS }) {
                   const big = item.count === maxCount;
                   return (
                     <g key={item.city} transform={`translate(${x} ${y})`}>
-                      <circle r={big ? 40 : 34} fill="#14a3a3" opacity="0.25" />
+                      <circle r={big ? 40 : 34} fill="#1a9a94" opacity="0.25" />
                       <circle r={big ? 30 : 25} fill="#0b3c6e" stroke="#fff" strokeWidth="4" />
                       <text y="9">{item.count}</text>
                     </g>

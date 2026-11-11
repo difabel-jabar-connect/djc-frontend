@@ -28,11 +28,11 @@ import { CsvButton } from './PengelolaParts';
 
 const PAGE_SIZE = 10;
 const STATUS_COLORS = {
-  menunggu: '#d97706',
-  diterima: '#2563eb',
-  berjalan: '#14a3a3',
-  selesai: '#16a34a',
-  ditolak: '#dc2626',
+  menunggu: '#b45309',
+  diterima: '#0b3c6e',
+  berjalan: '#1a9a94',
+  selesai: '#15803d',
+  ditolak: '#b91c1c',
   dibatalkan: '#6b7280',
 };
 const PERIODS = REPORT_PERIODS.filter((p) => p.from);

@@ -1,80 +1,127 @@
 import { lazy, Suspense, useState } from 'react';
 import { Link } from 'react-router';
-import captionIcon from '@/assets/icons/map-caption.svg';
-import statProvidersIcon from '@/assets/icons/stat-providers.svg';
-import statCitiesIcon from '@/assets/icons/stat-cities.svg';
-import statCategoriesIcon from '@/assets/icons/stat-categories.svg';
-import arrowRight from '@/assets/icons/arrow-right.svg';
-import { SAMPLE_PROVIDERS } from '@/features/providers/sampleProviders';
+import { JABAR_BOUNDS, inArea } from '@/features/map/jabarGeo';
+import { usePublicProviders } from '@/features/search/useProviderSearch';
+import { useInViewClass } from '@/hooks/useInViewClass';
 import { PATHS } from '@/routes/paths';
-import SectionHeader from './SectionHeader';
 
 // Leaflet cukup besar: dimuat terpisah saat Beranda dibuka.
 const ProviderMap = lazy(() => import('@/pages/services/ProviderMap'));
 
-const count = (key) => new Set(SAMPLE_PROVIDERS.map((p) => p[key])).size;
-
-const STATS = [
-  { value: String(SAMPLE_PROVIDERS.length), label: 'Penyedia layanan', icon: statProvidersIcon },
-  { value: String(count('city')), label: 'Kota/kabupaten terjangkau', icon: statCitiesIcon },
-  { value: String(count('categorySlug')), label: 'Kategori layanan', icon: statCategoriesIcon },
+const REGIONS = [
+  { id: 'jabar', label: 'Seluruh Jabar', name: 'seluruh Jawa Barat', bounds: JABAR_BOUNDS },
+  {
+    id: 'bandung',
+    label: 'Bandung Raya',
+    name: 'Bandung Raya',
+    bounds: [
+      [-7.2, 107.3],
+      [-6.7, 108.0],
+    ],
+  },
+  {
+    id: 'bodebek',
+    label: 'Bogor–Bekasi',
+    name: 'Bogor, Depok, dan Bekasi',
+    bounds: [
+      [-6.8, 106.55],
+      [-6.1, 107.35],
+    ],
+  },
+  {
+    id: 'priangan',
+    label: 'Priangan Timur',
+    name: 'Priangan Timur',
+    bounds: [
+      [-7.6, 107.75],
+      [-7.0, 108.65],
+    ],
+  },
 ];
 
+const areaOf = ([[south, west], [north, east]]) => ({ south, west, north, east });
+
 /**
- * Section 2. PETA SEBARAN — peta SIG Jawa Barat (sama dengan Cari Layanan) dengan pin harga
- * tiap penyedia sesuai alamatnya. Klik pin → kartu penyedia (Lihat Profil / Pesan).
+ * Section PETA SEBARAN (blueprint "Square plate, spare text"): peta SIG persegi di kiri;
+ * di kanan tab wilayah, judul, jumlah alumni di wilayah itu, dan dua aksi.
  */
 export default function ServiceMapSection() {
+  const [regionId, setRegionId] = useState('jabar');
   const [hoveredId, setHoveredId] = useState(null);
   const [selectedId, setSelectedId] = useState(null);
+  // Setelah "Cara memesan" diklik, tombolnya tetap biru sebagai tanda pilihan aktif.
+  const [howChosen, setHowChosen] = useState(false);
+  const plateRef = useInViewClass();
+  const { status, providers: all } = usePublicProviders();
+  const providers = all.filter((p) => p.lat !== null && p.lng !== null);
+  const region = REGIONS.find((r) => r.id === regionId);
+  const inRegion = providers.filter((p) => inArea(p, areaOf(region.bounds)));
+  const cities = new Set(inRegion.map((p) => p.city)).size;
 
   return (
-    <section className="home-section" aria-labelledby="map-title">
-      <div className="container service-map">
-        <figure className="service-map__figure">
-          <div className="service-map__sig">
-            <Suspense fallback={<div className="pm pm--loading">Memuat peta…</div>}>
-              <ProviderMap
-                providers={SAMPLE_PROVIDERS}
-                hoveredId={hoveredId}
-                onHover={setHoveredId}
-                selectedId={selectedId}
-                onSelect={setSelectedId}
-                scrollZoom={false}
-              />
-            </Suspense>
-          </div>
-          <figcaption className="service-map__caption">
-            <img src={captionIcon} alt="" width="18" height="18" />
-            Klik pin harga untuk melihat penyedia · gunakan tombol + / − untuk memperbesar
-          </figcaption>
-        </figure>
-
-        <div className="service-map__info">
-          <SectionHeader
-            id="map-title"
-            eyebrow="Jangkauan layanan"
-            title="Peta Sebaran Layanan"
-            description="Penyedia layanan tersebar di berbagai kota dan kabupaten di Jawa Barat. Temukan yang paling dekat dengan Anda langsung di peta."
+    <section className="showcase" aria-labelledby="map-title">
+      <div ref={plateRef} className="showcase__plate shutter">
+        <Suspense fallback={<div className="pm pm--loading">Memuat peta…</div>}>
+          <ProviderMap
+            providers={providers}
+            hoveredId={hoveredId}
+            onHover={setHoveredId}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+            scrollZoom={false}
+            focus={region.bounds}
           />
-          <ul className="stat-list">
-            {STATS.map((stat) => (
-              <li key={stat.label} className="stat-list__item">
-                <span className="stat-list__icon">
-                  <img src={stat.icon} alt="" width="24" height="24" />
-                </span>
-                <span className="stat-list__text">
-                  <strong className="stat-list__value">{stat.value}</strong>
-                  <span className="stat-list__label">{stat.label}</span>
-                </span>
-              </li>
-            ))}
-          </ul>
-          <Link to={PATHS.services} className="link-arrow">
-            Cari di Peta Lengkap
-            <span className="visually-hidden"> pada halaman Cari Layanan</span>
-            <img src={arrowRight} alt="" width="20" height="20" />
+        </Suspense>
+      </div>
+
+      <div className="showcase__side">
+        <div className="showcase__tabs" role="group" aria-label="Tampilkan wilayah di peta">
+          {REGIONS.map((r) => (
+            <button
+              key={r.id}
+              type="button"
+              className="showcase__tab"
+              aria-pressed={r.id === regionId}
+              onClick={() => {
+                setRegionId(r.id);
+                setSelectedId(null);
+              }}
+            >
+              {r.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="showcase__body">
+          <h2 id="map-title" className="section-title">
+            Peta Sebaran Layanan
+          </h2>
+          <p className="showcase__desc" aria-live="polite">
+            {status === 'loading' ? (
+              'Memuat sebaran alumni…'
+            ) : status === 'error' ? (
+              'Data sebaran alumni belum bisa dimuat. Muat ulang halaman untuk mencoba lagi.'
+            ) : (
+              <>
+                Di {region.name} ada <strong>{inRegion.length} alumni</strong> di {cities} kota dan
+                kabupaten. Klik pin harga untuk melihat penyedia, atau perbesar peta dengan tombol +
+                dan −.
+              </>
+            )}
+          </p>
+        </div>
+
+        <div className="showcase__actions">
+          <Link to={PATHS.services} className="showcase__cell showcase__cell--ink">
+            Buka peta lengkap
           </Link>
+          <a
+            href="#cara-pesan"
+            className={`showcase__cell${howChosen ? ' is-active' : ''}`}
+            onClick={() => setHowChosen(true)}
+          >
+            Cara memesan
+          </a>
         </div>
       </div>
     </section>

@@ -1,8 +1,7 @@
 import { Link } from 'react-router';
-import logo from '@/assets/icons/logo-footer.svg';
-import partnerAlumniIcon from '@/assets/icons/partner-alumni.svg';
-import partnerUptdIcon from '@/assets/icons/partner-uptd.svg';
 import { appName } from '@/config/env';
+import logo from '@/assets/icons/logo-footer.svg';
+import { CATEGORY_PHOTOS } from '@/features/content/photoCredits';
 import { PATHS } from '@/routes/paths';
 
 const FOOTER_MENU = [
@@ -12,29 +11,26 @@ const FOOTER_MENU = [
   { to: `${PATHS.about}#kontak`, label: 'Kontak' },
 ];
 
-const PARTNERS = [
-  { name: 'Alumni PPSGHD', icon: partnerAlumniIcon },
-  { name: 'UPTD PPSGHD Jawa Barat', icon: partnerUptdIcon },
-];
+const PARTNERS = ['Alumni PPSGHD', 'UPTD PPSGHD Jawa Barat'];
 
 export default function Footer() {
+  const credits = Object.values(CATEGORY_PHOTOS);
   return (
     <footer className="app-footer">
       <div className="container">
-        <div className="app-footer__grid">
-          <div className="app-footer__about">
-            <Link to={PATHS.home} className="brand" aria-label={`${appName}, ke beranda`}>
-              <img src={logo} alt="" width="44" height="44" className="brand__logo" />
-              <span className="brand__name" aria-hidden="true">
-                {appName}
-              </span>
-            </Link>
-            <p className="app-footer__tagline">
-              Talenta Difabel, untuk Jawa Barat yang Lebih Inklusif.
-            </p>
-          </div>
+        <Link
+          to={PATHS.home}
+          className="brand app-footer__brand"
+          aria-label={`${appName}, ke beranda`}
+        >
+          <img src={logo} alt="" width="40" height="40" className="brand__logo" />
+          <span className="brand__name" aria-hidden="true">
+            {appName}
+          </span>
+        </Link>
 
-          <nav aria-labelledby="footer-menu-title">
+        <div className="app-footer__grid">
+          <nav className="app-footer__col" aria-labelledby="footer-menu-title">
             <h2 id="footer-menu-title" className="app-footer__heading">
               Menu
             </h2>
@@ -47,24 +43,45 @@ export default function Footer() {
             </ul>
           </nav>
 
-          <div>
+          <div className="app-footer__col">
             <h2 className="app-footer__heading">Bekerja sama dengan</h2>
-            <ul className="app-footer__partners">
+            <ul className="app-footer__menu">
               {PARTNERS.map((partner) => (
-                <li key={partner.name} className="app-footer__partner">
-                  <img src={partner.icon} alt="" width="22" height="22" />
-                  {partner.name}
+                <li key={partner}>
+                  <span>{partner}</span>
                 </li>
               ))}
             </ul>
           </div>
+
+          <div className="app-footer__contact">
+            <h2 className="app-footer__heading">{appName}</h2>
+            <p>Jasa sehari-hari dari alumni difabel UPTD PPSGHD, untuk seluruh Jawa Barat.</p>
+            <p>Dibuat dengan prinsip desain inklusif sesuai WCAG 2.2 AA.</p>
+          </div>
         </div>
+
+        <p className="app-footer__credits">
+          Foto keahlian:{' '}
+          {credits.map((photo, i) => (
+            <span key={photo.page}>
+              <a href={photo.page} target="_blank" rel="noreferrer">
+                {photo.title}
+              </a>{' '}
+              oleh {photo.creator}, {photo.license}
+              {i < credits.length - 1 ? '; ' : '. '}
+            </span>
+          ))}
+          Via Wikimedia Commons.
+        </p>
 
         <div className="app-footer__bottom">
           <p>
             © {new Date().getFullYear()} {appName}. Seluruh hak cipta dilindungi.
           </p>
-          <p>Dibuat dengan prinsip desain inklusif · WCAG 2.2 AA</p>
+          <a href="#main-content" className="btn btn--on-dark">
+            Kembali ke atas
+          </a>
         </div>
       </div>
     </footer>

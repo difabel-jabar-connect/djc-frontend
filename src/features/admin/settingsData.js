@@ -6,12 +6,13 @@ import { RESPONSE_HOURS } from '@/features/booking/bookingDraft';
 import { INVITE_HOURS } from './accountForm';
 
 export const AVATAR_COLOR_OPTIONS = [
+  // Palet A: semua pilihan dari keluarga warna merek (navy, teal, slate, hijau, amber).
   { value: '#0b3c6e', label: 'Navy' },
-  { value: '#0c7272', label: 'Teal' },
-  { value: '#6d28d9', label: 'Ungu' },
-  { value: '#be185d', label: 'Merah muda' },
-  { value: '#9a3412', label: 'Cokelat' },
-  { value: '#1d4ed8', label: 'Biru' },
+  { value: '#0b6b67', label: 'Teal' },
+  { value: '#3d5a80', label: 'Biru baja' },
+  { value: '#26324a', label: 'Slate' },
+  { value: '#1e6b3a', label: 'Hijau' },
+  { value: '#92400e', label: 'Amber' },
 ];
 
 /** Sesi masuk akun admin. `current` = perangkat yang sedang dipakai. */
