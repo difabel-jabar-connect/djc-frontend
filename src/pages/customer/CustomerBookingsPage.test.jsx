@@ -2,6 +2,7 @@ import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DEMO_ACCOUNTS } from '@/features/auth/session';
 import { renderAt } from '@/test/renderWithRouter';
+import { SAMPLE_BOOKINGS } from '@/features/booking/customerBookings';
 
 const customer = { user: DEMO_ACCOUNTS.customer };
 const bookingList = () => screen.getByRole('list', { name: /daftar pesanan/i });
@@ -90,5 +91,24 @@ describe('Halaman Pesanan Saya', () => {
     expect(screen.getByRole('tab', { name: /^selesai/i })).toHaveAttribute('aria-selected', 'true');
     expect(cardLinks()).toHaveLength(3);
     expect(screen.getAllByRole('link', { name: /^beri ulasan/i })).toHaveLength(1);
+  });
+  it('pesanan ke penyedia dari backend (bukan data contoh) tetap tampil tanpa error', () => {
+    const base = SAMPLE_BOOKINGS[0];
+    const bookings = [
+      {
+        ...base,
+        code: 'BK-0021',
+        providerId: '6f1c2a9e-1111-4c2b-9d3e-000000000001',
+        provider: { name: 'Asep Gunawan', initials: 'AG', avatarColor: '#1a9a94', city: 'Bandung' },
+      },
+      { ...base, code: 'BK-0020', providerId: '6f1c2a9e-1111-4c2b-9d3e-000000000002' },
+    ];
+    renderAt('/bookings', { ...customer, bookings });
+    expect(cardLinks().map((link) => link.textContent)).toEqual([
+      'Layanan Kebersihan Rumah, BK-0021, status Menunggu',
+      'Layanan Kebersihan Rumah, BK-0020, status Menunggu',
+    ]);
+    expect(within(bookingList()).getByText('Asep Gunawan · Penyedia')).toBeInTheDocument();
+    expect(within(bookingList()).getByText('Penyedia layanan · Penyedia')).toBeInTheDocument();
   });
 });

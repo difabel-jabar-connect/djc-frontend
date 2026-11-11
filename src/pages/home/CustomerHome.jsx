@@ -10,6 +10,7 @@ import {
   lastCompletedPerProvider,
 } from '@/features/booking/customerBookings';
 import { SAMPLE_NEARBY_KM, getSampleProvider } from '@/features/providers/sampleProviders';
+import { bookingProvider } from '@/features/booking/bookingProvider';
 import { getCategory } from '@/features/search/catalog';
 import {
   PATHS,
@@ -121,7 +122,7 @@ function ActiveBookingCard({ bookings }) {
 }
 
 function ActiveBookingBody({ booking }) {
-  const provider = getSampleProvider(booking.providerId);
+  const provider = bookingProvider(booking);
   return (
     <>
       <div className="active-order__who">
@@ -213,7 +214,7 @@ function NearbySection({ favorites, onToggleFavorite }) {
 function QuickReview({ booking }) {
   const navigate = useNavigate();
   const [rating, setRating] = useState(0);
-  const provider = getSampleProvider(booking.providerId);
+  const provider = bookingProvider(booking);
   const doneAt = booking.history.at(-1).at;
 
   return (
@@ -286,7 +287,7 @@ function ActivitySection({ bookings }) {
               </h3>
               <ul>
                 {reorders.map((booking) => {
-                  const provider = getSampleProvider(booking.providerId);
+                  const provider = bookingProvider(booking);
                   const category = getCategory(provider.categorySlug);
                   return (
                     <li key={booking.code}>

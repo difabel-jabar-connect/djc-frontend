@@ -1,3 +1,6 @@
+import { addressLine, addressesFor } from './addressBook';
+import { providerSnapshot } from './bookingProvider';
+import { findPaymentMethod } from './payment';
 import { formatRupiah } from '@/lib/format';
 import {
   MAX_DURATION,
@@ -24,6 +27,24 @@ export const RESPONSE_HOURS = 24;
 export const PHONE_PATTERN = /^8\d{7,12}$/;
 
 const storageKey = (providerId) => `djc.booking.${providerId}`;
+const originKey = (providerId) => `djc.booking.${providerId}.asal`;
+
+/** Halaman asal pemesanan (untuk tombol Kembali), bertahan saat masuk akun / muat ulang. */
+export function loadOrigin(providerId) {
+  try {
+    return sessionStorage.getItem(originKey(providerId));
+  } catch {
+    return null;
+  }
+}
+
+export function saveOrigin(providerId, path) {
+  try {
+    sessionStorage.setItem(originKey(providerId), path);
+  } catch {
+    // abaikan: tombol Kembali memakai profil penyedia
+  }
+}
 
 /** "0812-3456 7890" / "+62 812…" → "8123456 7890" tanpa awalan 0/62/+62 & non-angka. */
 export const normalizePhone = (value) =>
@@ -54,16 +75,17 @@ export function timeLabel(start, hours, hourly) {
 }
 
 export function createDraft({ profile, user, packageId, date }) {
-  const addresses = user?.addresses ?? [];
+  const addresses = addressesFor(user);
   return {
     packageId: profile.packages.find((p) => p.id === packageId)?.id ?? profile.packages[0]?.id,
     date: date ? toISODate(date) : '',
     start: '',
     duration: DEFAULT_DURATION,
-    addressId: (addresses.find((a) => a.primary) ?? addresses[0])?.id ?? 'lain',
+    addressId: (addresses.find((a) => a.primary) ?? addresses[0])?.id ?? '',
     customAddress: '',
     note: '',
     phone: '',
+    paymentMethod: '',
     agree: false,
   };
 }
@@ -92,13 +114,15 @@ export function clearDraft(providerId) {
   }
 }
 
-/** Alamat terpilih sebagai objek tampilan, atau null bila belum diisi. */
+/** Alamat terpilih sebagai objek tampilan, atau null bila belum dipilih. */
 export function selectedAddress(draft, user) {
+  // Draf lama (sebelum ada daftar alamat) masih bisa berisi alamat ketik bebas.
   if (draft.addressId === 'lain') {
-    const text = draft.customAddress.trim();
+    const text = draft.customAddress?.trim();
     return text ? { id: 'lain', label: 'Alamat lain', text } : null;
   }
-  return (user?.addresses ?? []).find((a) => a.id === draft.addressId) ?? null;
+  const address = addressesFor(user).find((a) => a.id === draft.addressId);
+  return address ? { ...address, text: addressLine(address) } : null;
 }
 
 /**
@@ -138,11 +162,16 @@ export function validateStep(step, { draft, profile, user, today, now }) {
       }
     }
     if (!selectedAddress(draft, user)) {
-      errors['booking-address'] = 'Isi alamat lengkap lokasi layanan.';
+      errors['booking-address'] = 'Pilih atau tambahkan alamat lokasi layanan.';
     }
   }
-  if (step === 4 && !draft.agree) {
-    errors['booking-agree'] = 'Centang persetujuan Syarat & Ketentuan untuk mengirim pesanan.';
+  if (step === 4) {
+    if (!findPaymentMethod(draft.paymentMethod)) {
+      errors['booking-payment'] = 'Pilih metode pembayaran.';
+    }
+    if (!draft.agree) {
+      errors['booking-agree'] = 'Centang persetujuan Syarat & Ketentuan untuk mengirim pesanan.';
+    }
   }
   return errors;
 }
@@ -161,6 +190,7 @@ export const serviceModeOf = (pkg) =>
 
 /** Area singkat lokasi (min. 3 karakter di backend): kota pengguna atau bagian akhir alamat. */
 function areaOf(address, user) {
+  if (address?.area?.trim().length >= 3) return address.area.trim().slice(0, 100);
   const fromAddress = address?.text
     ?.split(',')
     .map((part) => part.trim())
@@ -186,7 +216,14 @@ export function draftToApiPayload({ draft, profile, user }) {
     service_mode: mode,
     ...(isHourly(pkg) ? { quantity: effectiveDuration(draft, pkg, slots) } : {}),
     ...(mode === 'at_customer'
-      ? { location_area: areaOf(address, user), location_address: address?.text ?? '' }
+      ? {
+          location_area: areaOf(address, user),
+          location_address: (address?.text ?? '').slice(0, 500),
+          // Titik peta dari pop-up Tambah Alamat (drop pin), bila ada.
+          ...(Number.isFinite(address?.lat) && Number.isFinite(address?.lng)
+            ? { location_lat: address.lat, location_lng: address.lng }
+            : {}),
+        }
       : {}),
     ...(note ? { customer_note: note } : {}),
   };
@@ -204,6 +241,7 @@ export function draftToBooking({ draft, profile, user }, created = {}) {
     id: created.id,
     code: created.code,
     providerId: profile.id,
+    provider: providerSnapshot(profile),
     service: pkg.title,
     mode:
       serviceModeOf(pkg) === 'at_provider'
@@ -219,5 +257,9 @@ export function draftToBooking({ draft, profile, user }, created = {}) {
     address: address?.text ?? '',
     customerPhone: user?.phone ?? `+62${normalizePhone(draft.phone)}`,
     autoCancelHours: RESPONSE_HOURS,
+    // Pembayaran simulasi (dummy) yang dipilih di langkah 4.
+    payment: findPaymentMethod(draft.paymentMethod)
+      ? { method: findPaymentMethod(draft.paymentMethod).label, status: 'lunas-simulasi' }
+      : null,
   };
 }

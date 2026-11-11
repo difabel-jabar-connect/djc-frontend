@@ -18,6 +18,7 @@ import {
   StarFilledIcon,
   UserIcon,
 } from '@/components/ui/icons';
+import { PAYMENT_GROUPS } from '@/features/booking/payment';
 import { CostBreakdown } from './OrderSummary';
 import { StepHeading } from './StepParts';
 
@@ -50,6 +51,7 @@ export default function StepReview({
   const hourly = isHourly(pkg);
   const phone = user.phone ?? `+62 ${normalizePhone(draft.phone)}`;
   const agreeError = errors['booking-agree'];
+  const paymentError = errors['booking-payment'];
 
   return (
     <>
@@ -121,7 +123,55 @@ export default function StepReview({
             <CostBreakdown pkg={pkg} hours={hours} total={total} />
             <p className="field-hint field-hint--icon">
               <InfoIcon size={18} />
-              Harga final disepakati dengan penyedia. Pembayaran langsung ke penyedia.
+              Harga final disepakati dengan penyedia.
+            </p>
+          </section>
+
+          <section className="booking-card" aria-labelledby="bayar-title">
+            <h3 id="bayar-title" className="booking-card__title">
+              Metode Pembayaran
+            </h3>
+            <fieldset
+              className={`pay-methods${paymentError ? ' pay-methods--invalid' : ''}`}
+              aria-describedby={`bayar-note${paymentError ? ' booking-payment-error' : ''}`}
+            >
+              <legend className="visually-hidden">Pilih metode pembayaran</legend>
+              {PAYMENT_GROUPS.map((group, groupIndex) => (
+                <div key={group.id} className="pay-group">
+                  <p className="pay-group__label" id={`bayar-${group.id}`}>
+                    {group.label}
+                    <span>{group.hint}</span>
+                  </p>
+                  <div
+                    className="pay-group__options"
+                    role="group"
+                    aria-labelledby={`bayar-${group.id}`}
+                  >
+                    {group.methods.map((method, index) => (
+                      <label key={method.id} className="pay-option">
+                        <input
+                          id={groupIndex === 0 && index === 0 ? 'booking-payment' : undefined}
+                          type="radio"
+                          name="pembayaran"
+                          value={method.id}
+                          checked={draft.paymentMethod === method.id}
+                          onChange={() => update({ paymentMethod: method.id })}
+                        />
+                        <span>{method.short ?? method.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </fieldset>
+            {paymentError && (
+              <p id="booking-payment-error" className="field-error">
+                {paymentError}
+              </p>
+            )}
+            <p id="bayar-note" className="field-hint field-hint--icon">
+              <InfoIcon size={18} />
+              Simulasi pembayaran (dummy) untuk demo. Tidak ada uang yang ditarik.
             </p>
           </section>
 
