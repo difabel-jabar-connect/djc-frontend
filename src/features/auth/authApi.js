@@ -53,3 +53,13 @@ export async function authenticateWithGoogle({ code, intent, ...extra }) {
   const res = await api.post('/auth/google', { code, intent, ...extra });
   return res?.data;
 }
+
+/**
+ * POST /auth/google/complete — selesaikan daftar dari tombol "Masuk dengan Google" untuk akun
+ * yang belum terdaftar. `signupToken` berasal dari `details.signup_token` respons 404
+ * POST /auth/google; backend membuat akun customer lalu memasang cookie sesi.
+ */
+export async function completeGoogleSignup({ signupToken, phone }) {
+  const res = await api.post('/auth/google/complete', { signup_token: signupToken, phone });
+  return res?.data;
+}

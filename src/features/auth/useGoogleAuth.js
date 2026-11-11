@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { isDev } from '@/config/env';
 import { getHealth } from '@/lib/api/health';
-import { authenticateWithGoogle } from './authApi';
+import { authenticateWithGoogle, completeGoogleSignup } from './authApi';
 import {
   getGoogleClientId,
   loadGoogleScript,
@@ -38,6 +38,8 @@ const profileToData = (profile, extra) => ({
  */
 export function useGoogleAuth({ intent, onSuccess, errorMessages = {} }) {
   const [state, setState] = useState({ status: 'idle', message: '', errorCode: null });
+  // Akun Google belum terdaftar saat Masuk: { token, name, email } untuk melengkapi nomor HP.
+  const [signup, setSignup] = useState(null);
   const backendDown = useRef(false);
 
   // Muat skrip GIS lebih awal agar popup terbuka langsung saat tombol diklik
@@ -104,6 +106,12 @@ export function useGoogleAuth({ intent, onSuccess, errorMessages = {} }) {
         });
         return;
       }
+      if (intent === 'login' && error?.status === 404 && error?.details?.signup_token) {
+        const { signup_token: token, name, email } = error.details;
+        setSignup({ token, name, email });
+        setState({ status: 'idle', message: '', errorCode: null });
+        return;
+      }
       setState({
         status: 'error',
         message:
@@ -115,5 +123,41 @@ export function useGoogleAuth({ intent, onSuccess, errorMessages = {} }) {
     }
   };
 
-  return { ...state, loading: state.status === 'loading', start };
+  /** Langkah kedua daftar lewat tombol Masuk: kirim nomor HP, akun dibuat, langsung masuk. */
+  const completeSignup = async (phone) => {
+    if (!signup) return;
+    setState({ status: 'loading', message: '', errorCode: null });
+    try {
+      const data = await completeGoogleSignup({ signupToken: signup.token, phone });
+      setState({ status: 'idle', message: '', errorCode: null });
+      setSignup(null);
+      onSuccess(data);
+    } catch (error) {
+      setState({
+        status: 'error',
+        message:
+          error?.status === 401
+            ? 'Sesi pendaftaran Google sudah kedaluwarsa. Silakan klik Masuk dengan Google lagi.'
+            : error?.status === 409
+              ? 'Email ini sudah terdaftar. Silakan masuk.'
+              : error?.message || 'Gagal mendaftar dengan Google. Silakan coba lagi.',
+        errorCode: error?.status ?? error?.code ?? null,
+      });
+      if (error?.status === 401 || error?.status === 409) setSignup(null);
+    }
+  };
+
+  const cancelSignup = () => {
+    setSignup(null);
+    setState({ status: 'idle', message: '', errorCode: null });
+  };
+
+  return {
+    ...state,
+    loading: state.status === 'loading',
+    start,
+    signup,
+    completeSignup,
+    cancelSignup,
+  };
 }

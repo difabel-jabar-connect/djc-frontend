@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/icons';
 import AuthIntro, { AuthPageFooter } from './AuthIntro';
 import GoogleAuthButton from './GoogleAuthButton';
+import GoogleSignupForm from './GoogleSignupForm';
 import './auth.css';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -117,154 +118,163 @@ export default function LoginPage() {
       />
 
       <main id="main-content" tabIndex={-1} className="auth-main">
-        <form className="auth-card" aria-labelledby="form-title" noValidate onSubmit={handleSubmit}>
-          <div className="auth-card__head">
-            <h2 id="form-title">Masuk ke Akun Anda</h2>
-            <p>Silakan masukkan email dan kata sandi Anda.</p>
-          </div>
-
-          {isBookingNext(next) && (
-            <p className="auth-info" role="status">
-              Masuk atau daftar dulu untuk melanjutkan pemesanan. Layanan dan jadwal yang Anda pilih
-              sudah tersimpan, setelah masuk Anda langsung lanjut ke Detail Pesanan.
-            </p>
-          )}
-
-          {status.state === 'error' && (
-            <p className="auth-alert" role="alert">
-              {status.message}
-            </p>
-          )}
-
-          <div className="field">
-            <label htmlFor="email" className="auth-label">
-              Email{' '}
-              <span className="auth-required" aria-hidden="true">
-                *
-              </span>
-            </label>
-            <div className={`auth-input${errors.email ? ' auth-input--invalid' : ''}`}>
-              <MailIcon className="auth-input__icon" />
-              <input
-                ref={fieldRefs.email}
-                id="email"
-                type="email"
-                name="email"
-                autoComplete="email"
-                required
-                placeholder="contoh@email.com"
-                value={form.email}
-                onChange={update('email')}
-                aria-invalid={Boolean(errors.email)}
-                aria-describedby={errors.email ? 'email-error' : undefined}
-              />
-            </div>
-            {errors.email && (
-              <p id="email-error" className="field-error">
-                {errors.email}
-              </p>
-            )}
-          </div>
-
-          <div className="field">
-            <label htmlFor="sandi" className="auth-label">
-              Kata Sandi{' '}
-              <span className="auth-required" aria-hidden="true">
-                *
-              </span>
-            </label>
-            <div
-              className={`auth-input auth-input--action${errors.sandi ? ' auth-input--invalid' : ''}`}
-            >
-              <LockIcon strokeWidth={2} className="auth-input__icon" />
-              <input
-                ref={fieldRefs.sandi}
-                id="sandi"
-                type={showPassword ? 'text' : 'password'}
-                name="password"
-                autoComplete="current-password"
-                required
-                placeholder="Masukkan kata sandi"
-                value={form.password}
-                onChange={update('password')}
-                aria-invalid={Boolean(errors.sandi)}
-                aria-describedby={errors.sandi ? 'sandi-error' : undefined}
-              />
-              <button
-                type="button"
-                className="auth-input__toggle"
-                aria-label="Tampilkan kata sandi"
-                aria-pressed={showPassword}
-                aria-controls="sandi"
-                onClick={() => setShowPassword((shown) => !shown)}
-              >
-                {showPassword ? <EyeOffIcon /> : <EyeIcon />}
-              </button>
-            </div>
-            {errors.sandi && (
-              <p id="sandi-error" className="field-error">
-                {errors.sandi}
-              </p>
-            )}
-          </div>
-
-          <div className="auth-card__row">
-            <label htmlFor="ingat" className="auth-check">
-              <input
-                id="ingat"
-                type="checkbox"
-                name="remember"
-                checked={form.remember}
-                onChange={update('remember')}
-              />
-              Ingat saya
-            </label>
-            <Link to={PATHS.forgotPassword} className="auth-link">
-              Lupa kata sandi?
-            </Link>
-          </div>
-
-          <button
-            type="submit"
-            className="btn btn--primary btn--block auth-submit"
-            disabled={loading}
-            aria-busy={loading}
+        {google.signup ? (
+          <GoogleSignupForm google={google} />
+        ) : (
+          <form
+            className="auth-card"
+            aria-labelledby="form-title"
+            noValidate
+            onSubmit={handleSubmit}
           >
-            {loading ? 'Memproses…' : 'Masuk'}
-          </button>
+            <div className="auth-card__head">
+              <h2 id="form-title">Masuk ke Akun Anda</h2>
+              <p>Silakan masukkan email dan kata sandi Anda.</p>
+            </div>
 
-          <div className="auth-divider" aria-hidden="true">
-            atau
-          </div>
+            {isBookingNext(next) && (
+              <p className="auth-info" role="status">
+                Masuk atau daftar dulu untuk melanjutkan pemesanan. Layanan dan jadwal yang Anda
+                pilih sudah tersimpan, setelah masuk Anda langsung lanjut ke Detail Pesanan.
+              </p>
+            )}
 
-          <GoogleAuthButton
-            label="Masuk dengan Google"
-            google={google}
-            onClick={() => google.start()}
-            action={
-              google.errorCode === 404 && (
+            {status.state === 'error' && (
+              <p className="auth-alert" role="alert">
+                {status.message}
+              </p>
+            )}
+
+            <div className="field">
+              <label htmlFor="email" className="auth-label">
+                Email{' '}
+                <span className="auth-required" aria-hidden="true">
+                  *
+                </span>
+              </label>
+              <div className={`auth-input${errors.email ? ' auth-input--invalid' : ''}`}>
+                <MailIcon className="auth-input__icon" />
+                <input
+                  ref={fieldRefs.email}
+                  id="email"
+                  type="email"
+                  name="email"
+                  autoComplete="email"
+                  required
+                  placeholder="contoh@email.com"
+                  value={form.email}
+                  onChange={update('email')}
+                  aria-invalid={Boolean(errors.email)}
+                  aria-describedby={errors.email ? 'email-error' : undefined}
+                />
+              </div>
+              {errors.email && (
+                <p id="email-error" className="field-error">
+                  {errors.email}
+                </p>
+              )}
+            </div>
+
+            <div className="field">
+              <label htmlFor="sandi" className="auth-label">
+                Kata Sandi{' '}
+                <span className="auth-required" aria-hidden="true">
+                  *
+                </span>
+              </label>
+              <div
+                className={`auth-input auth-input--action${errors.sandi ? ' auth-input--invalid' : ''}`}
+              >
+                <LockIcon strokeWidth={2} className="auth-input__icon" />
+                <input
+                  ref={fieldRefs.sandi}
+                  id="sandi"
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  autoComplete="current-password"
+                  required
+                  placeholder="Masukkan kata sandi"
+                  value={form.password}
+                  onChange={update('password')}
+                  aria-invalid={Boolean(errors.sandi)}
+                  aria-describedby={errors.sandi ? 'sandi-error' : undefined}
+                />
+                <button
+                  type="button"
+                  className="auth-input__toggle"
+                  aria-label="Tampilkan kata sandi"
+                  aria-pressed={showPassword}
+                  aria-controls="sandi"
+                  onClick={() => setShowPassword((shown) => !shown)}
+                >
+                  {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+                </button>
+              </div>
+              {errors.sandi && (
+                <p id="sandi-error" className="field-error">
+                  {errors.sandi}
+                </p>
+              )}
+            </div>
+
+            <div className="auth-card__row">
+              <label htmlFor="ingat" className="auth-check">
+                <input
+                  id="ingat"
+                  type="checkbox"
+                  name="remember"
+                  checked={form.remember}
+                  onChange={update('remember')}
+                />
+                Ingat saya
+              </label>
+              <Link to={PATHS.forgotPassword} className="auth-link">
+                Lupa kata sandi?
+              </Link>
+            </div>
+
+            <button
+              type="submit"
+              className="btn btn--primary btn--block auth-submit"
+              disabled={loading}
+              aria-busy={loading}
+            >
+              {loading ? 'Memproses…' : 'Masuk'}
+            </button>
+
+            <div className="auth-divider" aria-hidden="true">
+              atau
+            </div>
+
+            <GoogleAuthButton
+              label="Masuk dengan Google"
+              google={google}
+              onClick={() => google.start()}
+              action={
+                google.errorCode === 404 && (
+                  <Link to={registerPath} className="auth-link auth-link--strong">
+                    Daftar dengan Google
+                  </Link>
+                )
+              }
+            />
+
+            <div className="auth-card__foot">
+              <p>
+                Belum punya akun?{' '}
                 <Link to={registerPath} className="auth-link auth-link--strong">
-                  Daftar dengan Google
+                  Daftar sekarang
                 </Link>
-              )
-            }
-          />
-
-          <div className="auth-card__foot">
-            <p>
-              Belum punya akun?{' '}
-              <Link to={registerPath} className="auth-link auth-link--strong">
-                Daftar sekarang
-              </Link>
-            </p>
-            <p>
-              Alumni PPSGHD?{' '}
-              <Link to={`${PATHS.register}?peran=mitra`} className="auth-link auth-link--strong">
-                Daftar sebagai Mitra
-              </Link>
-            </p>
-          </div>
-        </form>
+              </p>
+              <p>
+                Alumni PPSGHD?{' '}
+                <Link to={`${PATHS.register}?peran=mitra`} className="auth-link auth-link--strong">
+                  Daftar sebagai Mitra
+                </Link>
+              </p>
+            </div>
+          </form>
+        )}
 
         {/* Backend auth belum tersedia: akun demo hanya muncul di mode development. */}
         {isDev && (
