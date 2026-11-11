@@ -6,6 +6,7 @@ import { renderAt } from '@/test/renderWithRouter';
 import { fakeApi } from '@/test/fakeApi';
 
 beforeEach(() => {
+  localStorage.clear();
   vi.useFakeTimers({ toFake: ['Date'] });
   vi.setSystemTime(new Date(2026, 9, 19, 9)); // Senin, 19 Oktober 2026
 });
@@ -28,7 +29,23 @@ async function fillAndSend(user) {
   await next(user);
   await next(user);
   await user.click(await screen.findByRole('checkbox', { name: /saya menyetujui/i }));
-  await user.click(screen.getByRole('button', { name: /kirim pesanan/i }));
+  await user.click(screen.getByRole('radio', { name: 'QRIS' }));
+  await pay(user);
+}
+
+/** Langkah 4: buka layar pembayaran dummy lalu konfirmasi "Saya sudah bayar". */
+async function pay(user) {
+  await user.click(screen.getByRole('button', { name: /lanjut ke pembayaran/i }));
+  const payment = await screen.findByRole('dialog', { name: /bayar dengan/i });
+  await user.click(within(payment).getByRole('button', { name: /saya sudah bayar/i }));
+}
+
+/** Pop-up Tambah Alamat: isi alamat lengkap lalu simpan. */
+async function addAddress(user, text) {
+  await user.click(screen.getAllByRole('button', { name: /tambah alamat/i })[0]);
+  const dialog = await screen.findByRole('dialog', { name: 'Tambah Alamat' });
+  await user.type(within(dialog).getByLabelText(/alamat lengkap/i), text);
+  await user.click(within(dialog).getByRole('button', { name: 'Simpan Alamat' }));
 }
 
 describe('Pesan Layanan', () => {
@@ -133,10 +150,12 @@ describe('Pesan Layanan', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Dalam area layanan penyedia (±3 km)');
     expect(within(summary()).getByText(/jl\. cigadung raya no\. 12/i)).toBeInTheDocument();
 
-    await user.click(screen.getByRole('radio', { name: /gunakan alamat lain/i }));
-    await next(user);
-    expect(screen.getByRole('alert')).toHaveTextContent('Isi alamat lengkap lokasi layanan.');
-    await user.type(screen.getByLabelText(/alamat lengkap/i), 'Jl. Dago No. 5, Bandung');
+    // Tambah alamat lewat pop-up (peta + alamat lengkap) → langsung terpilih.
+    await addAddress(user, 'Jl. Dago No. 5, Bandung');
+    expect(screen.queryByRole('dialog', { name: 'Tambah Alamat' })).not.toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: /jl\. dago no\. 5/i })).toBeChecked();
+    // Kartu Pembayaran lama di Detail Pesanan sudah dihapus.
+    expect(screen.queryByRole('heading', { name: 'Pembayaran' })).not.toBeInTheDocument();
     await user.type(screen.getByRole('textbox', { name: /catatan untuk penyedia/i }), 'Ada kucing');
     expect(screen.getByText('10/300 karakter')).toBeInTheDocument();
     await next(user);
@@ -150,10 +169,28 @@ describe('Pesan Layanan', () => {
     expect(review).toHaveTextContent('Jl. Dago No. 5, Bandung');
     expect(review).toHaveTextContent('Budi Santoso · +62 812-3456-7890');
 
-    await user.click(screen.getByRole('button', { name: /kirim pesanan/i }));
+    await user.click(screen.getByRole('button', { name: /lanjut ke pembayaran/i }));
+    expect(screen.getByRole('alert')).toHaveTextContent('Pilih metode pembayaran.');
     expect(screen.getByRole('alert')).toHaveTextContent(/centang persetujuan/i);
+    expect(bookingRequests()).toHaveLength(0);
     await user.click(screen.getByRole('checkbox', { name: /saya menyetujui/i }));
-    await user.click(screen.getByRole('button', { name: /kirim pesanan/i }));
+    await user.click(screen.getByRole('radio', { name: 'BCA' }));
+
+    // Layar pembayaran dummy: nomor VA + batas waktu; pesanan belum terkirim.
+    await user.click(screen.getByRole('button', { name: /lanjut ke pembayaran/i }));
+    const payment = await screen.findByRole('dialog', { name: 'Bayar dengan BCA Virtual Account' });
+    expect(payment).toHaveTextContent(/simulasi pembayaran/i);
+    expect(payment).toHaveTextContent('Rp100.000');
+    expect(within(payment).getByText(/^3901 2\d{3} \d{4} \d{4}$/)).toBeInTheDocument();
+    expect(payment).toHaveTextContent('15:00');
+    expect(bookingRequests()).toHaveLength(0);
+    // Ganti metode menutup layar bayar; pilih QRIS → kode QR.
+    await user.click(within(payment).getByRole('button', { name: 'Ganti metode' }));
+    await user.click(screen.getByRole('radio', { name: 'QRIS' }));
+    await user.click(screen.getByRole('button', { name: /lanjut ke pembayaran/i }));
+    const qris = await screen.findByRole('dialog', { name: 'Bayar dengan QRIS' });
+    expect(within(qris).getByRole('img', { name: /kode qr qris/i })).toBeInTheDocument();
+    await user.click(within(qris).getByRole('button', { name: /saya sudah bayar/i }));
 
     // Sukses: pop-up di atas langkah 4
     const dialog = await screen.findByRole('dialog', { name: 'Pesanan Berhasil Dikirim!' });
@@ -167,6 +204,8 @@ describe('Pesan Layanan', () => {
       quantity: 2,
       location_area: 'Bandung',
       location_address: 'Jl. Dago No. 5, Bandung',
+      location_lat: expect.any(Number),
+      location_lng: expect.any(Number),
       customer_note: 'Ada kucing',
     });
     await vi.waitFor(() => expect(within(dialog).getByRole('heading', { level: 2 })).toHaveFocus());
@@ -177,6 +216,7 @@ describe('Pesan Layanan', () => {
     expect(within(dialog).getByText('DJC-TEST0001')).toBeInTheDocument();
     expect(dialog).toHaveTextContent('Status: Menunggu');
     expect(within(dialog).getByText('Sel, 20 Okt 2026 · 09.00–11.00 WIB')).toBeInTheDocument();
+    expect(within(dialog).getByText('QRIS · Lunas (simulasi)')).toBeInTheDocument();
     expect(within(dialog).getByRole('link', { name: 'Chat dengan Rizki Maulana' })).toHaveAttribute(
       'href',
       '/bookings/DJC-TEST0001/chat',
@@ -225,6 +265,18 @@ describe('Pesan Layanan', () => {
     ).toBeInTheDocument();
   });
 
+  it('tombol Kembali di langkah 1 kembali ke halaman asal (mis. Cari Layanan)', async () => {
+    const user = userEvent.setup();
+    const { router } = renderAt('/services?q=kebersihan', customer);
+    await router.navigate('/pesan/rizki-maulana');
+    expect(await loaded()).toBeVisible();
+    const back = screen.getByRole('link', { name: 'Kembali' });
+    expect(back).toHaveAttribute('href', '/services?q=kebersihan');
+    await user.click(back);
+    expect(router.state.location.pathname).toBe('/services');
+    expect(router.state.location.search).toBe('?q=kebersihan');
+  });
+
   it('membaca paket & tanggal dari query (tautan profil penyedia)', async () => {
     renderAt(
       '/pesan/siti-nurjanah?paket=siti-nurjanah--busana-muslim&tanggal=2026-10-21',
@@ -248,8 +300,10 @@ describe('Pesan Layanan', () => {
 
     await next(user);
     expect(screen.getByRole('alert')).toHaveTextContent('Periksa kembali 2 isian berikut');
+    expect(screen.getByRole('alert')).toHaveTextContent('Pilih atau tambahkan alamat');
     await user.type(screen.getByLabelText(/nomor hp/i), '0812 9999 1111');
-    await user.type(screen.getByLabelText(/alamat lengkap/i), 'Jl. Riau No. 1, Bandung');
+    await addAddress(user, 'Jl. Riau No. 1, Bandung');
+    expect(screen.getByRole('radio', { name: /jl\. riau no\. 1/i })).toBeChecked();
     await next(user);
     expect(await screen.findByRole('region', { name: 'Ringkasan pesanan' })).toHaveTextContent(
       'Rina Amalia · +62 81299991111',

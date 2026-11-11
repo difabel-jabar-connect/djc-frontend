@@ -11,7 +11,7 @@ import {
   formatBookingLong,
   formatStamp,
 } from '@/features/booking/customerBookings';
-import { getSampleProvider } from '@/features/providers/sampleProviders';
+import { bookingProvider } from '@/features/booking/bookingProvider';
 import { formatRating, formatRupiah } from '@/lib/format';
 import { PATHS, buildBookingChatPath, buildBookingPath, buildProviderPath } from '@/routes/paths';
 import { CHAT_OPEN_STATUSES, getThread, unreadCount } from '@/features/chat/chatStore';
@@ -267,7 +267,7 @@ export default function BookingDetailPage() {
 
   if (!booking) return <BookingNotFound code={code} />;
 
-  const provider = getSampleProvider(booking.providerId);
+  const provider = bookingProvider(booking);
   const banner = bannerCopy(booking, provider);
   const tone = BOOKING_STATUS[booking.status].tone;
 

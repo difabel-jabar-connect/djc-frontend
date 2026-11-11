@@ -67,6 +67,12 @@ function SuccessContent({ booking, provider, onClose }) {
           <dt>Tanggal &amp; jam</dt>
           <dd>{formatBookingRange(booking)} WIB</dd>
         </div>
+        {booking.payment && (
+          <div>
+            <dt>Pembayaran</dt>
+            <dd>{booking.payment.method} · Lunas (simulasi)</dd>
+          </div>
+        )}
       </dl>
       <div className="booking-success__chat">
         <p>

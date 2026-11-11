@@ -881,3 +881,510 @@ p.selection-note {
     flex-wrap: wrap;
   }
 }
+
+/* Ringkasan: judul + keterangan, label kelompok penyedia/layanan, petunjuk baris kosong. */
+.order-summary__head {
+  display: grid;
+  gap: 4px;
+}
+
+.order-summary__lead {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.order-summary__group {
+  display: grid;
+  gap: 8px;
+}
+
+.order-summary__caption {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.order-summary__hint {
+  font-size: var(--font-size-sm);
+}
+
+/* Alamat Layanan: judul + tombol tambah, keadaan kosong. */
+.booking-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.booking-card__head .booking-card__title {
+  margin: 0;
+}
+
+.btn--sm {
+  min-height: 44px;
+  padding-inline: 16px;
+  gap: 6px;
+}
+
+.address-empty {
+  display: grid;
+  gap: 14px;
+}
+
+.address-empty p {
+  margin: 0;
+  color: var(--color-text-body);
+}
+
+.address-empty__add {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 72px;
+  padding: 14px 18px;
+  border: 1.5px dashed var(--color-input-border);
+  border-radius: 14px;
+  background: var(--color-bg);
+  color: var(--color-primary);
+  font: inherit;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease-out,
+    background-color 160ms ease-out;
+}
+
+.address-empty__add:hover {
+  border-color: var(--color-primary);
+  background: var(--color-paper);
+}
+
+.address-empty__add:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.address-empty__plus {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+}
+
+/* Pop-up Tambah Alamat. */
+.dialog--address {
+  width: min(640px, calc(100vw - 2 * var(--gutter)));
+}
+
+.address-form {
+  gap: 16px;
+}
+
+.address-search {
+  display: flex;
+  gap: 8px;
+}
+
+.address-search .input-shell {
+  flex: 1;
+}
+
+.address-results {
+  display: grid;
+  gap: 4px;
+  max-height: 200px;
+  margin: -8px 0 0;
+  padding: 6px;
+  overflow-y: auto;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius);
+  list-style: none;
+}
+
+.address-results button {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.address-results button:hover,
+.address-results button:focus-visible {
+  background: var(--color-surface);
+}
+
+.address-results svg {
+  flex: none;
+  margin-top: 3px;
+  color: var(--color-accent);
+}
+
+.pin-map {
+  position: relative;
+  height: 280px;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+.pin-map__canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.pin-map__canvas:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: -3px;
+}
+
+/* Pin tetap di tengah; ujung bawahnya menunjuk titik pusat peta. */
+.pin-map__pin {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 500;
+  transform: translate(-50%, calc(-100% + 2px));
+  pointer-events: none;
+  filter: drop-shadow(0 4px 6px rgb(7 42 77 / 30%));
+}
+
+.pin-map__zoom {
+  position: absolute;
+  right: 10px;
+  bottom: 28px;
+  z-index: 500;
+  display: grid;
+  gap: 6px;
+}
+
+.address-form__locate {
+  display: grid;
+  gap: 6px;
+  margin-top: -6px;
+}
+
+.address-form__locate .field-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.field-hint--warn {
+  color: var(--color-danger);
+}
+
+.address-labels {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.address-labels legend {
+  margin-bottom: 8px;
+  padding: 0;
+}
+
+.address-labels__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.address-label-chip {
+  position: relative;
+  cursor: pointer;
+}
+
+.address-label-chip input {
+  position: absolute;
+  opacity: 0;
+}
+
+.address-label-chip span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 999px;
+  background: var(--color-bg);
+  font-weight: 600;
+}
+
+.address-label-chip span svg {
+  color: var(--color-accent);
+}
+
+.address-label-chip input:checked + span {
+  border: 2px solid var(--color-primary);
+  padding: 0 15px;
+  background: var(--color-paper);
+  color: var(--color-primary);
+}
+
+.address-label-chip input:focus-visible + span {
+  box-shadow:
+    0 0 0 2px #ffffff,
+    0 0 0 5px var(--color-primary);
+}
+
+.address-primary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.address-primary input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--color-primary);
+}
+
+@media (max-width: 480px) {
+  .pin-map {
+    height: 240px;
+  }
+}
+
+.pin-map__btn {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgb(7 42 77 / 20%);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.pin-map__btn:hover {
+  background: var(--color-paper);
+}
+
+.pin-map__btn:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Metode pembayaran (dummy) di langkah 4. */
+.pay-methods {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.pay-group {
+  display: grid;
+  gap: 8px;
+}
+
+.pay-group__label {
+  display: grid;
+  margin: 0;
+  font-weight: 700;
+}
+
+.pay-group__label span {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: 400;
+}
+
+.pay-group__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pay-option {
+  position: relative;
+  cursor: pointer;
+}
+
+.pay-option input {
+  position: absolute;
+  opacity: 0;
+}
+
+.pay-option span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  font-weight: 600;
+}
+
+.pay-option:hover span {
+  border-color: var(--color-primary);
+}
+
+.pay-option input:checked + span {
+  padding: 0 15px;
+  border: 2px solid var(--color-primary);
+  background: var(--color-paper);
+  color: var(--color-primary);
+}
+
+.pay-option input:focus-visible + span {
+  box-shadow:
+    0 0 0 2px #ffffff,
+    0 0 0 5px var(--color-primary);
+}
+
+.pay-methods--invalid .pay-option span {
+  border-color: var(--color-danger);
+}
+
+/* Layar pembayaran (dummy). */
+.dialog--payment {
+  width: min(480px, calc(100vw - 2 * var(--gutter)));
+}
+
+.pay {
+  display: grid;
+  gap: 16px;
+}
+
+.pay__demo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.pay__demo svg {
+  flex: none;
+}
+
+.pay__amount {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pay__amount span {
+  color: var(--color-text-body);
+}
+
+.pay__amount strong {
+  color: var(--color-primary);
+  font-size: 1.5rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.pay__code {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background: #ffffff;
+}
+
+.pay-qr {
+  width: min(240px, 100%);
+  height: auto;
+}
+
+.pay__code--expired .pay-qr,
+.pay__code--expired .pay__va {
+  opacity: 0.12;
+}
+
+.pay__expired {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.pay__va {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+}
+
+.pay__va-bank {
+  font-weight: 700;
+}
+
+.pay__va-label {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.pay__va-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pay__va-number {
+  font-size: 1.375rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.pay__timer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--color-text-body);
+}
+
+.pay__time {
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.pay__steps {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 1.25rem;
+  color: var(--color-text-body);
+}

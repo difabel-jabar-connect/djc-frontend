@@ -23,15 +23,19 @@ import {
   effectiveDuration,
   firstIncompleteStep,
   loadDraft,
+  loadOrigin,
   saveDraft,
+  saveOrigin,
   selectedAddress,
   validateStep,
 } from '@/features/booking/bookingDraft';
 import { findBooking } from '@/features/booking/customerBookings';
+import { findPaymentMethod, seededDigits } from '@/features/booking/payment';
 import { homePathFor } from '@/features/auth/session';
+import { lastVisitedPath } from '@/hooks/useNavigationTrail';
 import { ensureThread } from '@/features/chat/chatStore';
 import { PATHS, buildAuthPath, buildBookingPath, buildProviderPath } from '@/routes/paths';
-import { ArrowLeftIcon, ArrowRightIcon, LogInIcon, SendIcon } from '@/components/ui/icons';
+import { ArrowLeftIcon, ArrowRightIcon, LogInIcon, WalletIcon } from '@/components/ui/icons';
 import ProviderStatus from '@/pages/providers/ProviderStatus';
 import BookingStepper from './BookingStepper';
 import OrderSummary from './OrderSummary';
@@ -40,12 +44,13 @@ import StepSchedule from './StepSchedule';
 import StepDetails from './StepDetails';
 import StepReview from './StepReview';
 import BookingSuccessDialog from './BookingSuccess';
+import PaymentDialog from './PaymentDialog';
 import { BookingAssurance, ErrorSummary, GuestLoginNote, StepNav } from './StepParts';
 import './booking.css';
 import './bookingSteps.css';
 
 const LEADS = {
-  4: 'Satu langkah lagi. Periksa pesanan Anda, lalu kirim ke penyedia.',
+  4: 'Satu langkah lagi. Periksa pesanan Anda, pilih metode pembayaran, lalu bayar.',
   5: 'Pesanan Anda sudah terkirim ke penyedia.',
 };
 const DEFAULT_LEAD =
@@ -63,10 +68,34 @@ function initialDraft(profile, user, searchParams, today) {
   const stored = searchParams.has('langkah') ? loadDraft(profile.id) : null;
   if (!stored) return base;
   const draft = { ...base, ...stored, agree: false };
-  // Draf dari tamu belum punya alamat: pakai alamat utama akun yang baru masuk.
-  if (stored.addressId === 'lain' && !stored.customAddress?.trim())
-    draft.addressId = base.addressId;
+  // Draf dari tamu belum punya alamat (atau alamatnya sudah tidak ada): pakai alamat utama
+  // akun yang baru masuk.
+  if (!selectedAddress(draft, user)) draft.addressId = base.addressId;
   return draft;
+}
+
+/** Halaman yang tidak dijadikan tujuan tombol Kembali: alur pesan itu sendiri & halaman akun. */
+const NOT_ORIGIN = [
+  '/pesan/',
+  PATHS.login,
+  PATHS.register,
+  PATHS.forgotPassword,
+  PATHS.resetPassword,
+];
+const isOrigin = (path) => !NOT_ORIGIN.some((prefix) => path.startsWith(prefix));
+
+/**
+ * Tujuan tombol Kembali di langkah 1: halaman tempat pengguna menekan "Pesan" (Cari Layanan,
+ * profil penyedia, Beranda, …). Disimpan per penyedia agar tetap benar setelah masuk akun
+ * atau muat ulang; tanpa jejak (mis. tautan dibuka langsung) kembali ke profil penyedia.
+ */
+function bookingOrigin(providerId) {
+  const visited = lastVisitedPath((path) => !isOrigin(path));
+  if (visited) {
+    saveOrigin(providerId, visited);
+    return visited;
+  }
+  return loadOrigin(providerId) ?? buildProviderPath(providerId);
 }
 
 /** Langkah terakhir yang boleh diisi tamu (belum masuk): Pilih Layanan & Jadwal. */
@@ -135,10 +164,13 @@ function BookingFlow({ profile, user }) {
 
   const today = startOfDay(new Date());
   const [draft, setDraft] = useState(() => initialDraft(profile, user, searchParams, today));
+  const [origin] = useState(() => bookingOrigin(profile.id));
   const [attempted, setAttempted] = useState(null);
   const [createdCode, setCreatedCode] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+  // Metode pembayaran yang layarnya (dummy) sedang terbuka, atau null.
+  const [paying, setPaying] = useState(null);
   const errorRef = useRef(null);
   const submitErrorRef = useRef(null);
   const previousStep = useRef(null);
@@ -170,6 +202,7 @@ function BookingFlow({ profile, user }) {
   const total = calculateServiceFee(pkg, hours);
   const address = selectedAddress(draft, user);
   const errors = attempted === step ? validateStep(step, context) : {};
+  const paymentReference = `DJC-PAY-${seededDigits(`${profile.id}:${draft.date}:${draft.start}:${draft.paymentMethod}`, 8)}`;
 
   const update = (patch) =>
     setDraft((current) => {
@@ -210,6 +243,14 @@ function BookingFlow({ profile, user }) {
       goTo(step + 1);
       return;
     }
+    // Langkah 4: buka layar pembayaran (simulasi); pesanan dikirim setelah "Saya sudah bayar".
+    setSubmitError(null);
+    setPaying(findPaymentMethod(draft.paymentMethod));
+  };
+
+  /** Kirim pesanan (POST /bookings) setelah pembayaran simulasi dikonfirmasi. */
+  const sendBooking = async () => {
+    if (submitting) return;
     setSubmitting(true);
     setSubmitError(null);
     let created;
@@ -217,6 +258,7 @@ function BookingFlow({ profile, user }) {
       created = await createBookingRequest(draftToApiPayload(context));
     } catch (error) {
       setSubmitting(false);
+      setPaying(null);
       if (error?.status === 401) {
         // Sesi di server habis: masuk lagi, lalu kembali ke langkah 4 dengan draf yang sama.
         saveDraft(profile.id, draft);
@@ -239,6 +281,7 @@ function BookingFlow({ profile, user }) {
       service: pkg.title,
     });
     clearDraft(profile.id);
+    setPaying(null);
     setCreatedCode(code);
   };
 
@@ -277,6 +320,14 @@ function BookingFlow({ profile, user }) {
         </div>
       </section>
 
+      <PaymentDialog
+        method={created ? null : paying}
+        total={total}
+        reference={paymentReference}
+        submitting={submitting}
+        onPaid={sendBooking}
+        onClose={() => setPaying(null)}
+      />
       <BookingSuccessDialog booking={created} provider={profile} onClose={closeSuccess} />
 
       <div className={`container booking-layout${step === 4 ? ' booking-layout--single' : ''}`}>
@@ -328,12 +379,9 @@ function BookingFlow({ profile, user }) {
           {step === 1 ? (
             <StepNav
               back={
-                <Link
-                  to={buildProviderPath(profile.id)}
-                  className="btn btn--outline step-nav__back"
-                >
+                <Link to={origin} className="btn btn--outline step-nav__back">
                   <ArrowLeftIcon />
-                  Kembali ke Profil
+                  Kembali
                 </Link>
               }
             />
@@ -353,8 +401,8 @@ function BookingFlow({ profile, user }) {
                     disabled={submitting}
                     aria-busy={submitting}
                   >
-                    <SendIcon />
-                    {submitting ? 'Mengirim…' : 'Kirim Pesanan'}
+                    <WalletIcon />
+                    Lanjut ke Pembayaran
                     <ArrowRightIcon />
                   </button>
                 ) : undefined
