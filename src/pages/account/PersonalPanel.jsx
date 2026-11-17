@@ -3,7 +3,7 @@ import { updateAccount, updateEmail } from '@/features/account/accountApi';
 import { PHONE_PATTERN, normalizePhone, toApiPhone } from '@/features/auth/phone';
 import { GoogleMarkIcon, PencilIcon, SpinnerIcon } from '@/components/ui/icons';
 import { Field, FormStatus, PanelHead, PasswordInput } from './accountParts';
-import { IDLE, fieldErrorsFrom, useSessionUpdate } from './accountUtils';
+import { IDLE, displayPhone, fieldErrorsFrom, useSessionUpdate } from './accountUtils';
 
 const NAME_MAX = 100;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -125,17 +125,38 @@ function EmailForm({ user, onDone, onCancel }) {
 export default function PersonalPanel({ user }) {
   const id = useId();
   const updateSession = useSessionUpdate();
+  const editRef = useRef(null);
   const editEmailRef = useRef(null);
   const google = user.has_password === false;
-  const [form, setForm] = useState(() => ({
+  const initialForm = () => ({
     name: user.name ?? '',
     phone: normalizePhone(String(user.phone ?? '')),
-  }));
+  });
+  const [editing, setEditing] = useState(false);
+  const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState(IDLE);
   const [editingEmail, setEditingEmail] = useState(false);
   const [emailStatus, setEmailStatus] = useState(IDLE);
   const saving = status.state === 'saving';
+
+  useEffect(() => {
+    if (editing) document.getElementById(`${id}-name`)?.focus();
+  }, [editing, id]);
+
+  const startEdit = () => {
+    setForm(initialForm());
+    setErrors({});
+    setStatus(IDLE);
+    setEditing(true);
+  };
+
+  const closeEdit = (nextStatus = IDLE) => {
+    setEditing(false);
+    setErrors({});
+    setStatus(nextStatus);
+    requestAnimationFrame(() => editRef.current?.focus());
+  };
 
   const update = (key) => (event) => {
     setForm((f) => ({ ...f, [key]: event.target.value }));
@@ -158,14 +179,13 @@ export default function PersonalPanel({ user }) {
       changes.phone = toApiPhone(form.phone);
     }
     if (!Object.keys(changes).length) {
-      setStatus({ state: 'info', message: 'Tidak ada perubahan untuk disimpan.' });
+      closeEdit({ state: 'info', message: 'Tidak ada perubahan.' });
       return;
     }
     setStatus({ state: 'saving', message: '' });
     try {
       updateSession(await updateAccount(changes));
-      setForm((f) => ({ ...f, name }));
-      setStatus({ state: 'done', message: 'Data diri disimpan.' });
+      closeEdit({ state: 'done', message: 'Data diri disimpan.' });
     } catch (error) {
       const fields = fieldErrorsFrom(error);
       setErrors(fields);
@@ -190,62 +210,107 @@ export default function PersonalPanel({ user }) {
         id={`${id}-title`}
         title="Data Diri"
         description="Nama dan nomor HP ini terisi otomatis di Detail Pesanan."
+        action={
+          !editing && (
+            <button
+              ref={editRef}
+              type="button"
+              className="btn btn--outline btn--sm"
+              onClick={startEdit}
+            >
+              <PencilIcon size={18} />
+              Ubah data diri
+            </button>
+          )
+        }
       />
 
-      <form className="profile-form" onSubmit={submit} noValidate>
-        <div className="profile-form__grid">
-          <Field id={`${id}-name`} label="Nama lengkap" required error={errors.name}>
-            {({ describedBy, invalid }) => (
-              <input
-                id={`${id}-name`}
-                type="text"
-                autoComplete="name"
-                className="input-shell__control"
-                value={form.name}
-                onChange={update('name')}
-                maxLength={NAME_MAX}
-                aria-invalid={invalid}
-                aria-describedby={describedBy}
-              />
-            )}
-          </Field>
-          <Field
-            id={`${id}-phone`}
-            label="Nomor HP"
-            required
-            prefix="+62"
-            hint="Dipakai penyedia hanya bila darurat."
-            error={errors.phone}
-          >
-            {({ describedBy, invalid }) => (
-              <input
-                id={`${id}-phone`}
-                type="tel"
-                inputMode="numeric"
-                autoComplete="tel-national"
-                className="input-shell__control"
-                placeholder="81234567890"
-                value={form.phone}
-                onChange={update('phone')}
-                aria-invalid={invalid}
-                aria-describedby={describedBy}
-              />
-            )}
-          </Field>
-        </div>
-        <div className="profile-form__actions">
-          <button
-            type="submit"
-            className="btn btn--primary btn--sm"
-            disabled={saving}
-            aria-busy={saving}
-          >
-            {saving && <SpinnerIcon size={18} className="spin" />}
-            {saving ? 'Menyimpan…' : 'Simpan data diri'}
-          </button>
+      {editing ? (
+        <form
+          className="profile-form profile-subform"
+          onSubmit={submit}
+          noValidate
+          aria-labelledby={`${id}-form-title`}
+        >
+          <h3 id={`${id}-form-title`} className="profile-subform__title">
+            Ubah data diri
+          </h3>
+          <div className="profile-form__grid">
+            <Field id={`${id}-name`} label="Nama lengkap" required error={errors.name}>
+              {({ describedBy, invalid }) => (
+                <input
+                  id={`${id}-name`}
+                  type="text"
+                  autoComplete="name"
+                  className="input-shell__control"
+                  value={form.name}
+                  onChange={update('name')}
+                  maxLength={NAME_MAX}
+                  aria-invalid={invalid}
+                  aria-describedby={describedBy}
+                />
+              )}
+            </Field>
+            <Field
+              id={`${id}-phone`}
+              label="Nomor HP"
+              required
+              prefix="+62"
+              hint="Dipakai penyedia hanya bila darurat."
+              error={errors.phone}
+            >
+              {({ describedBy, invalid }) => (
+                <input
+                  id={`${id}-phone`}
+                  type="tel"
+                  inputMode="numeric"
+                  autoComplete="tel-national"
+                  className="input-shell__control"
+                  placeholder="81234567890"
+                  value={form.phone}
+                  onChange={update('phone')}
+                  aria-invalid={invalid}
+                  aria-describedby={describedBy}
+                />
+              )}
+            </Field>
+          </div>
+          <div className="profile-form__actions">
+            <button
+              type="submit"
+              className="btn btn--primary btn--sm"
+              disabled={saving}
+              aria-busy={saving}
+            >
+              {saving && <SpinnerIcon size={18} className="spin" />}
+              {saving ? 'Menyimpan…' : 'Simpan perubahan'}
+            </button>
+            <button
+              type="button"
+              className="btn btn--outline btn--sm"
+              onClick={() => closeEdit()}
+              disabled={saving}
+            >
+              Batal
+            </button>
+            <FormStatus status={status} />
+          </div>
+        </form>
+      ) : (
+        <>
+          <dl className="profile-facts">
+            <div>
+              <dt>Nama lengkap</dt>
+              <dd>{user.name}</dd>
+            </div>
+            <div>
+              <dt>Nomor HP</dt>
+              <dd>{user.phone ? displayPhone(user.phone) : 'Belum diisi'}</dd>
+            </div>
+          </dl>
           <FormStatus status={status} />
-        </div>
-      </form>
+        </>
+      )}
 
       <div className="profile-email">
         <div className="profile-email__row">
@@ -263,7 +328,7 @@ export default function PersonalPanel({ user }) {
             <button
               ref={editEmailRef}
               type="button"
-              className="link-button link-button--flush"
+              className="btn btn--outline btn--sm"
               onClick={() => {
                 setEmailStatus(IDLE);
                 setEditingEmail(true);

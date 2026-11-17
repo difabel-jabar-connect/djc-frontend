@@ -1,23 +1,27 @@
-import { useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useAuth } from '@/context/useAuth';
 import { changePassword } from '@/features/account/accountApi';
 import { checkPasswordRequirements } from '@/features/auth/password';
 import { PATHS } from '@/routes/paths';
 import { PasswordRequirements } from '@/pages/auth/AuthFields';
-import { GoogleMarkIcon, LogOutIcon, SpinnerIcon } from '@/components/ui/icons';
+import { GoogleMarkIcon, KeyIcon, LogOutIcon, SpinnerIcon } from '@/components/ui/icons';
 import { FormStatus, PanelHead, PasswordInput } from './accountParts';
 import { IDLE, fieldErrorsFrom } from './accountUtils';
 
 const EMPTY = { current: '', next: '', confirm: '' };
 
-function PasswordForm() {
+function PasswordForm({ onDone, onCancel }) {
   const id = useId();
   const [form, setForm] = useState(EMPTY);
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState(IDLE);
   const saving = status.state === 'saving';
   const check = checkPasswordRequirements(form.next);
+
+  useEffect(() => {
+    document.getElementById(`${id}-current`)?.focus();
+  }, [id]);
 
   const update = (key) => (event) => {
     setForm((f) => ({ ...f, [key]: event.target.value }));
@@ -48,11 +52,7 @@ function PasswordForm() {
     setStatus({ state: 'saving', message: '' });
     try {
       await changePassword({ currentPassword: form.current, newPassword: form.next });
-      setForm(EMPTY);
-      setStatus({
-        state: 'done',
-        message: 'Kata sandi diganti. Pakai kata sandi baru saat masuk berikutnya.',
-      });
+      onDone('Kata sandi diganti. Pakai kata sandi baru saat masuk berikutnya.');
     } catch (error) {
       const api = fieldErrorsFrom(error);
       const fields = { current: api.current_password, next: api.new_password };
@@ -69,7 +69,12 @@ function PasswordForm() {
   };
 
   return (
-    <form className="profile-form" onSubmit={submit} noValidate aria-labelledby={`${id}-title`}>
+    <form
+      className="profile-form profile-subform"
+      onSubmit={submit}
+      noValidate
+      aria-labelledby={`${id}-title`}
+    >
       <h3 id={`${id}-title`} className="profile-subform__title">
         Ganti kata sandi
       </h3>
@@ -113,7 +118,15 @@ function PasswordForm() {
           aria-busy={saving}
         >
           {saving && <SpinnerIcon size={18} className="spin" />}
-          {saving ? 'Menyimpan…' : 'Ganti kata sandi'}
+          {saving ? 'Menyimpan…' : 'Simpan kata sandi'}
+        </button>
+        <button
+          type="button"
+          className="btn btn--outline btn--sm"
+          onClick={onCancel}
+          disabled={saving}
+        >
+          Batal
         </button>
         <FormStatus status={status} />
       </div>
@@ -127,6 +140,15 @@ export default function SecurityPanel({ user }) {
   const navigate = useNavigate();
   const { signOut } = useAuth();
   const [leaving, setLeaving] = useState(false);
+  const [changing, setChanging] = useState(false);
+  const [passwordStatus, setPasswordStatus] = useState(IDLE);
+  const changeRef = useRef(null);
+
+  const closePassword = (message) => {
+    setChanging(false);
+    setPasswordStatus(message ? { state: 'done', message } : IDLE);
+    requestAnimationFrame(() => changeRef.current?.focus());
+  };
   const google = user.has_password === false;
 
   const logout = async () => {
@@ -149,7 +171,33 @@ export default function SecurityPanel({ user }) {
           </p>
         </div>
       ) : (
-        <PasswordForm />
+        <div className="profile-password">
+          <div className="profile-email__row">
+            <div className="profile-email__text">
+              <p className="profile-email__label">Kata sandi</p>
+              <p className="profile-email__value">Dipakai untuk masuk dengan email.</p>
+            </div>
+            {!changing && (
+              <button
+                ref={changeRef}
+                type="button"
+                className="btn btn--outline btn--sm"
+                onClick={() => {
+                  setPasswordStatus(IDLE);
+                  setChanging(true);
+                }}
+              >
+                <KeyIcon size={18} />
+                Ganti kata sandi
+              </button>
+            )}
+          </div>
+          {changing ? (
+            <PasswordForm onDone={closePassword} onCancel={() => closePassword()} />
+          ) : (
+            <FormStatus status={passwordStatus} />
+          )}
+        </div>
       )}
 
       <div className="profile-logout">
