@@ -209,7 +209,7 @@ function accountRoute(method, path, body) {
     if (body.phone !== undefined) account.user.phone = body.phone;
     return userResponse();
   }
-  if (method === 'PUT' && (path === '/me/password' || path === '/me/email')) {
+  if (method === 'PUT' && path === '/me/password') {
     if (!account.user.has_password) {
       return json(
         { error: { code: 'PASSWORD_NOT_SET', message: 'Akun ini belum punya kata sandi.' } },
@@ -219,13 +219,8 @@ function accountRoute(method, path, body) {
     if (body.current_password !== account.password) {
       return validationError('current_password', 'Kata sandi saat ini salah.');
     }
-    if (path === '/me/password') {
-      account.password = body.new_password;
-      return json({ data: { password_changed: true } });
-    }
-    account.user.email = body.email.trim().toLowerCase();
-    account.user.email_verified = false;
-    return userResponse();
+    account.password = body.new_password;
+    return json({ data: { password_changed: true } });
   }
   if (path === '/me/photo') {
     account.user.avatar_url = method === 'PUT' ? 'https://res.cloudinary.test/foto.webp' : null;

@@ -619,12 +619,6 @@
   overflow-wrap: anywhere;
 }
 
-.profile-email__google {
-  display: flex;
-  gap: var(--space-2);
-  align-items: center;
-}
-
 .profile-subform {
   padding: var(--space-3);
   background: var(--color-paper);
