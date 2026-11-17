@@ -1,6 +1,7 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { logout as logoutRequest } from '@/features/auth/authApi';
 import { SESSION_STORAGE_KEY as STORAGE_KEY, toSessionUser } from '@/features/auth/session';
+import { resetAddressBook } from '@/features/booking/addressBook';
 import { AuthContext } from './useAuth';
 
 function readStoredUser() {
@@ -20,9 +21,13 @@ export function AuthProvider({ children, initialUser }) {
   const [user, setUser] = useState(() =>
     initialUser !== undefined ? toSessionUser(initialUser) : readStoredUser(),
   );
+  const userIdRef = useRef(user?.id ?? null);
 
   const signIn = useCallback((raw) => {
     const next = toSessionUser(raw);
+    // Masuk (bukan sekadar memperbarui profil): alamat dimuat ulang dengan sesi yang baru.
+    if (next?.id !== userIdRef.current) resetAddressBook();
+    userIdRef.current = next?.id ?? null;
     setUser(next);
     try {
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(next));
@@ -38,6 +43,8 @@ export function AuthProvider({ children, initialUser }) {
     } catch {
       // Sesi tetap diakhiri di sisi klien walau server tidak merespons.
     }
+    resetAddressBook();
+    userIdRef.current = null;
     setUser(null);
     try {
       sessionStorage.removeItem(STORAGE_KEY);
