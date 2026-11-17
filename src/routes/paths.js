@@ -17,6 +17,7 @@ export const PATHS = {
   register: '/register',
   registerSuccess: '/register/berhasil',
   customerBookings: '/bookings',
+  profile: '/profil',
   bookingDetail: '/bookings/:code',
   bookingChat: '/bookings/:code/chat',
   providerDashboard: '/dashboard/provider',
