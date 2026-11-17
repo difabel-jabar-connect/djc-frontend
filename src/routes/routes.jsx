@@ -17,6 +17,7 @@ import RegisterSuccessPage from '@/pages/auth/RegisterSuccessPage';
 import CustomerBookingsPage from '@/pages/customer/CustomerBookingsPage';
 import BookingDetailPage from '@/pages/customer/BookingDetailPage';
 import BookingChatPage from '@/pages/customer/BookingChatPage';
+import ProfilePage from '@/pages/account/ProfilePage';
 import ProviderDashboardPage from '@/pages/provider/ProviderDashboardPage';
 import ProviderChatPage from '@/pages/provider/ProviderChatPage';
 import AdminLayout from '@/pages/admin/AdminLayout';
@@ -144,6 +145,7 @@ export const routes = [
           { path: PATHS.customerBookings, element: <CustomerBookingsPage /> },
           { path: PATHS.bookingDetail, element: <BookingDetailPage /> },
           { path: PATHS.bookingChat, element: <BookingChatPage /> },
+          { path: PATHS.profile, element: <ProfilePage /> },
         ],
       },
       { path: '*', element: <NotFoundPage /> },

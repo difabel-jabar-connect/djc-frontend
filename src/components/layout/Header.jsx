@@ -24,7 +24,10 @@ const CUSTOMER_NAV_ITEMS = [
 ];
 
 const ROLE_MENU = {
-  customer: [{ label: 'Pesanan Saya', to: PATHS.customerBookings }],
+  customer: [
+    { label: 'Profil Saya', to: PATHS.profile },
+    { label: 'Pesanan Saya', to: PATHS.customerBookings },
+  ],
   provider: [{ label: 'Dashboard Penyedia', to: PATHS.providerDashboard }],
   admin: [{ label: 'Dashboard Pengelola', to: PATHS.adminDashboard }],
 };
@@ -101,7 +104,7 @@ function AccountActions({ user }) {
         buttonContent={
           <>
             <span className="account-menu__avatar" aria-hidden="true">
-              {user.initials}
+              {user.avatar_url ? <img src={user.avatar_url} alt="" /> : user.initials}
             </span>
             <span className="account-menu__name" aria-hidden="true">
               {user.name}
