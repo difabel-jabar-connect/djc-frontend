@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react';
+import { act, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderAt } from '@/test/renderWithRouter';
 import { fakeApi } from '@/test/fakeApi';
@@ -274,11 +274,27 @@ describe('Profil Saya', () => {
     expect(container.querySelector('.profile-avatar img')).not.toBeInTheDocument();
   });
 
-  it('Keluar mengakhiri sesi dan kembali ke Beranda', async () => {
+  it('Keluar mengakhiri sesi dan kembali ke Beranda, tanpa singgah di Masuk', async () => {
     const user = userEvent.setup();
     const { router } = openProfile();
+    const visited = [];
+    router.subscribe((state) => visited.push(state.location.pathname + state.location.search));
     await user.click(within(panel('Keamanan')).getByRole('button', { name: 'Keluar' }));
     await waitFor(() => expect(router.state.location.pathname).toBe('/'));
     expect(screen.queryByRole('button', { name: /menu akun/i })).not.toBeInTheDocument();
+    // Login berikutnya harus ke Beranda, bukan kembali ke Profil Saya.
+    expect(visited.filter((path) => path.startsWith('/login'))).toEqual([]);
+  });
+
+  it('alamat yang gagal dimuat dicoba lagi saat Profil Saya dibuka ulang', async () => {
+    fakeApi.offline = true;
+    const { router } = openProfile();
+    expect(await screen.findByText(/tidak dapat terhubung ke server/i)).toBeInTheDocument();
+
+    fakeApi.offline = false;
+    await act(() => router.navigate('/'));
+    expect(screen.queryByRole('heading', { name: 'Alamat Tersimpan' })).not.toBeInTheDocument();
+    await act(() => router.navigate('/profil'));
+    expect(await addressList()).toBeInTheDocument();
   });
 });

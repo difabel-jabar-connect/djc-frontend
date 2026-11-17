@@ -79,14 +79,16 @@ export async function removeAddress(user, id) {
 
 /**
  * Alamat akun untuk komponen: `{ status, addresses, error, reload }`. Memuat sekali per akun
- * saat pertama dipakai; `status` 'loading' | 'ready' | 'error'.
+ * saat pertama dipakai, dan mencoba lagi saat dibuka ulang bila muatan terakhir gagal;
+ * `status` 'loading' | 'ready' | 'error'.
  */
 export function useAddressBook(user) {
   const key = keyOf(user);
   const entry = useSyncExternalStore(subscribe, () => entries.get(key) ?? EMPTY_ENTRY);
 
   useEffect(() => {
-    if (key && (entries.get(key) ?? EMPTY_ENTRY).status === 'idle') loadAddresses(user);
+    const { status } = entries.get(key) ?? EMPTY_ENTRY;
+    if (key && (status === 'idle' || status === 'error')) loadAddresses(user);
     // Muat ulang hanya saat akun berganti.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
