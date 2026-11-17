@@ -137,6 +137,9 @@ describe('Profil Saya', () => {
     const personal = panel('Data Diri');
     // Data diri tampil sebagai teks dulu; baru bisa diubah lewat tombol Ubah data diri.
     expect(within(personal).queryByRole('textbox')).not.toBeInTheDocument();
+    // Email hanya ditampilkan, tidak bisa diganti dari sini.
+    expect(within(personal).getByText('budi.santoso@contoh.id')).toBeInTheDocument();
+    expect(within(personal).queryByRole('button', { name: /email/i })).not.toBeInTheDocument();
     expect(within(personal).getByText('Budi Santoso', { selector: 'dd' })).toBeInTheDocument();
     await user.click(within(personal).getByRole('button', { name: 'Ubah data diri' }));
     const name = within(personal).getByLabelText(/nama lengkap/i);
@@ -189,28 +192,6 @@ describe('Profil Saya', () => {
     expect(within(personal).getByText('+62 812-3456-7890')).toBeInTheDocument();
   });
 
-  it('mengganti email dengan kata sandi saat ini', async () => {
-    const user = userEvent.setup();
-    openProfile();
-    const personal = panel('Data Diri');
-    await user.click(within(personal).getByRole('button', { name: 'Ganti email' }));
-    const form = within(personal).getByRole('form', { name: 'Ganti email' });
-    await user.type(within(form).getByLabelText(/email baru/i), 'budi.baru@contoh.id');
-    await user.type(within(form).getByLabelText(/^kata sandi saat ini/i), 'salah');
-    await user.click(within(form).getByRole('button', { name: 'Simpan email' }));
-    expect(await within(form).findByText('Kata sandi saat ini salah.')).toBeVisible();
-
-    const password = within(form).getByLabelText(/^kata sandi saat ini/i);
-    await user.clear(password);
-    await user.type(password, 'Demo12345');
-    await user.click(within(form).getByRole('button', { name: 'Simpan email' }));
-
-    expect(
-      await within(personal).findByText('Email diganti ke budi.baru@contoh.id.'),
-    ).toBeInTheDocument();
-    expect(screen.getByText('budi.baru@contoh.id', { selector: 'dd' })).toBeInTheDocument();
-  });
-
   it('mengganti kata sandi lewat tombol Ganti kata sandi: salah ditandai, lalu berhasil', async () => {
     const user = userEvent.setup();
     openProfile();
@@ -256,12 +237,9 @@ describe('Profil Saya', () => {
     expect(within(security).queryByRole('form')).not.toBeInTheDocument();
   });
 
-  it('akun Google: email terkunci dan kata sandi dibuat lewat Lupa Kata Sandi', async () => {
+  it('akun Google: kata sandi dibuat lewat Lupa Kata Sandi', async () => {
     openProfile({ has_password: false });
     expect(screen.getByText('Masuk dengan Google')).toBeInTheDocument();
-    const personal = panel('Data Diri');
-    expect(within(personal).getByText(/terhubung dengan akun google/i)).toBeInTheDocument();
-    expect(within(personal).queryByRole('button', { name: 'Ganti email' })).not.toBeInTheDocument();
 
     const security = panel('Keamanan');
     expect(within(security).queryByRole('form')).not.toBeInTheDocument();

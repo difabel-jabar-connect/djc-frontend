@@ -11,12 +11,6 @@ export async function updateAccount({ name, phone }) {
   return res?.data?.user;
 }
 
-/** PUT /me/email — butuh kata sandi saat ini; email baru belum terverifikasi. */
-export async function updateEmail({ email, currentPassword }) {
-  const res = await api.put('/me/email', { email, current_password: currentPassword });
-  return res?.data?.user;
-}
-
 /** PUT /me/password — 409 PASSWORD_NOT_SET untuk akun Google tanpa kata sandi. */
 export async function changePassword({ currentPassword, newPassword }) {
   await api.put('/me/password', {
