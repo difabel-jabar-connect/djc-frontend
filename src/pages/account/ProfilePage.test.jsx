@@ -21,7 +21,7 @@ describe('Profil Saya', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Profil Saya' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 2, name: 'Budi Santoso' })).toBeInTheDocument();
     expect(screen.getByText('budi.santoso@contoh.id', { selector: 'dd' })).toBeInTheDocument();
-    expect(screen.getByText('+62 812-3456-7890')).toBeInTheDocument();
+    expect(screen.getAllByText('+62 812-3456-7890')).toHaveLength(2); // identitas + Data Diri
     expect(
       within(screen.getByRole('navigation', { name: 'Akun' })).getByRole('link', {
         name: /pesanan saya/i,
@@ -135,7 +135,12 @@ describe('Profil Saya', () => {
     const user = userEvent.setup();
     openProfile();
     const personal = panel('Data Diri');
+    // Data diri tampil sebagai teks dulu; baru bisa diubah lewat tombol Ubah data diri.
+    expect(within(personal).queryByRole('textbox')).not.toBeInTheDocument();
+    expect(within(personal).getByText('Budi Santoso', { selector: 'dd' })).toBeInTheDocument();
+    await user.click(within(personal).getByRole('button', { name: 'Ubah data diri' }));
     const name = within(personal).getByLabelText(/nama lengkap/i);
+    expect(name).toHaveFocus();
     const phone = within(personal).getByLabelText(/nomor hp/i);
     expect(phone).toHaveValue('81234567890');
 
@@ -143,9 +148,13 @@ describe('Profil Saya', () => {
     await user.type(name, 'Budi Santoso Putra');
     await user.clear(phone);
     await user.type(phone, '0812 9999 1111');
-    await user.click(within(personal).getByRole('button', { name: 'Simpan data diri' }));
+    await user.click(within(personal).getByRole('button', { name: 'Simpan perubahan' }));
 
     expect(await within(personal).findByText('Data diri disimpan.')).toBeInTheDocument();
+    expect(within(personal).queryByRole('textbox')).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(within(personal).getByRole('button', { name: 'Ubah data diri' })).toHaveFocus(),
+    );
     expect(callsTo('PATCH', '/me')[0].body).toEqual({
       name: 'Budi Santoso Putra',
       phone: '+6281299991111',
@@ -153,7 +162,7 @@ describe('Profil Saya', () => {
     expect(
       screen.getByRole('heading', { level: 2, name: 'Budi Santoso Putra' }),
     ).toBeInTheDocument();
-    expect(screen.getByText('+62 812-9999-1111')).toBeInTheDocument();
+    expect(screen.getAllByText('+62 812-9999-1111')).toHaveLength(2);
     expect(
       screen.getByRole('button', { name: 'Menu akun Budi Santoso Putra' }),
     ).toBeInTheDocument();
@@ -163,15 +172,21 @@ describe('Profil Saya', () => {
     const user = userEvent.setup();
     openProfile();
     const personal = panel('Data Diri');
+    await user.click(within(personal).getByRole('button', { name: 'Ubah data diri' }));
     const phone = within(personal).getByLabelText(/nomor hp/i);
     await user.clear(phone);
     await user.type(phone, '12345');
-    await user.click(within(personal).getByRole('button', { name: 'Simpan data diri' }));
+    await user.click(within(personal).getByRole('button', { name: 'Simpan perubahan' }));
 
     expect(within(personal).getByText('Nomor HP belum valid, contoh: 81234567890.')).toBeVisible();
     expect(phone).toHaveAttribute('aria-invalid', 'true');
     expect(phone).toHaveFocus();
     expect(callsTo('PATCH', '/me')).toHaveLength(0);
+
+    // Batal menutup form tanpa menyimpan.
+    await user.click(within(personal).getByRole('button', { name: 'Batal' }));
+    expect(within(personal).queryByRole('textbox')).not.toBeInTheDocument();
+    expect(within(personal).getByText('+62 812-3456-7890')).toBeInTheDocument();
   });
 
   it('mengganti email dengan kata sandi saat ini', async () => {
@@ -196,41 +211,49 @@ describe('Profil Saya', () => {
     expect(screen.getByText('budi.baru@contoh.id', { selector: 'dd' })).toBeInTheDocument();
   });
 
-  it('mengganti kata sandi: salah kata sandi lama ditandai, lalu berhasil', async () => {
+  it('mengganti kata sandi lewat tombol Ganti kata sandi: salah ditandai, lalu berhasil', async () => {
     const user = userEvent.setup();
     openProfile();
     const security = panel('Keamanan');
+    expect(within(security).queryByRole('form')).not.toBeInTheDocument();
+    await user.click(within(security).getByRole('button', { name: 'Ganti kata sandi' }));
     const form = within(security).getByRole('form', { name: 'Ganti kata sandi' });
     const current = within(form).getByLabelText(/^kata sandi saat ini/i);
+    expect(current).toHaveFocus();
     await user.type(current, 'Salah123');
     await user.type(within(form).getByLabelText(/^kata sandi baru/i), 'BaruSekali9');
     await user.type(within(form).getByLabelText(/^ulangi kata sandi baru/i), 'BaruSekali9');
-    await user.click(within(form).getByRole('button', { name: 'Ganti kata sandi' }));
+    await user.click(within(form).getByRole('button', { name: 'Simpan kata sandi' }));
 
     expect(await within(form).findByText('Kata sandi saat ini salah.')).toBeVisible();
     expect(current).toHaveFocus();
 
     await user.clear(current);
     await user.type(current, 'Demo12345');
-    await user.click(within(form).getByRole('button', { name: 'Ganti kata sandi' }));
+    await user.click(within(form).getByRole('button', { name: 'Simpan kata sandi' }));
 
-    expect(await within(form).findByText(/kata sandi diganti/i)).toBeInTheDocument();
+    expect(await within(security).findByText(/kata sandi diganti/i)).toBeInTheDocument();
     expect(fakeApi.account.password).toBe('BaruSekali9');
-    expect(current).toHaveValue('');
+    expect(within(security).queryByRole('form')).not.toBeInTheDocument();
   });
 
   it('kata sandi baru yang lemah atau tidak sama ditolak sebelum dikirim', async () => {
     const user = userEvent.setup();
     openProfile();
-    const form = within(panel('Keamanan')).getByRole('form', { name: 'Ganti kata sandi' });
+    const security = panel('Keamanan');
+    await user.click(within(security).getByRole('button', { name: 'Ganti kata sandi' }));
+    const form = within(security).getByRole('form', { name: 'Ganti kata sandi' });
     await user.type(within(form).getByLabelText(/^kata sandi saat ini/i), 'Demo12345');
     await user.type(within(form).getByLabelText(/^kata sandi baru/i), 'pendek');
     await user.type(within(form).getByLabelText(/^ulangi kata sandi baru/i), 'lain');
-    await user.click(within(form).getByRole('button', { name: 'Ganti kata sandi' }));
+    await user.click(within(form).getByRole('button', { name: 'Simpan kata sandi' }));
 
     expect(within(form).getByText(/belum memenuhi semua syarat/i)).toBeVisible();
     expect(within(form).getByText('Kata sandi tidak sama.')).toBeVisible();
     expect(callsTo('PUT', '/me/password')).toHaveLength(0);
+
+    await user.click(within(form).getByRole('button', { name: 'Batal' }));
+    expect(within(security).queryByRole('form')).not.toBeInTheDocument();
   });
 
   it('akun Google: email terkunci dan kata sandi dibuat lewat Lupa Kata Sandi', async () => {
