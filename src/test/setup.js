@@ -4,6 +4,7 @@ import { cleanup } from '@testing-library/react';
 import { MotionGlobalConfig } from 'motion';
 import { resetChatStore } from '@/features/chat/chatStore';
 import { clearSearchCache } from '@/features/search/useProviderSearch';
+import { resetAddressBook } from '@/features/booking/addressBook';
 import { fakeApi, fakeFetch } from './fakeApi';
 
 // Animasi Motion langsung selesai di test, dan elemen dirender langsung di keadaan
@@ -64,6 +65,7 @@ afterEach(() => {
   sessionStorage.clear();
   localStorage.clear();
   resetChatStore();
+  resetAddressBook();
 });
 
 // jsdom tidak mengimplementasikan scrollTo.

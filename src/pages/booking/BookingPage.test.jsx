@@ -154,6 +154,10 @@ describe('Pesan Layanan', () => {
     await addAddress(user, 'Jl. Dago No. 5, Bandung');
     expect(screen.queryByRole('dialog', { name: 'Tambah Alamat' })).not.toBeInTheDocument();
     expect(screen.getByRole('radio', { name: /jl\. dago no\. 5/i })).toBeChecked();
+    // Alamat baru tersimpan di akun (backend), bukan hanya di browser.
+    expect(
+      fakeApi.calls.find((call) => call.method === 'POST' && call.path === '/me/addresses').body,
+    ).toMatchObject({ label: 'Rumah', address: 'Jl. Dago No. 5, Bandung' });
     // Kartu Pembayaran lama di Detail Pesanan sudah dihapus.
     expect(screen.queryByRole('heading', { name: 'Pembayaran' })).not.toBeInTheDocument();
     await user.type(screen.getByRole('textbox', { name: /catatan untuk penyedia/i }), 'Ada kucing');
@@ -288,6 +292,7 @@ describe('Pesan Layanan', () => {
   });
 
   it('akun tanpa nomor HP & alamat tersimpan wajib mengisinya di langkah 3', async () => {
+    fakeApi.account.addresses = [];
     const user = userEvent.setup();
     renderAt('/pesan/rizki-maulana?tanggal=2026-10-21', {
       user: { name: 'Rina Amalia', email: 'rina@gmail.com', role: 'customer' },

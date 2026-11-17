@@ -1,6 +1,13 @@
 import { useState } from 'react';
+import { Link } from 'react-router';
 import { DEFAULT_RADIUS_KM, NOTE_MAX } from '@/features/booking/bookingDraft';
-import { addAddress, addressLine, addressesFor, distanceKm } from '@/features/booking/addressBook';
+import {
+  addAddress,
+  addressLine,
+  distanceKm,
+  useAddressBook,
+} from '@/features/booking/addressBook';
+import { PATHS } from '@/routes/paths';
 import {
   BuildingIcon,
   CheckCircleIcon,
@@ -10,8 +17,9 @@ import {
   MapPinIcon,
   PhoneIcon,
   PlusIcon,
+  SpinnerIcon,
 } from '@/components/ui/icons';
-import AddressDialog from './AddressDialog';
+import AddressDialog from '@/components/address/AddressDialog';
 import { StepHeading } from './StepParts';
 
 /** Ikon per label alamat (alamat contoh memakai id rumah/kantor). */
@@ -132,8 +140,7 @@ function AreaMap({ providerName, address, radiusKm }) {
 /** Langkah 3 — data pemesan, alamat layanan (pilih / tambah lewat pop-up peta), catatan. */
 export default function StepDetails({ profile, user, draft, update, errors }) {
   const [adding, setAdding] = useState(false);
-  const [, setVersion] = useState(0);
-  const addresses = addressesFor(user);
+  const { status: addressStatus, addresses } = useAddressBook(user);
   const saved = addresses.find((a) => a.id === draft.addressId);
   const radiusKm = profile.serviceRadiusKm ?? DEFAULT_RADIUS_KM;
   const phoneError = errors['booking-phone'];
@@ -141,10 +148,10 @@ export default function StepDetails({ profile, user, draft, update, errors }) {
   const providerPoint = { lat: profile.lat, lng: profile.lng };
   const savedDistance = saved ? (distanceKm(providerPoint, saved) ?? saved.distanceKm) : undefined;
 
-  const saveAddress = (address) => {
-    const entry = addAddress(user, address);
+  // Gagal simpan dilempar ke pop-up (pesan error di sana); berhasil → tutup & pilih.
+  const saveAddress = async (address) => {
+    const entry = await addAddress(user, address);
     setAdding(false);
-    setVersion((n) => n + 1);
     update({ addressId: entry.id });
     // Kembalikan fokus ke alamat yang baru dipilih.
     requestAnimationFrame(() => document.getElementById(`alamat-${entry.id}`)?.focus());
@@ -242,7 +249,12 @@ export default function StepDetails({ profile, user, draft, update, errors }) {
             </button>
           )}
         </div>
-        {addresses.length > 0 ? (
+        {addresses.length === 0 && addressStatus === 'loading' ? (
+          <p className="field-hint" role="status">
+            <SpinnerIcon size={16} className="spin" />
+            Memuat alamat tersimpan…
+          </p>
+        ) : addresses.length > 0 ? (
           <fieldset
             className="address-fieldset"
             aria-describedby={addressError ? 'booking-address-error' : undefined}
@@ -310,6 +322,11 @@ export default function StepDetails({ profile, user, draft, update, errors }) {
         {addressError && (
           <p id="booking-address-error" className="field-error">
             {addressError}
+          </p>
+        )}
+        {addresses.length > 0 && (
+          <p className="field-hint">
+            Ubah atau hapus alamat di <Link to={PATHS.profile}>Profil Saya</Link>.
           </p>
         )}
 
