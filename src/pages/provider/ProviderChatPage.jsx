@@ -2,8 +2,15 @@ import { Link, useParams } from 'react-router';
 import DashboardShell from '@/components/dashboard/DashboardShell';
 import ChatPanel from '@/components/chat/ChatPanel';
 import { ChatIcon } from '@/components/ui/icons';
-import { lastActivity, threadsForProvider, unreadCount } from '@/features/chat/chatStore';
+import {
+  lastActivity,
+  remoteThreads,
+  threadsForProvider,
+  unreadCount,
+} from '@/features/chat/chatStore';
+import { isBackendId, useChatInbox } from '@/features/chat/chatSync';
 import { useChatStore } from '@/features/chat/useChat';
+import { useAuth } from '@/context/useAuth';
 import { PROVIDER_ID, sampleOrders } from '@/features/dashboard/providerDashboardData';
 import { getProviderProfile } from '@/features/providers/providerProfiles';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
@@ -15,14 +22,14 @@ const COLORS = ['#0b3c6e', '#0b6b67', '#26324a', '#3d5a80', '#3d5a80', '#0b3c6e'
 const TIME = new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit' });
 const DAY = new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short' });
 
-const initialsOf = (name) =>
+const initialsOf = (name = '') =>
   name
     .split(/\s+/)
     .slice(0, 2)
     .map((word) => word[0]?.toUpperCase() ?? '')
     .join('');
 
-const colorOf = (name) => COLORS[[...name].reduce((sum, ch) => sum + ch.charCodeAt(0), 0) % 6];
+const colorOf = (name = '') => COLORS[[...name].reduce((sum, ch) => sum + ch.charCodeAt(0), 0) % 6];
 
 function shortTime(iso) {
   if (!iso) return '';
@@ -42,8 +49,14 @@ export default function ProviderChatPage() {
   useDocumentTitle('Chat Pelanggan');
   const { code } = useParams();
   useChatStore();
+  const { user } = useAuth();
+  // Login asli (id UUID dari backend) → kotak masuk dari GET /chat/inbox + Socket.io.
+  // Akun demo → percakapan contoh lokal seperti sebelumnya.
+  const live = isBackendId(user?.id);
+  useChatInbox('provider', live);
   const profile = getProviderProfile(PROVIDER_ID);
-  const threads = threadsForProvider(PROVIDER_ID);
+  const displayName = live ? user.name : profile.name;
+  const threads = live ? remoteThreads() : threadsForProvider(PROVIDER_ID);
   const active = threads.find((thread) => thread.code === code) ?? null;
   const chatUnread = threads.reduce((sum, thread) => sum + unreadCount(thread, 'provider'), 0);
   const newCount = sampleOrders().filter((o) => o.status === 'baru').length;
@@ -54,8 +67,8 @@ export default function ProviderChatPage() {
       navLabel="Menu penyedia"
       navItems={providerNavItems({ page: 'chat', newCount, chatUnread })}
       user={{
-        name: profile.name,
-        initials: profile.initials,
+        name: displayName,
+        initials: live ? user.initials : profile.initials,
         role: 'Penyedia Layanan',
         color: '#0b3c6e',
       }}
@@ -72,26 +85,31 @@ export default function ProviderChatPage() {
             <ul className="pchat__list">
               {threads.map((thread) => {
                 const unread = unreadCount(thread, 'provider');
-                const last = thread.messages.at(-1);
-                const preview = last.from === 'provider' ? `Anda: ${last.text}` : last.text;
+                const last = thread.messages.at(-1) ?? thread.lastMessage;
+                const preview = !last
+                  ? 'Belum ada pesan'
+                  : last.from === 'provider'
+                    ? `Anda: ${last.text}`
+                    : last.text;
+                const customerName = thread.customerName ?? 'Pelanggan';
                 return (
                   <li key={thread.code}>
                     <Link
                       to={buildProviderChatPath(thread.code)}
                       className={`pchat__thread${thread.code === code ? ' is-active' : ''}${unread ? ' is-unread' : ''}`}
                       aria-current={thread.code === code ? 'page' : undefined}
-                      aria-label={`${thread.customerName}, ${thread.service}, pesanan ${thread.code}${unread ? `, ${unread} pesan belum dibaca` : ''}`}
+                      aria-label={`${customerName}, ${thread.service}, pesanan ${thread.code}${unread ? `, ${unread} pesan belum dibaca` : ''}`}
                     >
                       <span
                         className="pchat__avatar"
-                        style={{ backgroundColor: colorOf(thread.customerName) }}
+                        style={{ backgroundColor: colorOf(customerName) }}
                         aria-hidden="true"
                       >
-                        {initialsOf(thread.customerName)}
+                        {initialsOf(customerName)}
                       </span>
                       <span className="pchat__summary">
                         <span className="pchat__row">
-                          <strong>{thread.customerName}</strong>
+                          <strong>{customerName}</strong>
                           <time dateTime={lastActivity(thread)}>
                             {shortTime(lastActivity(thread))}
                           </time>
@@ -129,11 +147,12 @@ export default function ProviderChatPage() {
                 code={active.code}
                 viewer="provider"
                 peer={{
-                  name: active.customerName,
-                  initials: initialsOf(active.customerName),
-                  color: colorOf(active.customerName),
+                  name: active.customerName ?? 'Pelanggan',
+                  initials: initialsOf(active.customerName ?? 'Pelanggan'),
+                  color: colorOf(active.customerName ?? 'Pelanggan'),
                   subtitle: `Pesanan ${active.code} · ${active.service}`,
                 }}
+                closed={active.bookingId ? active.canSend === false : false}
                 quickReplies={QUICK_REPLIES}
               />
             </>

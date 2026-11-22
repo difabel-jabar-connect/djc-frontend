@@ -35,6 +35,7 @@ import { findPaymentMethod, seededDigits } from '@/features/booking/payment';
 import { homePathFor } from '@/features/auth/session';
 import { lastVisitedPath } from '@/hooks/useNavigationTrail';
 import { ensureThread } from '@/features/chat/chatStore';
+import { isBackendId } from '@/features/chat/chatSync';
 import { PATHS, buildAuthPath, buildBookingPath, buildProviderPath } from '@/routes/paths';
 import { ArrowLeftIcon, ArrowRightIcon, LogInIcon, WalletIcon } from '@/components/ui/icons';
 import ProviderStatus from '@/pages/providers/ProviderStatus';
@@ -288,6 +289,8 @@ function BookingFlow({ profile, user }) {
     // Buka percakapan chat pesanan ini agar langsung muncul di kotak masuk penyedia.
     ensureThread({
       code,
+      bookingId: isBackendId(created?.id) ? created.id : undefined,
+      viewer: 'customer',
       providerId: profile.id,
       providerName: profile.name,
       customerName: user.name,
