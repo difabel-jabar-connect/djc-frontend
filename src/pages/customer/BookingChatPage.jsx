@@ -4,7 +4,9 @@ import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useAuth } from '@/context/useAuth';
 import { useCustomer } from '@/context/useCustomer';
 import { findBooking, formatBookingRange } from '@/features/booking/customerBookings';
-import { CHAT_OPEN_STATUSES, ensureThread } from '@/features/chat/chatStore';
+import { CHAT_OPEN_STATUSES, ensureThread, getThread } from '@/features/chat/chatStore';
+import { isBackendId, useChatInbox } from '@/features/chat/chatSync';
+import { useChatStore } from '@/features/chat/useChat';
 import { bookingProvider } from '@/features/booking/bookingProvider';
 import { PATHS, buildBookingDetailPath, buildProviderPath } from '@/routes/paths';
 import ChatPanel from '@/components/chat/ChatPanel';
@@ -19,6 +21,43 @@ const QUICK_REPLIES = [
   'Terima kasih!',
 ];
 
+const initialsOf = (name = '') =>
+  name
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((word) => word[0]?.toUpperCase() ?? '')
+    .join('');
+
+/** Chat pesanan backend yang hanya diketahui dari inbox (detail pesanan belum dimuat). */
+function RemoteOnlyChat({ thread }) {
+  const name = thread.providerName ?? 'Penyedia';
+  return (
+    <div className="customer-page chat-page">
+      <div className="container chat-page__inner">
+        <div className="chat-page__top">
+          <Link to={PATHS.customerBookings} className="chat-page__back">
+            <ArrowLeftIcon size={18} />
+            Pesanan Saya
+          </Link>
+          <h1 className="visually-hidden">Chat dengan {name}</h1>
+        </div>
+        <ChatPanel
+          code={thread.code}
+          viewer="customer"
+          peer={{
+            name,
+            initials: initialsOf(name),
+            color: '#0b3c6e',
+            subtitle: `Pesanan ${thread.code}${thread.service ? ` · ${thread.service}` : ''}`,
+          }}
+          closed={!['requested', 'accepted', 'in_progress'].includes(thread.status)}
+          quickReplies={QUICK_REPLIES}
+        />
+      </div>
+    </div>
+  );
+}
+
 /** Chat real-time pelanggan dengan penyedia untuk satu pesanan (pengganti WhatsApp). */
 export default function BookingChatPage() {
   const { code } = useParams();
@@ -26,19 +65,32 @@ export default function BookingChatPage() {
   const { bookings } = useCustomer();
   const booking = findBooking(bookings, code);
   const provider = booking ? bookingProvider(booking) : null;
-  useDocumentTitle(provider ? `Chat dengan ${provider.name}` : 'Chat tidak ditemukan');
+  useChatStore();
+  // Pesanan dari backend yang belum ada di data lokal (mis. setelah muat ulang) → cari di inbox.
+  useChatInbox('customer', !booking && isBackendId(user?.id));
+  const inboxThread = !booking ? getThread(code) : null;
+  const remoteOnly = inboxThread?.bookingId ? inboxThread : null;
+  const peerName = provider?.name ?? remoteOnly?.providerName;
+  useDocumentTitle(peerName ? `Chat dengan ${peerName}` : 'Chat tidak ditemukan');
 
   // Pesanan tanpa riwayat chat (mis. data lama) → buka percakapan baru.
+  // Pesanan dari backend (id UUID) → percakapan tersambung ke server chat.
   useEffect(() => {
     if (!booking || !provider) return;
     ensureThread({
       code: booking.code,
+      bookingId: isBackendId(booking.id) ? booking.id : undefined,
       providerId: provider.id,
       providerName: provider.name,
       customerName: user.name,
       service: booking.service,
+      viewer: 'customer',
     });
   }, [booking, provider, user.name]);
+
+  if (remoteOnly) {
+    return <RemoteOnlyChat thread={remoteOnly} />;
+  }
 
   if (!booking || !provider) {
     return (
@@ -84,6 +136,7 @@ export default function BookingChatPage() {
             }}
             closed={closed}
             quickReplies={QUICK_REPLIES}
+            disabilityType={provider.disabilityType ?? provider.disability}
           />
 
           <aside className="chat-page__aside detail-card" aria-label="Pesanan terkait">

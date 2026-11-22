@@ -7,7 +7,7 @@ import { api } from '@/lib/api/client';
  * @param {Object} [params]
  * @param {number} [params.limit=50]
  * @param {string} [params.before_id] - UUID pesan untuk paginasi ke belakang
- * @returns {Promise<{ items: Array, can_send: boolean, provider_disability_type: string|null, meta: Object }>}
+ * @returns {Promise<{ booking: Object|null, messages: Array, provider_disability_type: string|null, meta: Object }>}
  */
 export async function getBookingMessages(bookingId, params = {}) {
   const query = new URLSearchParams();
@@ -17,10 +17,11 @@ export async function getBookingMessages(bookingId, params = {}) {
   const qs = query.toString();
   const path = qs ? `/bookings/${bookingId}/messages?${qs}` : `/bookings/${bookingId}/messages`;
   const res = await api.get(path);
+  // Bentuk respons: { data: { booking, provider_disability_type, messages }, meta }.
   return {
-    items: res?.data ?? [],
-    can_send: res?.can_send ?? true,
-    provider_disability_type: res?.provider_disability_type ?? null,
+    booking: res?.data?.booking ?? null,
+    messages: res?.data?.messages ?? [],
+    provider_disability_type: res?.data?.provider_disability_type ?? null,
     meta: res?.meta ?? {},
   };
 }

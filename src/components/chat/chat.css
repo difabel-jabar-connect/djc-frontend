@@ -195,6 +195,55 @@
   color: #7fd1c9;
 }
 
+.chat-receipt--failed {
+  align-items: center;
+  gap: 4px;
+  min-height: 28px;
+  padding: 2px 8px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: #fff;
+  color: var(--color-danger);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.chat-receipt--failed:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* Catatan cara berkomunikasi dengan mitra (jenis disabilitas) & error riwayat. */
+.chat__note,
+.chat__error {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 0;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+}
+
+.chat__note {
+  background: var(--color-accent-soft);
+  color: var(--color-text);
+}
+
+.chat__note svg,
+.chat__error svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+.chat__error {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
 .chat-bubble--typing {
   display: inline-flex;
   gap: 4px;
@@ -316,6 +365,40 @@
 .chat__send:focus-visible {
   outline: 3px solid var(--color-focus-outline);
   outline-offset: 2px;
+}
+
+.chat__mic {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--color-input-border);
+  border-radius: 50%;
+  background: var(--color-bg);
+  color: var(--color-primary);
+  cursor: pointer;
+}
+
+.chat__mic.is-listening {
+  border-color: var(--color-danger);
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+.chat__mic:focus-visible {
+  outline: 3px solid var(--color-focus-outline);
+  outline-offset: 2px;
+}
+
+.chat__speech:empty {
+  display: none;
+}
+
+.chat__speech {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 12px;
 }
 
 .chat__hint {

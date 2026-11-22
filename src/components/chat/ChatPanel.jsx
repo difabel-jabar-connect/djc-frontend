@@ -7,11 +7,22 @@ import {
   getThread,
   isTyping,
   markRead,
+  retryMessage,
   seenByOther,
   sendMessage,
   sendTyping,
 } from '@/features/chat/chatStore';
-import { CheckIcon, LockIcon, SendIcon } from '@/components/ui/icons';
+import { useRemoteThread } from '@/features/chat/chatSync';
+import { disabilityNote, useSpeechInput } from '@/features/chat/accessibility';
+import {
+  AlertCircleIcon,
+  CheckIcon,
+  ClockIcon,
+  InfoIcon,
+  LockIcon,
+  MicIcon,
+  SendIcon,
+} from '@/components/ui/icons';
 import './chat.css';
 
 const TIME = new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit' });
@@ -30,6 +41,27 @@ function dayLabel(iso) {
   return DAY.format(date);
 }
 
+/** Status pesan milik sendiri: mengirim, gagal (bisa dikirim ulang), terkirim, dibaca. */
+function MessageStatus({ thread, message, onRetry }) {
+  if (message.pending) {
+    return (
+      <span className="chat-receipt">
+        <ClockIcon size={13} aria-hidden="true" />
+        <span className="visually-hidden">Mengirim</span>
+      </span>
+    );
+  }
+  if (message.failed) {
+    return (
+      <button type="button" className="chat-receipt chat-receipt--failed" onClick={onRetry}>
+        <AlertCircleIcon size={14} aria-hidden="true" />
+        Gagal terkirim, kirim ulang
+      </button>
+    );
+  }
+  return <Receipt seen={seenByOther(thread, message)} />;
+}
+
 /** Dua centang = dibaca, satu centang = terkirim. */
 function Receipt({ seen }) {
   return (
@@ -46,10 +78,23 @@ function Receipt({ seen }) {
  * 'provider'); `peer` = lawan bicara { name, initials, color, subtitle }.
  * `closed` → hanya riwayat (pesanan selesai/dibatalkan), tanpa kolom tulis pesan.
  */
-export default function ChatPanel({ code, viewer, peer, closed = false, quickReplies = [] }) {
+export default function ChatPanel({
+  code,
+  viewer,
+  peer,
+  closed = false,
+  quickReplies = [],
+  disabilityType,
+}) {
   const role = viewer;
   useChatStore();
   const thread = getThread(code);
+  // Percakapan backend: gabung room Socket.io + muat riwayat selama panel terbuka.
+  useRemoteThread(thread?.bookingId);
+  const remote = Boolean(thread?.bookingId);
+  const readOnly = closed || thread?.canSend === false;
+  const note =
+    role === 'customer' ? disabilityNote(disabilityType ?? thread?.disabilityType) : null;
   const other = role === 'customer' ? 'provider' : 'customer';
   const [text, setText] = useState('');
   const logRef = useRef(null);
@@ -88,6 +133,11 @@ export default function ChatPanel({ code, viewer, peer, closed = false, quickRep
     inputRef.current?.focus();
   };
 
+  const speech = useSpeechInput((spoken) => {
+    setText((current) => (current ? `${current.trimEnd()} ${spoken}` : spoken).slice(0, CHAT_MAX));
+    inputRef.current?.focus();
+  });
+
   const handleChange = (event) => {
     setText(event.target.value);
     const now = Date.now();
@@ -105,9 +155,9 @@ export default function ChatPanel({ code, viewer, peer, closed = false, quickRep
     }
   };
 
-  if (!thread) {
+  if (!thread || (remote && !thread.loaded)) {
     return (
-      <div className="chat chat--empty">
+      <div className="chat chat--empty" role="status">
         <p>Memuat percakapan…</p>
       </div>
     );
@@ -138,6 +188,20 @@ export default function ChatPanel({ code, viewer, peer, closed = false, quickRep
           Real-time
         </span>
       </header>
+
+      {note && (
+        <p className="chat__note">
+          <InfoIcon size={18} aria-hidden="true" />
+          <span>{note}</span>
+        </p>
+      )}
+
+      {thread.error && (
+        <p className="chat__error" role="alert">
+          <AlertCircleIcon size={18} aria-hidden="true" />
+          {thread.error}
+        </p>
+      )}
 
       <div
         ref={logRef}
@@ -179,7 +243,13 @@ export default function ChatPanel({ code, viewer, peer, closed = false, quickRep
                       <p className="chat-bubble__text">{message.text}</p>
                       <span className="chat-bubble__meta">
                         <time dateTime={message.at}>{TIME.format(new Date(message.at))}</time>
-                        {mine && <Receipt seen={seenByOther(thread, message)} />}
+                        {mine && (
+                          <MessageStatus
+                            thread={thread}
+                            message={message}
+                            onRetry={() => retryMessage(code, message.id)}
+                          />
+                        )}
                       </span>
                     </div>
                   )}
@@ -197,7 +267,7 @@ export default function ChatPanel({ code, viewer, peer, closed = false, quickRep
         )}
       </div>
 
-      {closed ? (
+      {readOnly ? (
         <p className="chat__closed">
           <LockIcon size={18} aria-hidden="true" />
           Pesanan ini sudah ditutup. Riwayat chat tetap bisa dibaca.
@@ -237,6 +307,17 @@ export default function ChatPanel({ code, viewer, peer, closed = false, quickRep
               onKeyDown={handleKeyDown}
               aria-describedby={`chat-hint-${code}`}
             />
+            {speech.supported && (
+              <button
+                type="button"
+                className={`chat__mic${speech.listening ? ' is-listening' : ''}`}
+                aria-label={speech.listening ? 'Berhenti mendengarkan' : 'Ketik dengan suara'}
+                aria-pressed={speech.listening}
+                onClick={speech.listening ? speech.stop : speech.start}
+              >
+                <MicIcon size={20} />
+              </button>
+            )}
             <button
               type="submit"
               className="chat__send"
@@ -249,6 +330,9 @@ export default function ChatPanel({ code, viewer, peer, closed = false, quickRep
           <p id={`chat-hint-${code}`} className="chat__hint">
             Enter untuk kirim · Shift+Enter untuk baris baru
             {text.length > CHAT_MAX - 200 && ` · ${text.length}/${CHAT_MAX}`}
+          </p>
+          <p className="chat__speech" role="status">
+            {speech.listening ? 'Mendengarkan… silakan bicara.' : speech.error}
           </p>
         </form>
       )}

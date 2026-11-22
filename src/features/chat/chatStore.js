@@ -1,11 +1,12 @@
 /**
  * Chat pelanggan ↔ penyedia per pesanan (pengganti tombol WhatsApp).
  *
- * Real-time tanpa backend: percakapan disimpan di localStorage dan setiap perubahan
- * disiarkan lewat BroadcastChannel (+ event `storage` sebagai cadangan), sehingga pesan
- * langsung muncul di tab/jendela lain (mis. pelanggan di satu tab, penyedia di tab lain).
- * TODO(API): ganti `persist`/`broadcast` dengan WebSocket ke layanan chat backend; bentuk
- * data & fungsi publik di modul ini bisa tetap sama.
+ * Dua jenis percakapan memakai bentuk data & fungsi publik yang sama:
+ * - Percakapan backend (`thread.bookingId` = UUID booking): riwayat dari
+ *   GET /bookings/:id/messages, pesan/typing/dibaca lewat Socket.io (lihat `chatSync.js`).
+ *   Hanya disimpan di memori, tidak ditulis ke localStorage.
+ * - Percakapan demo (pesanan contoh tanpa UUID): disimpan di localStorage dan disiarkan
+ *   lewat BroadcastChannel (+ event `storage`) supaya tetap jalan tanpa backend.
  */
 
 export const CHAT_MAX = 1000;
@@ -100,9 +101,28 @@ function readStorage() {
   return { threads: seedThreads() };
 }
 
+const isRemote = (thread) => Boolean(thread?.bookingId);
+
+/** Percakapan backend tidak ikut disimpan; hanya percakapan demo. */
+function localPart(state) {
+  const threads = Object.fromEntries(
+    Object.entries(state.threads).filter(([, thread]) => !isRemote(thread)),
+  );
+  return { ...state, threads };
+}
+
+/** Muat ulang percakapan demo dari penyimpanan tanpa membuang percakapan backend. */
+function reloadLocal() {
+  const fresh = readStorage();
+  const remote = Object.fromEntries(
+    Object.entries(cache?.threads ?? {}).filter(([, thread]) => isRemote(thread)),
+  );
+  cache = { ...fresh, threads: { ...fresh.threads, ...remote } };
+}
+
 function persist(state) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(localPart(state)));
   } catch {
     // Penyimpanan diblokir: percakapan tetap ada di memori tab ini.
   }
@@ -132,7 +152,7 @@ function getChannel() {
   channel = new BroadcastChannel(CHANNEL_NAME);
   channel.onmessage = ({ data }) => {
     if (data?.type === 'update') {
-      cache = readStorage();
+      reloadLocal();
       notify();
     } else if (data?.type === 'typing') {
       setTypingLocal(data.code, data.role, data.active);
@@ -152,7 +172,7 @@ function broadcast(message) {
 if (typeof window !== 'undefined') {
   window.addEventListener('storage', (event) => {
     if (event.key !== STORAGE_KEY) return;
-    cache = readStorage();
+    reloadLocal();
     notify();
   });
 }
@@ -173,6 +193,141 @@ function commit(update) {
   broadcast({ type: 'update' });
 }
 
+/** Perubahan percakapan backend: cukup di memori, tidak disimpan/disiarkan antartab. */
+function commitRemote(update) {
+  cache = update(getState());
+  notify();
+}
+
+function patchThread(code, patch) {
+  commitRemote((state) => {
+    const thread = state.threads[code];
+    if (!thread) return state;
+    const next = typeof patch === 'function' ? patch(thread) : { ...thread, ...patch };
+    return { ...state, threads: { ...state.threads, [code]: next } };
+  });
+}
+
+// ---------- jalur ke backend (diisi oleh chatSync.js) ----------
+
+/**
+ * `transport` = { send(bookingId, text) → Promise<pesan API>, markRead(bookingId),
+ * typing(bookingId, active) }. Dipasang oleh `chatSync.js` supaya modul ini tidak
+ * bergantung langsung pada Socket.io (dan tetap mudah dites).
+ */
+let transport = null;
+
+export function setChatTransport(next) {
+  transport = next;
+}
+
+/** Ubah pesan API ({ sender_role, message_text, ... }) ke bentuk pesan di store. */
+export function fromApiMessage(raw) {
+  return {
+    id: raw.id,
+    from: raw.sender_role || 'system',
+    text: raw.message_text,
+    at: raw.created_at,
+    isRead: Boolean(raw.is_read),
+  };
+}
+
+const byTime = (a, b) => String(a.at).localeCompare(String(b.at));
+
+/**
+ * Daftarkan/perbarui percakapan backend. `viewer` = peran pengguna yang login.
+ * Field lain (nama, layanan, status, jenis disabilitas mitra, ringkasan inbox) opsional.
+ */
+export function upsertRemoteThread({ code, bookingId, ...meta }) {
+  if (!code || !bookingId) return;
+  const defined = Object.fromEntries(Object.entries(meta).filter(([, v]) => v !== undefined));
+  commitRemote((state) => {
+    const current = state.threads[code];
+    const base = current?.bookingId
+      ? current
+      : { code, bookingId, messages: [], read: {}, loaded: false };
+    return {
+      ...state,
+      threads: { ...state.threads, [code]: { ...base, ...defined, code, bookingId } },
+    };
+  });
+}
+
+export const findThreadByBooking = (bookingId) =>
+  Object.values(getState().threads).find((thread) => thread.bookingId === bookingId) ?? null;
+
+/** Ganti isi percakapan backend dengan riwayat dari API (pesan tertunda tetap dipertahankan). */
+export function setRemoteHistory(code, rawMessages, meta = {}) {
+  patchThread(code, (thread) => {
+    const fromApi = rawMessages.map(fromApiMessage);
+    const ids = new Set(fromApi.map((m) => m.id));
+    const pending = thread.messages.filter((m) => m.pending && !ids.has(m.id));
+    return {
+      ...thread,
+      ...meta,
+      loaded: true,
+      messages: [...fromApi, ...pending].sort(byTime),
+    };
+  });
+}
+
+/** Pesan baru dari server (event `new_message`, atau hasil kirim). */
+export function receiveRemoteMessage(raw) {
+  const thread = findThreadByBooking(raw.booking_id);
+  if (!thread) return;
+  const message = fromApiMessage(raw);
+  patchThread(thread.code, (current) => {
+    if (current.messages.some((m) => m.id === message.id)) return current;
+    // Pesan milik sendiri yang masih tertunda → ganti dengan versi dari server.
+    const pendingIndex = current.messages.findIndex(
+      (m) => m.pending && m.from === message.from && m.text === message.text,
+    );
+    const messages = [...current.messages];
+    if (pendingIndex >= 0) messages.splice(pendingIndex, 1, message);
+    else messages.push(message);
+    return {
+      ...current,
+      messages: messages.sort(byTime),
+      lastMessage: message,
+      unread:
+        current.viewer && message.from !== current.viewer && message.from !== 'system'
+          ? (current.unread ?? 0) + 1
+          : current.unread,
+    };
+  });
+}
+
+/** Event `messages_read`: pesan dari pihak lain sudah dibaca oleh `readerRole`. */
+export function applyRemoteRead(bookingId, readerRole) {
+  const thread = findThreadByBooking(bookingId);
+  if (!thread) return;
+  patchThread(thread.code, (current) => ({
+    ...current,
+    unread: readerRole === current.viewer ? 0 : current.unread,
+    messages: current.messages.map((m) =>
+      m.from !== readerRole && m.from !== 'system' && !m.pending ? { ...m, isRead: true } : m,
+    ),
+  }));
+}
+
+/** Event `user_typing` dari server. */
+export function applyRemoteTyping(bookingId, role, active) {
+  const thread = findThreadByBooking(bookingId);
+  if (thread) setTypingLocal(thread.code, role, active);
+}
+
+/** Buang semua percakapan backend dari memori (mis. saat keluar akun). */
+export function clearRemoteThreads() {
+  if (!cache) return;
+  commitRemote((state) => localPart(state));
+}
+
+/** Semua percakapan backend, terbaru di atas. */
+export const remoteThreads = () =>
+  Object.values(getState().threads)
+    .filter(isRemote)
+    .sort((a, b) => lastActivity(b).localeCompare(lastActivity(a)));
+
 // ---------- API publik ----------
 
 export function subscribe(listener) {
@@ -192,6 +347,11 @@ export function getSnapshot() {
 
 /** Siarkan ke tab lain bahwa `role` sedang (atau berhenti) mengetik di percakapan `code`. */
 export function sendTyping(code, role, active = true) {
+  const thread = getThread(code);
+  if (isRemote(thread)) {
+    transport?.typing(thread.bookingId, active);
+    return;
+  }
   broadcast({ type: 'typing', code, role, active });
 }
 
@@ -199,7 +359,7 @@ export const isTyping = (code, role) => typing.has(`${code}:${role}`);
 
 export const getThread = (code) => getState().threads[code] ?? null;
 
-export const lastActivity = (thread) => thread.messages.at(-1)?.at ?? '';
+export const lastActivity = (thread) => thread.messages.at(-1)?.at ?? thread.lastMessage?.at ?? '';
 
 export const threadsForProvider = (providerId) =>
   Object.values(getState().threads)
@@ -209,6 +369,11 @@ export const threadsForProvider = (providerId) =>
 /** Jumlah pesan dari pihak lain yang belum dibaca `role`. */
 export function unreadCount(thread, role) {
   if (!thread) return 0;
+  if (isRemote(thread)) {
+    if (!thread.loaded) return thread.unread ?? 0;
+    return thread.messages.filter((m) => m.from !== role && m.from !== 'system' && !m.isRead)
+      .length;
+  }
   const since = thread.read?.[role] ?? '';
   return thread.messages.filter((m) => m.from !== role && m.from !== 'system' && m.at > since)
     .length;
@@ -216,13 +381,36 @@ export function unreadCount(thread, role) {
 
 /** Pesan ini sudah dibaca pihak lawan bicara? */
 export function seenByOther(thread, message) {
+  if (isRemote(thread)) return Boolean(message.isRead);
   const other = message.from === 'customer' ? 'provider' : 'customer';
   const read = thread.read?.[other];
   return Boolean(read && read >= message.at);
 }
 
 /** Buat percakapan untuk pesanan baru (dipanggil saat pesanan terkirim). */
-export function ensureThread({ code, providerId, providerName, customerName, service }) {
+export function ensureThread({
+  code,
+  bookingId,
+  providerId,
+  providerName,
+  customerName,
+  service,
+  viewer = 'customer',
+  ...meta
+}) {
+  if (bookingId) {
+    upsertRemoteThread({
+      code,
+      bookingId,
+      providerId,
+      providerName,
+      customerName,
+      service,
+      viewer,
+      ...meta,
+    });
+    return;
+  }
   if (getThread(code)) return;
   const now = stamp(new Date());
   commit((state) => ({
@@ -254,6 +442,7 @@ export function sendMessage(code, from, text) {
   const body = String(text).trim().slice(0, CHAT_MAX);
   const thread = getThread(code);
   if (!body || !thread) return null;
+  if (isRemote(thread)) return sendRemote(thread, from, body);
   const message = {
     id: `${code}-${from}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
     from,
@@ -276,9 +465,71 @@ export function sendMessage(code, from, text) {
 }
 
 /** Tandai percakapan sudah dibaca `role` (memunculkan tanda "Dibaca" di sisi lawan). */
+function sendRemote(thread, from, body) {
+  const message = {
+    id: `pending-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    from,
+    text: body,
+    at: stamp(new Date()),
+    pending: true,
+  };
+  patchThread(thread.code, (current) => ({
+    ...current,
+    messages: [...current.messages, message],
+  }));
+  transport?.typing(thread.bookingId, false);
+  const markFailed = () =>
+    patchThread(thread.code, (current) => ({
+      ...current,
+      messages: current.messages.map((m) =>
+        m.id === message.id ? { ...m, pending: false, failed: true } : m,
+      ),
+    }));
+  if (!transport) {
+    markFailed();
+    return message;
+  }
+  Promise.resolve(transport.send(thread.bookingId, body))
+    .then((saved) => {
+      if (!saved?.id) return;
+      patchThread(thread.code, (current) => {
+        const exists = current.messages.some((m) => m.id === saved.id);
+        const messages = exists
+          ? current.messages.filter((m) => m.id !== message.id)
+          : current.messages.map((m) => (m.id === message.id ? fromApiMessage(saved) : m));
+        return { ...current, messages, lastMessage: fromApiMessage(saved) };
+      });
+    })
+    .catch(markFailed);
+  return message;
+}
+
+/** Kirim ulang pesan yang gagal terkirim ke backend. */
+export function retryMessage(code, messageId) {
+  const thread = getThread(code);
+  const failed = thread?.messages.find((m) => m.id === messageId && m.failed);
+  if (!failed) return null;
+  patchThread(code, (current) => ({
+    ...current,
+    messages: current.messages.filter((m) => m.id !== messageId),
+  }));
+  return sendRemote(getThread(code), failed.from, failed.text);
+}
+
 export function markRead(code, role) {
   const thread = getThread(code);
   if (!thread || !unreadCount(thread, role)) return;
+  if (isRemote(thread)) {
+    patchThread(code, (current) => ({
+      ...current,
+      unread: 0,
+      messages: current.messages.map((m) =>
+        m.from !== role && m.from !== 'system' ? { ...m, isRead: true } : m,
+      ),
+    }));
+    Promise.resolve(transport?.markRead(thread.bookingId)).catch(() => {});
+    return;
+  }
   const latest = thread.messages.at(-1).at;
   commit((state) => ({
     ...state,
