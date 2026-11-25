@@ -13,14 +13,20 @@ export function useProviderProfile(id) {
   useEffect(() => {
     const controller = new AbortController();
     setState({ id, status: 'loading', profile: null, error: null });
-    getProviderProfile(id, { signal: controller.signal }).then(
-      (data) => setState({ id, status: 'success', profile: toProfile(data), error: null }),
-      (error) => {
-        if (error?.name === 'AbortError') return;
+    getProviderProfile(id, { signal: controller.signal })
+      .then((data) => {
+        if (controller.signal.aborted) return;
+        if (!data || typeof data !== 'object') {
+          setState({ id, status: 'notfound', profile: null, error: null });
+          return;
+        }
+        setState({ id, status: 'success', profile: toProfile(data), error: null });
+      })
+      .catch((error) => {
+        if (controller.signal.aborted || error?.name === 'AbortError') return;
         const notFound = error?.status === 404 || error?.status === 400;
         setState({ id, status: notFound ? 'notfound' : 'error', profile: null, error });
-      },
-    );
+      });
     return () => controller.abort();
   }, [id, attempt]);
 
