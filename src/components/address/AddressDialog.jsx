@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import Dialog from '@/components/ui/Dialog';
+import './AddressDialog.css';
 import {
   ADDRESS_DETAIL_MAX,
   ADDRESS_LABELS,
@@ -10,6 +11,7 @@ import {
 } from '@/features/booking/addressBook';
 import { JABAR_MAX_BOUNDS } from '@/features/map/jabarGeo';
 import {
+  AlertIcon,
   BuildingIcon,
   CrosshairIcon,
   HomeIcon,
@@ -149,24 +151,36 @@ function PinMap({ center, onMove, mapRef }) {
   );
 }
 
-function AddressForm({ initialCenter, onSave, onClose }) {
+function AddressForm({ initialCenter, address, onSave, onClose }) {
   const id = useId();
+  const editing = Boolean(address);
   const mapRef = useRef(null);
-  const textEdited = useRef(false);
+  // Alamat yang diubah sudah berisi teks sendiri: titik peta tidak menimpanya.
+  const textEdited = useRef(editing);
+  const firstPoint = useRef(true);
   const lookup = useRef(null);
   const [point, setPoint] = useState(initialCenter);
-  const [label, setLabel] = useState('Rumah');
-  const [text, setText] = useState('');
-  const [area, setArea] = useState('');
-  const [detail, setDetail] = useState('');
+  const [label, setLabel] = useState(
+    ADDRESS_LABELS.includes(address?.label) ? address.label : 'Rumah',
+  );
+  const [text, setText] = useState(address?.text ?? '');
+  const [area, setArea] = useState(address?.area ?? '');
+  const [detail, setDetail] = useState(address?.detail ?? '');
   const [primary, setPrimary] = useState(false);
   const [geo, setGeo] = useState({ state: 'idle', message: '' });
   const [query, setQuery] = useState('');
   const [search, setSearch] = useState({ state: 'idle', results: [] });
   const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
-  // Titik berubah → isi alamat otomatis dari peta (selama belum diketik sendiri).
+  // Titik berubah → isi alamat otomatis dari peta (selama belum diketik sendiri). Saat
+  // mengubah alamat, titik awal sudah punya alamat, jadi tidak perlu dicari.
   useEffect(() => {
+    if (editing && firstPoint.current) {
+      firstPoint.current = false;
+      return undefined;
+    }
     lookup.current?.abort();
     const controller = new AbortController();
     lookup.current = controller;
@@ -191,7 +205,7 @@ function AddressForm({ initialCenter, onSave, onClose }) {
       clearTimeout(timer);
       controller.abort();
     };
-  }, [point]);
+  }, [point, editing]);
 
   const moveTo = (target) => {
     mapRef.current?.setView([target.lat, target.lng], 17);
@@ -237,33 +251,44 @@ function AddressForm({ initialCenter, onSave, onClose }) {
     }
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     // Dialog dirender lewat portal, tapi event React tetap merambat ke <form> pesanan.
     event.stopPropagation();
+    if (saving) return;
     const value = text.trim();
     if (value.length < 10) {
       setError('Isi alamat lengkap (nama jalan, nomor, kelurahan/kecamatan), minimal 10 huruf.');
       document.getElementById(`${id}-text`)?.focus();
       return;
     }
-    onSave({
-      label,
-      text: value,
-      detail: detail.trim(),
-      area: area.trim(),
-      lat: Math.round(point.lat * 1e6) / 1e6,
-      lng: Math.round(point.lng * 1e6) / 1e6,
-      primary,
-    });
+    setSaving(true);
+    setSaveError('');
+    try {
+      await onSave({
+        label,
+        text: value,
+        detail: detail.trim(),
+        // Area dari peta dipakai backend pesanan (minimal 3 huruf); kosong bila tak dikenal.
+        area: area.trim().slice(0, 100),
+        lat: Math.round(point.lat * 1e6) / 1e6,
+        lng: Math.round(point.lng * 1e6) / 1e6,
+        ...(primary && { primary: true }),
+      });
+    } catch (err) {
+      setSaving(false);
+      setSaveError(err?.message || 'Alamat gagal disimpan. Silakan coba lagi.');
+    }
   };
+
+  const title = editing ? 'Ubah Alamat' : 'Tambah Alamat';
 
   return (
     <form className="dialog__form address-form" noValidate onSubmit={handleSubmit}>
       <div className="dialog__head">
         <div className="dialog__head-text">
-          <h2 id="tambah-alamat-title" className="dialog__title">
-            Tambah Alamat
+          <h2 id="alamat-dialog-title" className="dialog__title">
+            {title}
           </h2>
           <p className="dialog__desc">Geser peta sampai pin tepat di lokasi layanan.</p>
         </div>
@@ -407,7 +432,7 @@ function AddressForm({ initialCenter, onSave, onClose }) {
 
       <div className="field">
         <label htmlFor={`${id}-detail`} className="field-label">
-          Detail lainnya <span className="booking-card__optional">(opsional)</span>
+          Detail lainnya <span className="address-form__optional">(opsional)</span>
         </label>
         <div className="input-shell">
           <input
@@ -422,45 +447,64 @@ function AddressForm({ initialCenter, onSave, onClose }) {
         </div>
       </div>
 
-      <label className="address-primary">
-        <input
-          type="checkbox"
-          checked={primary}
-          onChange={(event) => setPrimary(event.target.checked)}
-        />
-        Jadikan alamat utama
-      </label>
+      {!address?.primary && (
+        <label className="address-primary">
+          <input
+            type="checkbox"
+            checked={primary}
+            onChange={(event) => setPrimary(event.target.checked)}
+          />
+          Jadikan alamat utama
+        </label>
+      )}
+
+      {saveError && (
+        <p className="address-form__error" role="alert">
+          <AlertIcon size={18} />
+          {saveError}
+        </p>
+      )}
 
       <div className="dialog__actions">
-        <button type="button" className="btn btn--outline" onClick={onClose}>
+        <button type="button" className="btn btn--outline" onClick={onClose} disabled={saving}>
           Batal
         </button>
-        <button type="submit" className="btn btn--primary">
-          Simpan Alamat
+        <button type="submit" className="btn btn--primary" disabled={saving} aria-busy={saving}>
+          {saving && <SpinnerIcon size={18} className="spin" />}
+          {saving ? 'Menyimpan…' : 'Simpan Alamat'}
         </button>
       </div>
     </form>
   );
 }
 
+const isPoint = (point) => Number.isFinite(point?.lat) && Number.isFinite(point?.lng);
+
 /**
- * Pop-up Tambah Alamat: cari lokasi, geser peta (drop pin), alamat terisi otomatis dari
- * titik peta, lalu label & detail. Dirender di <body> agar form-nya tidak bersarang di
- * form pesanan.
+ * Pop-up Tambah/Ubah Alamat: cari lokasi, geser peta (drop pin), alamat terisi otomatis dari
+ * titik peta, lalu label & detail. `address` diisi untuk mengubah alamat tersimpan.
+ * `onSave(alamat)` boleh async: pop-up menampilkan "Menyimpan…" dan pesan error bila
+ * gagal (error dilempar), dan pemanggil menutupnya setelah berhasil. Dirender di <body> agar
+ * form-nya tidak bersarang di form pesanan.
  */
-export default function AddressDialog({ open, initialCenter, onSave, onClose }) {
-  const center =
-    Number.isFinite(initialCenter?.lat) && Number.isFinite(initialCenter?.lng)
-      ? initialCenter
-      : BANDUNG;
+export default function AddressDialog({ open, address, initialCenter, onSave, onClose }) {
+  const start = isPoint(address) ? address : isPoint(initialCenter) ? initialCenter : BANDUNG;
   return createPortal(
     <Dialog
       open={open}
       onClose={onClose}
-      labelledBy="tambah-alamat-title"
+      labelledBy="alamat-dialog-title"
       className="dialog--address"
     >
-      {open && <AddressForm initialCenter={center} onSave={onSave} onClose={onClose} />}
+      {open && (
+        <AddressForm
+          key={address?.id ?? 'baru'}
+          initialCenter={{ lat: start.lat, lng: start.lng }}
+          address={address}
+          onSave={onSave}
+          onClose={onClose}
+        />
+      )}
     </Dialog>,
     document.body,
   );

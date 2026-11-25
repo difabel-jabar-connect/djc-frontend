@@ -30,6 +30,7 @@ import {
   validateStep,
 } from '@/features/booking/bookingDraft';
 import { findBooking } from '@/features/booking/customerBookings';
+import { useAddressBook } from '@/features/booking/addressBook';
 import { findPaymentMethod, seededDigits } from '@/features/booking/payment';
 import { homePathFor } from '@/features/auth/session';
 import { lastVisitedPath } from '@/hooks/useNavigationTrail';
@@ -211,6 +212,18 @@ function BookingFlow({ profile, user }) {
       if (changes.date instanceof Date) next.date = toISODate(changes.date);
       return next;
     });
+
+  // Alamat tersimpan dimuat dari backend setelah draf dibuat: pilih alamat utama bila draf
+  // belum punya alamat yang masih ada.
+  const addressBook = useAddressBook(user);
+  useEffect(() => {
+    if (addressBook.status !== 'ready' || !user) return;
+    setDraft((current) => {
+      if (selectedAddress(current, user)) return current;
+      const primary = addressBook.addresses.find((a) => a.primary) ?? addressBook.addresses[0];
+      return primary ? { ...current, addressId: primary.id } : current;
+    });
+  }, [addressBook.status, addressBook.addresses, user]);
 
   const goTo = (target) => {
     setAttempted(null);
