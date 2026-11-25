@@ -8,7 +8,7 @@ import {
   bookingTotal,
   formatBookingDate,
 } from '@/features/booking/customerBookings';
-import { getSampleProvider } from '@/features/providers/sampleProviders';
+import { bookingProvider } from '@/features/booking/bookingProvider';
 import { formatRupiah } from '@/lib/format';
 import { PATHS, buildBookingDetailPath } from '@/routes/paths';
 import {
@@ -27,7 +27,7 @@ const PAGE_SIZE = 5;
 const matchesTab = (booking, tab) => tab === 'semua' || BOOKING_STATUS[booking.status].tab === tab;
 
 function BookingCard({ booking, linkId }) {
-  const provider = getSampleProvider(booking.providerId);
+  const provider = bookingProvider(booking);
   const statusLabel = BOOKING_STATUS[booking.status].label;
   const detailPath = buildBookingDetailPath(booking.code);
 

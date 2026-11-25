@@ -3,7 +3,7 @@ import logo from '@/assets/icons/logo.svg';
 import loginIcon from '@/assets/icons/login.svg';
 import { useAuth } from '@/context/useAuth';
 import { useCustomer } from '@/context/useCustomer';
-import { getSampleProvider } from '@/features/providers/sampleProviders';
+import { bookingProvider } from '@/features/booking/bookingProvider';
 import { PATHS, buildBookingDetailPath } from '@/routes/paths';
 import UserMenu, { Disclosure } from '@/components/ui/UserMenu';
 import { BellIcon, ChevronDownIcon } from '@/components/ui/icons';
@@ -66,9 +66,7 @@ function Notifications() {
               {unread.map((b) => (
                 <li key={b.code}>
                   <Link to={buildBookingDetailPath(b.code)} onClick={close}>
-                    <strong>
-                      {NOTIFICATION_TEXT[b.status](getSampleProvider(b.providerId).name)}
-                    </strong>
+                    <strong>{NOTIFICATION_TEXT[b.status](bookingProvider(b).name)}</strong>
                     <span>
                       {b.code} · {b.service}
                     </span>

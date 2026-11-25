@@ -5,7 +5,7 @@ import { useAuth } from '@/context/useAuth';
 import { useCustomer } from '@/context/useCustomer';
 import { findBooking, formatBookingRange } from '@/features/booking/customerBookings';
 import { CHAT_OPEN_STATUSES, ensureThread } from '@/features/chat/chatStore';
-import { getSampleProvider } from '@/features/providers/sampleProviders';
+import { bookingProvider } from '@/features/booking/bookingProvider';
 import { PATHS, buildBookingDetailPath, buildProviderPath } from '@/routes/paths';
 import ChatPanel from '@/components/chat/ChatPanel';
 import { ArrowLeftIcon, BriefcaseIcon, ClockIcon, XCircleIcon } from '@/components/ui/icons';
@@ -25,7 +25,7 @@ export default function BookingChatPage() {
   const { user } = useAuth();
   const { bookings } = useCustomer();
   const booking = findBooking(bookings, code);
-  const provider = booking ? getSampleProvider(booking.providerId) : null;
+  const provider = booking ? bookingProvider(booking) : null;
   useDocumentTitle(provider ? `Chat dengan ${provider.name}` : 'Chat tidak ditemukan');
 
   // Pesanan tanpa riwayat chat (mis. data lama) → buka percakapan baru.

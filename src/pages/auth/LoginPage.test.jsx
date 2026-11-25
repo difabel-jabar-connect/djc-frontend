@@ -56,7 +56,9 @@ describe('Halaman Masuk', () => {
   it('login berhasil mengirim kredensial lalu kembali ke halaman tujuan', async () => {
     const fetchMock = vi
       .fn()
-      .mockResolvedValue(jsonResponse({ data: { id: 1, role: 'customer' } }));
+      .mockImplementation(() =>
+        Promise.resolve(jsonResponse({ data: { id: 1, role: 'customer' } })),
+      );
     vi.stubGlobal('fetch', fetchMock);
     const user = userEvent.setup();
     const { router } = renderAt('/login?next=%2Fpesan%2Frizki-maulana');
@@ -76,7 +78,10 @@ describe('Halaman Masuk', () => {
   });
 
   it('menolak redirect ke domain luar setelah login', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ data: {} })));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation(() => Promise.resolve(jsonResponse({ data: {} }))),
+    );
     const user = userEvent.setup();
     const { router } = renderAt('/login?next=https%3A%2F%2Fjahat.example');
     await fillAndSubmit(user);
@@ -119,7 +124,7 @@ describe('Halaman Masuk', () => {
   });
 
   it('akun demo (mode development) langsung masuk sesuai peran', async () => {
-    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ data: {} }));
+    const fetchMock = vi.fn().mockImplementation(() => Promise.resolve(jsonResponse({ data: {} })));
     vi.stubGlobal('fetch', fetchMock);
     const user = userEvent.setup();
     const { router } = renderAt('/login');

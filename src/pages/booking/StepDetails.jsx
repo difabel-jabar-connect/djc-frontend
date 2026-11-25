@@ -1,25 +1,27 @@
 import { useState } from 'react';
-import { PAYMENT_METHODS } from '@/features/providers/providerProfiles';
 import { DEFAULT_RADIUS_KM, NOTE_MAX } from '@/features/booking/bookingDraft';
+import { addAddress, addressLine, addressesFor, distanceKm } from '@/features/booking/addressBook';
 import {
-  BanknoteIcon,
   BuildingIcon,
   CheckCircleIcon,
-  CreditCardIcon,
-  CrosshairIcon,
   HomeIcon,
   InfoIcon,
   MailIcon,
   MapPinIcon,
   PhoneIcon,
   PlusIcon,
-  SmartphoneIcon,
-  WalletIcon,
 } from '@/components/ui/icons';
+import AddressDialog from './AddressDialog';
 import { StepHeading } from './StepParts';
 
-const ADDRESS_ICONS = { rumah: HomeIcon, kantor: BuildingIcon };
-const PAYMENT_ICONS = { transfer: CreditCardIcon, ewallet: SmartphoneIcon, cod: BanknoteIcon };
+/** Ikon per label alamat (alamat contoh memakai id rumah/kantor). */
+const ADDRESS_ICONS = {
+  rumah: HomeIcon,
+  Rumah: HomeIcon,
+  kantor: BuildingIcon,
+  Kantor: BuildingIcon,
+};
+const iconOf = (address) => ADDRESS_ICONS[address.label] ?? ADDRESS_ICONS[address.id] ?? MapPinIcon;
 const PIN_PATH = 'M0 0 C-2 -7 -14 -14 -14 -26 A14 14 0 1 1 14 -26 C14 -14 2 -7 0 0 Z';
 
 /** Peta mini: titik penyedia + radius layanan, dan alamat terpilih (ilustrasi, bukan peta asli). */
@@ -127,33 +129,25 @@ function AreaMap({ providerName, address, radiusKm }) {
   );
 }
 
-/** Langkah 3 — data pemesan, alamat, catatan, info pembayaran. */
+/** Langkah 3 — data pemesan, alamat layanan (pilih / tambah lewat pop-up peta), catatan. */
 export default function StepDetails({ profile, user, draft, update, errors }) {
-  const [geoStatus, setGeoStatus] = useState('');
-  const addresses = user.addresses ?? [];
+  const [adding, setAdding] = useState(false);
+  const [, setVersion] = useState(0);
+  const addresses = addressesFor(user);
   const saved = addresses.find((a) => a.id === draft.addressId);
   const radiusKm = profile.serviceRadiusKm ?? DEFAULT_RADIUS_KM;
   const phoneError = errors['booking-phone'];
   const addressError = errors['booking-address'];
+  const providerPoint = { lat: profile.lat, lng: profile.lng };
+  const savedDistance = saved ? (distanceKm(providerPoint, saved) ?? saved.distanceKm) : undefined;
 
-  const detectLocation = () => {
-    if (!navigator.geolocation) {
-      setGeoStatus(
-        'Browser Anda tidak mendukung deteksi lokasi. Silakan isi alamat secara manual.',
-      );
-      return;
-    }
-    setGeoStatus('Mendeteksi lokasi Anda…');
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        update((current) => ({
-          customAddress: `${current.customAddress ? `${current.customAddress}\n` : ''}Titik lokasi: ${coords.latitude.toFixed(5)}, ${coords.longitude.toFixed(5)}`,
-        }));
-        setGeoStatus('Titik lokasi ditambahkan. Lengkapi nama jalan dan nomor rumah.');
-      },
-      () => setGeoStatus('Lokasi tidak dapat diakses. Silakan isi alamat secara manual.'),
-      { timeout: 10000 },
-    );
+  const saveAddress = (address) => {
+    const entry = addAddress(user, address);
+    setAdding(false);
+    setVersion((n) => n + 1);
+    update({ addressId: entry.id });
+    // Kembalikan fokus ke alamat yang baru dipilih.
+    requestAnimationFrame(() => document.getElementById(`alamat-${entry.id}`)?.focus());
   };
 
   return (
@@ -233,28 +227,41 @@ export default function StepDetails({ profile, user, draft, update, errors }) {
       </section>
 
       <section className="booking-card" aria-labelledby="s-alamat">
-        <h3 id="s-alamat" className="booking-card__title">
-          Alamat Layanan
-        </h3>
-        <fieldset
-          className="address-fieldset"
-          aria-describedby={addressError ? 'booking-address-error' : undefined}
-        >
-          <legend className="field-label">
-            {addresses.length ? 'Alamat tersimpan' : 'Alamat lokasi layanan'}{' '}
-            <span className="field-required" aria-hidden="true">
-              *
-            </span>
-            <span className="visually-hidden">(wajib)</span>
-          </legend>
+        <div className="booking-card__head">
+          <h3 id="s-alamat" className="booking-card__title">
+            Alamat Layanan
+          </h3>
           {addresses.length > 0 && (
-            <div className="address-options">
+            <button
+              type="button"
+              className="btn btn--outline btn--sm"
+              onClick={() => setAdding(true)}
+            >
+              <PlusIcon size={18} strokeWidth={2.5} />
+              Tambah alamat
+            </button>
+          )}
+        </div>
+        {addresses.length > 0 ? (
+          <fieldset
+            className="address-fieldset"
+            aria-describedby={addressError ? 'booking-address-error' : undefined}
+          >
+            <legend className="field-label">
+              Pilih alamat{' '}
+              <span className="field-required" aria-hidden="true">
+                *
+              </span>
+              <span className="visually-hidden">(wajib)</span>
+            </legend>
+            <div className="address-options" id="booking-address" tabIndex={-1}>
               {addresses.map((address) => {
-                const Icon = ADDRESS_ICONS[address.id] ?? MapPinIcon;
+                const Icon = iconOf(address);
                 const checked = draft.addressId === address.id;
                 return (
                   <label key={address.id} className="address-option">
                     <input
+                      id={`alamat-${address.id}`}
                       type="radio"
                       name="alamat"
                       value={address.id}
@@ -267,7 +274,7 @@ export default function StepDetails({ profile, user, draft, update, errors }) {
                         <strong>{address.label}</strong>
                         {address.primary && <span className="address-badge">Utama</span>}
                       </span>
-                      <span className="address-option__text">{address.text}</span>
+                      <span className="address-option__text">{addressLine(address)}</span>
                       {checked && (
                         <span className="address-option__chosen">
                           <CheckCircleIcon size={16} strokeWidth={2.25} />
@@ -279,60 +286,25 @@ export default function StepDetails({ profile, user, draft, update, errors }) {
                 );
               })}
             </div>
-          )}
-          <label className="address-option address-option--other">
-            <input
-              type="radio"
-              name="alamat"
-              value="lain"
-              checked={draft.addressId === 'lain'}
-              onChange={() => update({ addressId: 'lain' })}
-              aria-controls="alamat-lain"
-            />
-            <span className="address-option__add">
-              <PlusIcon size={18} strokeWidth={2.5} />
-              {addresses.length ? 'Gunakan alamat lain' : 'Isi alamat lokasi layanan'}
-            </span>
-          </label>
-        </fieldset>
-
-        {draft.addressId === 'lain' && (
-          <div className="field" id="alamat-lain">
-            <label htmlFor="booking-address" className="field-label">
-              Alamat lengkap{' '}
-              <span className="field-required" aria-hidden="true">
-                *
-              </span>
-              <span className="visually-hidden">(wajib)</span>
-            </label>
-            <div
-              className={`input-shell input-shell--area${addressError ? ' input-shell--invalid' : ''}`}
-            >
-              <MapPinIcon className="input-shell__icon input-shell__icon--top" />
-              <textarea
-                id="booking-address"
-                rows={3}
-                className="input-shell__control"
-                placeholder="Contoh: Jl. Cigadung Raya No. 12, Cibeunying Kaler, Bandung"
-                value={draft.customAddress}
-                onChange={(event) => update({ customAddress: event.target.value })}
-                aria-invalid={Boolean(addressError)}
-                aria-describedby={addressError ? 'booking-address-error' : undefined}
-              />
-            </div>
+          </fieldset>
+        ) : (
+          <div className="address-empty">
+            <p>
+              Belum ada alamat tersimpan. Tambahkan alamat lokasi layanan dan pilih titiknya di
+              peta.
+            </p>
             <button
+              id="booking-address"
               type="button"
-              className="link-button link-button--flush"
-              onClick={detectLocation}
+              className="address-empty__add"
+              onClick={() => setAdding(true)}
+              aria-describedby={addressError ? 'booking-address-error' : undefined}
             >
-              <CrosshairIcon />
-              Gunakan Lokasi Saya
+              <span className="address-empty__plus" aria-hidden="true">
+                <PlusIcon size={22} strokeWidth={2.5} />
+              </span>
+              Tambah alamat
             </button>
-            {geoStatus && (
-              <p className="field-hint" role="status">
-                {geoStatus}
-              </p>
-            )}
           </div>
         )}
         {addressError && (
@@ -341,9 +313,19 @@ export default function StepDetails({ profile, user, draft, update, errors }) {
           </p>
         )}
 
-        {saved?.distanceKm !== undefined && (
-          <AreaMap providerName={profile.name.split(' ')[0]} address={saved} radiusKm={radiusKm} />
+        {saved && savedDistance != null && (
+          <AreaMap
+            providerName={profile.name.split(' ')[0]}
+            address={{ ...saved, distanceKm: savedDistance }}
+            radiusKm={radiusKm}
+          />
         )}
+        <AddressDialog
+          open={adding}
+          initialCenter={saved ?? providerPoint}
+          onSave={saveAddress}
+          onClose={() => setAdding(false)}
+        />
       </section>
 
       <section className="booking-card" aria-labelledby="s-catatan">
@@ -370,35 +352,6 @@ export default function StepDetails({ profile, user, draft, update, errors }) {
             {draft.note.length}/{NOTE_MAX} karakter
           </p>
         </div>
-      </section>
-
-      <section className="booking-card booking-card--tinted" aria-labelledby="s-bayar">
-        <h3 id="s-bayar" className="booking-card__title">
-          Pembayaran
-        </h3>
-        <div className="payment-info">
-          <span className="icon-tile icon-tile--primary" aria-hidden="true">
-            <WalletIcon size={24} />
-          </span>
-          <div>
-            <p className="payment-info__title">Pembayaran langsung ke penyedia</p>
-            <p>
-              Pembayaran dilakukan di luar platform setelah layanan disepakati. Penyedia menerima:{' '}
-              {profile.paymentMethods.map((key) => PAYMENT_METHODS[key].label).join(', ')}.
-            </p>
-          </div>
-        </div>
-        <ul className="payment-chips" aria-label="Metode yang diterima penyedia">
-          {profile.paymentMethods.map((key) => {
-            const Icon = PAYMENT_ICONS[key];
-            return (
-              <li key={key}>
-                <Icon size={18} />
-                {PAYMENT_METHODS[key].label}
-              </li>
-            );
-          })}
-        </ul>
       </section>
     </>
   );
