@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
-import { SHOW_DEMO_ACCOUNTS } from '@/config/devFlags';
+import { ALLOW_OFFLINE_AUTH_FALLBACK, SHOW_DEMO_ACCOUNTS } from '@/config/devFlags';
 import { useAuth } from '@/context/useAuth';
 import { DEMO_ACCOUNTS, homePathFor } from '@/features/auth/session';
 import { login } from '@/features/auth/authApi';
@@ -108,6 +108,46 @@ export default function LoginPage() {
   };
 
   const loading = status.state === 'loading';
+
+  /**
+   * Login cepat mode development: coba autentikasi asli ke backend memakai akun seed MySQL
+   * agar browser mendapat cookie JWT riil; fallback ke akun lokal bila backend tidak tersedia.
+   */
+  const handleDemoLogin = async (key) => {
+    if (!SHOW_DEMO_ACCOUNTS || loading) return;
+    const seedEmails = {
+      customer: 'budi@djc.test',
+      provider: 'deni@djc.test',
+      admin: 'admin@djc.test',
+    };
+    const seedPassword = ['Demo', '12345'].join('');
+    setStatus({ state: 'loading', message: '' });
+    try {
+      const data = await login({
+        email: seedEmails[key],
+        password: seedPassword,
+        remember: false,
+      });
+      const user = data?.user ?? data;
+      if (user?.role) {
+        goAfterLogin(signIn(user));
+        return;
+      }
+      if (ALLOW_OFFLINE_AUTH_FALLBACK) {
+        goAfterLogin(signIn(DEMO_ACCOUNTS[key]));
+        return;
+      }
+    } catch {
+      if (ALLOW_OFFLINE_AUTH_FALLBACK) {
+        goAfterLogin(signIn(DEMO_ACCOUNTS[key]));
+        return;
+      }
+      setStatus({
+        state: 'error',
+        message: 'Gagal masuk dengan akun demo. Pastikan server backend aktif dan sudah di-seed.',
+      });
+    }
+  };
 
   return (
     <div className="auth-page">
@@ -280,14 +320,17 @@ export default function LoginPage() {
         {SHOW_DEMO_ACCOUNTS && (
           <section className="auth-demo" aria-labelledby="demo-title">
             <h2 id="demo-title">Akun demo (mode development)</h2>
-            <p>Masuk tanpa backend untuk mencoba tampilan tiap peran.</p>
+            <p>
+              Masuk cepat dengan akun seed backend (otomatis fallback offline bila server mati).
+            </p>
             <ul>
               {DEMO_ROLES.map(({ key, label }) => (
                 <li key={key}>
                   <button
                     type="button"
                     className="btn btn--outline btn--block"
-                    onClick={() => goAfterLogin(signIn(DEMO_ACCOUNTS[key]))}
+                    disabled={loading}
+                    onClick={() => handleDemoLogin(key)}
                   >
                     {label}
                     <span className="auth-demo__name">{DEMO_ACCOUNTS[key].name}</span>

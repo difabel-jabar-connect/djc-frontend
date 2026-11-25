@@ -123,8 +123,24 @@ describe('Halaman Masuk', () => {
     });
   });
 
-  it('akun demo (mode development) langsung masuk sesuai peran', async () => {
-    const fetchMock = vi.fn().mockImplementation(() => Promise.resolve(jsonResponse({ data: {} })));
+  it('akun demo (mode development) login ke backend memakai akun seed bila server aktif', async () => {
+    const fetchMock = vi.fn().mockImplementation((input) => {
+      if (String(input).endsWith('/auth/login')) {
+        return Promise.resolve(
+          jsonResponse({
+            data: {
+              user: {
+                id: '11111111-1111-4111-8111-111111111111',
+                name: 'Budi Santoso',
+                email: 'budi@djc.test',
+                role: 'customer',
+              },
+            },
+          }),
+        );
+      }
+      return Promise.resolve(jsonResponse({ data: [] }));
+    });
     vi.stubGlobal('fetch', fetchMock);
     const user = userEvent.setup();
     const { router } = renderAt('/login');
@@ -132,11 +148,23 @@ describe('Halaman Masuk', () => {
     const demo = within(screen.getByRole('region', { name: /akun demo/i }));
     await user.click(demo.getByRole('button', { name: /pelanggan/i }));
 
-    expect(router.state.location.pathname).toBe('/');
+    await vi.waitFor(() => expect(router.state.location.pathname).toBe('/'));
     expect(await screen.findByRole('heading', { level: 1, name: /halo, budi!/i })).toBeVisible();
-    expect(fetchMock).not.toHaveBeenCalledWith(
-      expect.stringContaining('/auth/login'),
-      expect.anything(),
-    );
+    const loginCall = fetchMock.mock.calls.find(([url]) => String(url).endsWith('/auth/login'));
+    expect(loginCall).toBeTruthy();
+    expect(JSON.parse(loginCall[1].body)).toMatchObject({ email: 'budi@djc.test' });
+  });
+
+  it('akun demo (mode development) fallback ke sesi lokal saat backend tidak tersedia', async () => {
+    const fetchMock = vi.fn().mockRejectedValue(new TypeError('Failed to fetch'));
+    vi.stubGlobal('fetch', fetchMock);
+    const user = userEvent.setup();
+    const { router } = renderAt('/login');
+
+    const demo = within(screen.getByRole('region', { name: /akun demo/i }));
+    await user.click(demo.getByRole('button', { name: /pelanggan/i }));
+
+    await vi.waitFor(() => expect(router.state.location.pathname).toBe('/'));
+    expect(await screen.findByRole('heading', { level: 1, name: /halo, budi!/i })).toBeVisible();
   });
 });
