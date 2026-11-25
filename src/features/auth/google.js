@@ -8,11 +8,13 @@
  * membuat sesi cookie. Client secret TIDAK pernah ada di frontend.
  */
 
+import { getGoogleClientId } from '@/config/env';
+
 const GIS_SRC = 'https://accounts.google.com/gsi/client';
 const SCOPES = 'openid email profile';
 
 /** OAuth Client ID (publik) dari Google Cloud Console; kosong = fitur nonaktif. */
-export const getGoogleClientId = () => String(import.meta.env.VITE_GOOGLE_CLIENT_ID ?? '').trim();
+export { getGoogleClientId };
 
 export class GoogleAuthError extends Error {
   /** `code`: 'not_configured' | 'script_failed' | 'popup_closed' | 'popup_blocked' | 'denied' */

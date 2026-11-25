@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { isDev } from '@/config/env';
+import { ALLOW_OFFLINE_AUTH_FALLBACK, SHOW_DEV_CONFIG_HINTS } from '@/config/devFlags';
 import { getHealth } from '@/lib/api/health';
 import { authenticateWithGoogle, completeGoogleSignup } from './authApi';
 import {
@@ -9,7 +9,7 @@ import {
   requestGoogleProfile,
 } from './google';
 
-const NOT_CONFIGURED = isDev
+const NOT_CONFIGURED = SHOW_DEV_CONFIG_HINTS
   ? 'Masuk dengan Google belum dikonfigurasi. Isi VITE_GOOGLE_CLIENT_ID di .env.local lalu jalankan ulang dev server.'
   : 'Masuk dengan Google sedang tidak tersedia. Silakan gunakan email dan kata sandi.';
 
@@ -47,7 +47,7 @@ export function useGoogleAuth({ intent, onSuccess, errorMessages = {} }) {
   useEffect(() => {
     if (!getGoogleClientId()) return undefined;
     loadGoogleScript().catch(() => {});
-    if (!isDev) return undefined;
+    if (!ALLOW_OFFLINE_AUTH_FALLBACK) return undefined;
     const controller = new AbortController();
     getHealth({ signal: controller.signal })
       .then(() => {
@@ -71,7 +71,7 @@ export function useGoogleAuth({ intent, onSuccess, errorMessages = {} }) {
   const start = async (extra = {}) => {
     setState({ status: 'loading', message: '', errorCode: null });
 
-    if (isDev && backendDown.current) {
+    if (ALLOW_OFFLINE_AUTH_FALLBACK && backendDown.current) {
       try {
         const profile = await requestGoogleProfile();
         setState({ status: 'idle', message: '', errorCode: null });
@@ -95,7 +95,7 @@ export function useGoogleAuth({ intent, onSuccess, errorMessages = {} }) {
       setState({ status: 'idle', message: '', errorCode: null });
       onSuccess(data);
     } catch (error) {
-      if (isDev && error?.code === 'ERR_NET_FAIL') {
+      if (ALLOW_OFFLINE_AUTH_FALLBACK && error?.code === 'ERR_NET_FAIL') {
         // Cek backend di awal belum selesai saat tombol diklik; klik berikutnya pakai mode demo.
         backendDown.current = true;
         setState({

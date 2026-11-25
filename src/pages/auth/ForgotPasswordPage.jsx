@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
-import { isDev } from '@/config/env';
+import { ALLOW_OFFLINE_AUTH_FALLBACK } from '@/config/devFlags';
 import { requestPasswordReset } from '@/features/auth/authApi';
 import { PATHS } from '@/routes/paths';
 import { AlertCircleIcon, LockIcon, MailIcon, SpinnerIcon } from '@/components/ui/icons';
@@ -51,7 +51,7 @@ export default function ForgotPasswordPage() {
           </>,
         );
         inputRef.current?.focus();
-      } else if (isDev && err?.code === 'ERR_NET_FAIL') {
+      } else if (ALLOW_OFFLINE_AUTH_FALLBACK && err?.code === 'ERR_NET_FAIL') {
         // Backend belum berjalan: lanjutkan alur sebagai demo agar layar berikutnya bisa dicoba.
         navigate(PATHS.forgotPasswordSent, { state: { email: address, demo: true } });
       } else {

@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
-import { isDev } from '@/config/env';
+import { SHOW_DEMO_ACCOUNTS } from '@/config/devFlags';
 import { useAuth } from '@/context/useAuth';
 import { DEMO_ACCOUNTS, homePathFor } from '@/features/auth/session';
 import { login } from '@/features/auth/authApi';
@@ -276,8 +276,8 @@ export default function LoginPage() {
           </form>
         )}
 
-        {/* Backend auth belum tersedia: akun demo hanya muncul di mode development. */}
-        {isDev && (
+        {/* Akun demo hanya muncul di mode development (dikontrol lewat src/config/devFlags.js). */}
+        {SHOW_DEMO_ACCOUNTS && (
           <section className="auth-demo" aria-labelledby="demo-title">
             <h2 id="demo-title">Akun demo (mode development)</h2>
             <p>Masuk tanpa backend untuk mencoba tampilan tiap peran.</p>
