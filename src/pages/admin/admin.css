@@ -524,6 +524,15 @@
   min-width: 52rem;
 }
 
+.ad-dash-grid .ad-table {
+  min-width: 34rem;
+}
+
+.ad-dash-grid .ad-table th,
+.ad-dash-grid .ad-table td {
+  padding: 10px 7px;
+}
+
 .ad-table th,
 .ad-table td {
   padding: 12px 10px;
@@ -2303,6 +2312,15 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+}
+
+.ad-breakdown__head strong {
+  white-space: nowrap;
+}
+
+.ad-breakdown__head .dash-muted {
+  display: inline;
+  font-weight: 500;
 }
 
 .ad-breakdown__track {

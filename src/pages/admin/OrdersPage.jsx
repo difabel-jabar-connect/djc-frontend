@@ -25,7 +25,7 @@ const PAGE_SIZE = 10;
 const LIVE_BOOKING_KEY = {
   menunggu: 'requested',
   diterima: 'accepted',
-  berlangsung: 'in_progress',
+  berjalan: 'in_progress',
   selesai: 'completed',
   ditolak: 'rejected',
   dibatalkan: 'cancelled',

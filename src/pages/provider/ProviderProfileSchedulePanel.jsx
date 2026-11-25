@@ -197,9 +197,9 @@ export default function ProviderProfileSchedulePanel({
   };
 
   return (
-    <div id="pengaturan" className="provider-grid provider-grid--stretch">
-      <section className="dash-card dash-panel" aria-labelledby="profil-form-title">
-        <PanelHead id="profil-form-title" title="Pengaturan Profil Penyedia" />
+    <div className="provider-grid provider-grid--stretch">
+      <section id="profil" className="dash-card dash-panel" aria-labelledby="profil-form-title">
+        <PanelHead id="profil-form-title" title="Profil Penyedia" />
         <form className="provider-settings-form" noValidate onSubmit={handleProfileSubmit}>
           <div className="provider-form-grid">
             <div className="form-field">
@@ -355,8 +355,8 @@ export default function ProviderProfileSchedulePanel({
         </form>
       </section>
 
-      <section className="dash-card dash-panel" aria-labelledby="jadwal-form-title">
-        <PanelHead id="jadwal-form-title" title="Atur Jadwal Operasional" />
+      <section id="pengaturan" className="dash-card dash-panel" aria-labelledby="jadwal-form-title">
+        <PanelHead id="jadwal-form-title" title="Pengaturan Jadwal Operasional" />
         <form className="provider-settings-form" noValidate onSubmit={handleScheduleSubmit}>
           <ul className="provider-availability">
             {days.map((row) => (

@@ -195,24 +195,26 @@ export default function VerificationDrawer({
               )}
             </DrawerSection>
 
-            <DrawerSection id={`${id}-layanan`} title="Keahlian & Layanan" icon={BriefcaseIcon}>
-              <p className="ad-skill">
-                <CategoryIcon icon={category?.icon} size={18} />
-                {category?.name ?? 'Kategori tidak diketahui'}
-              </p>
-              {item.services.length ? (
-                <ul className="ad-service-list">
-                  {item.services.map((service) => (
-                    <li key={service.name}>
-                      <span>{service.name}</span>
-                      <strong>{service.price}</strong>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="ad-muted-text">Belum ada layanan dengan harga.</p>
-              )}
-            </DrawerSection>
+            {!(live && !category && item.services.length === 0) && (
+              <DrawerSection id={`${id}-layanan`} title="Keahlian & Layanan" icon={BriefcaseIcon}>
+                <p className="ad-skill">
+                  <CategoryIcon icon={category?.icon} size={18} />
+                  {category?.name ?? 'Kategori tidak diketahui'}
+                </p>
+                {item.services.length ? (
+                  <ul className="ad-service-list">
+                    {item.services.map((service) => (
+                      <li key={service.name}>
+                        <span>{service.name}</span>
+                        <strong>{service.price}</strong>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="ad-muted-text">Belum ada layanan dengan harga.</p>
+                )}
+              </DrawerSection>
+            )}
 
             <DrawerSection id={`${id}-lokasi`} title="Lokasi" icon={MapPinIcon}>
               {item.checklist.location && <LocationArt />}

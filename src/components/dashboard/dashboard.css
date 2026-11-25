@@ -639,6 +639,7 @@ a.dash-side__item:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   min-height: 44px;
   padding: 0 12px;
   border-radius: var(--radius-sm);
@@ -965,25 +966,36 @@ a.dash-side__item:hover {
 }
 
 @media (max-width: 1024px) {
-  /* Menu tidak lagi digeser keluar layar: item membungkus di dalam margin. */
+  /* Navigasi mobile satu baris horizontal yang bisa digeser tanpa memakan tinggi layar. */
   .dash-side {
     position: relative;
     top: auto;
     align-self: stretch;
     height: auto;
-    overflow: visible;
+    overflow-x: auto;
+    overflow-y: hidden;
     overscroll-behavior: auto;
     scrollbar-gutter: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
     border-bottom: 0;
   }
 
+  .dash-side::-webkit-scrollbar {
+    display: none;
+  }
+
   .dash-side__list {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    gap: 6px;
+    width: max-content;
   }
 
   .dash-side__item {
+    flex: none;
     min-height: 44px;
     padding: 0 12px;
+    white-space: nowrap;
   }
 }
 

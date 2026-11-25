@@ -74,7 +74,8 @@ export function Completeness({ item }) {
 /** Verifikasi Penyedia (desain Admin Verifikasi + Drawer Tinjau + dialog Setujui/Tolak). */
 export default function VerificationPage() {
   useDocumentTitle('Verifikasi Penyedia');
-  const { verifications, categories, approveProvider, rejectProvider, run, notify } = useAdmin();
+  const { live, verifications, categories, approveProvider, rejectProvider, run, notify } =
+    useAdmin();
   const [params, setParams] = useSearchParams();
   const [tab, setTab] = useState(() =>
     ADMIN_TABS.includes(params.get('tab')) ? params.get('tab') : 'menunggu',
@@ -144,7 +145,9 @@ export default function VerificationPage() {
 
   const subject = selected && {
     ...selected,
-    meta: `${categoryOf(selected.category)?.name ?? '-'} · ${selected.city}`,
+    meta: live
+      ? `${selected.alumni?.file ?? 'Alumni UPTD PPSGHD'} · ${selected.city}`
+      : `${categoryOf(selected.category)?.name ?? '-'} · ${selected.city}`,
   };
   const selectedDone = selected ? completeness(selected) : 0;
 
@@ -183,15 +186,17 @@ export default function VerificationPage() {
               onChange={withReset(setQuery)}
               width={300}
             />
-            <FilterSelect
-              label="Kategori"
-              value={category}
-              onChange={withReset(setCategory)}
-              options={[
-                { value: '', label: 'Semua' },
-                ...categories.map((c) => ({ value: c.id, label: c.name })),
-              ]}
-            />
+            {!live && (
+              <FilterSelect
+                label="Kategori"
+                value={category}
+                onChange={withReset(setCategory)}
+                options={[
+                  { value: '', label: 'Semua' },
+                  ...categories.map((c) => ({ value: c.id, label: c.name })),
+                ]}
+              />
+            )}
             <FilterSelect
               label="Kota"
               value={city}
@@ -247,7 +252,7 @@ export default function VerificationPage() {
                   <thead>
                     <tr>
                       <th scope="col">Penyedia</th>
-                      <th scope="col">Keahlian</th>
+                      <th scope="col">{live ? 'No. Alumni' : 'Keahlian'}</th>
                       <th scope="col">Domisili</th>
                       <th scope="col">Tanggal Daftar</th>
                       <th scope="col">{tab === 'menunggu' ? 'Lama Menunggu' : 'Keputusan'}</th>
@@ -264,10 +269,16 @@ export default function VerificationPage() {
                             <PersonCell person={item} />
                           </td>
                           <td>
-                            <span className="ad-skill">
-                              <CategoryIcon icon={cat?.icon} size={18} />
-                              {cat?.name ?? '-'}
-                            </span>
+                            {live ? (
+                              <span className="ad-nowrap">
+                                {item.alumni?.file?.replace(/^Nomor Alumni\s+/i, '') ?? '-'}
+                              </span>
+                            ) : (
+                              <span className="ad-skill">
+                                <CategoryIcon icon={cat?.icon} size={18} />
+                                {cat?.name ?? '-'}
+                              </span>
+                            )}
                           </td>
                           <td>{item.city}</td>
                           <td className="ad-nowrap">{formatDate(item.registeredAt)}</td>

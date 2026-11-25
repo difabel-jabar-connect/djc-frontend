@@ -375,7 +375,7 @@ export default function AdminDashboardPage() {
                 <thead>
                   <tr>
                     <th scope="col">Penyedia</th>
-                    <th scope="col">Keahlian</th>
+                    <th scope="col">{live ? 'No. Alumni' : 'Keahlian'}</th>
                     <th scope="col">Tanggal Daftar</th>
                     <th scope="col">Lama Menunggu</th>
                     <th scope="col">
@@ -393,10 +393,16 @@ export default function AdminDashboardPage() {
                           <PersonCell person={item} secondary={item.city} />
                         </td>
                         <td>
-                          <span className="ad-skill">
-                            <CategoryIcon icon={category?.icon} size={18} />
-                            {category?.name}
-                          </span>
+                          {live ? (
+                            <span className="ad-nowrap">
+                              {item.alumni?.file?.replace(/^Nomor Alumni\s+/i, '') ?? '-'}
+                            </span>
+                          ) : (
+                            <span className="ad-skill">
+                              <CategoryIcon icon={category?.icon} size={18} />
+                              {category?.name}
+                            </span>
+                          )}
                         </td>
                         <td className="ad-nowrap">{formatDate(item.registeredAt)}</td>
                         <td>

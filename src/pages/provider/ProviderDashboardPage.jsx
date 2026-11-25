@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useMemo, useState } from 'react';
+import { Link, useLocation } from 'react-router';
 import DashboardShell from '@/components/dashboard/DashboardShell';
 import { LineChart } from '@/components/dashboard/charts';
 import { PanelHead, StatCard, StatusBadge, Trend } from '@/components/dashboard/DashboardWidgets';
@@ -211,9 +212,21 @@ function buildDemoCategories() {
  */
 export default function ProviderDashboardPage() {
   useDocumentTitle('Dashboard Penyedia');
+  const location = useLocation();
+  const [activeHash, setActiveHash] = useState(() => location.hash || '#ringkasan');
   const { user, signIn } = useAuth();
   const live = isBackendId(user?.id);
   const demoProfile = useMemo(() => getProviderProfile(PROVIDER_ID), []);
+
+  useEffect(() => {
+    setActiveHash(location.hash || '#ringkasan');
+  }, [location.hash]);
+
+  useEffect(() => {
+    const syncHash = () => setActiveHash(window.location.hash || '#ringkasan');
+    window.addEventListener('hashchange', syncHash);
+    return () => window.removeEventListener('hashchange', syncHash);
+  }, []);
 
   const now = new Date();
   const today = startOfDay(now);
@@ -519,7 +532,7 @@ export default function ProviderDashboardPage() {
   const chatUnread = threads.reduce((sum, thread) => sum + unreadCount(thread, 'provider'), 0);
   const navItems = providerNavItems({
     page: 'dashboard',
-    providerId: activeProfile.id,
+    activeHash,
     newCount,
     chatUnread,
   });
@@ -1021,7 +1034,7 @@ export default function ProviderDashboardPage() {
                 {item.done ? (
                   <span className="checklist__status">Lengkap</span>
                 ) : (
-                  <a href="#pengaturan" className="dash-soon">
+                  <a href="#profil" className="dash-soon">
                     Lengkapi
                   </a>
                 )}
@@ -1030,6 +1043,28 @@ export default function ProviderDashboardPage() {
           </ul>
         </section>
       </div>
+
+      <section id="ulasan" className="dash-card dash-panel" aria-labelledby="ulasan-title">
+        <PanelHead id="ulasan-title" title="Ulasan Pelanggan">
+          <Link to={`${buildProviderPath(activeProfile.id)}#ulasan`} className="dash-panel__link">
+            Lihat di profil publik
+            <ArrowRightIcon size={16} />
+          </Link>
+        </PanelHead>
+        <div className="provider-reviews-summary">
+          <div className="provider-reviews-summary__score">
+            <strong>{formatRating(activeProfile.rating)}</strong>
+            <RatingStars value={activeProfile.rating} size={20} />
+            <span className="dash-muted">
+              Berdasarkan {activeProfile.reviewCount} ulasan pelanggan
+            </span>
+          </div>
+          <p className="dash-panel__note">
+            Pelanggan dapat memberikan ulasan setelah pesanan berstatus <strong>Selesai</strong>.
+            Ulasan yang dipublikasikan akan otomatis memperbarui skor rating Anda.
+          </p>
+        </div>
+      </section>
 
       <ProviderProfileSchedulePanel
         key={`${activeProfile.id}-${loadState}`}
