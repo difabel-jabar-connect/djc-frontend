@@ -183,6 +183,55 @@ const demoAccount = () => ({
   addresses: demoAddresses(),
 });
 
+const demoProviderState = () => ({
+  profile: {
+    id: '44444444-4444-4444-8444-444444444444',
+    display_name: 'Deni Setiawan',
+    photo_url: null,
+    photo_alt: null,
+    bio: 'Alumni pelatihan servis elektronik.',
+    communication_prefs: ['chat', 'call'],
+    disability_type: null,
+    alumni_reg_no: 'AL-2024-001',
+    address_detail: 'Jl. Ahmad Yani No. 12, Bekasi Selatan',
+    city: 'Kota Bekasi',
+    district: 'Bekasi Selatan',
+    lat: -6.2383,
+    lng: 106.9756,
+    public_lat: -6.24,
+    public_lng: 106.98,
+    service_radius_km: 10,
+    verification_status: 'verified',
+    rating_avg: 4.8,
+    rating_count: 12,
+    phone: '+6281234567890',
+  },
+  services: [
+    {
+      id: '55555555-5555-4555-8555-555555555555',
+      title: 'Servis Kipas Angin',
+      description: 'Perbaikan kipas angin rumah tangga.',
+      pricing_type: 'starting_from',
+      price_amount: 50000,
+      min_hours: null,
+      duration_estimate_min: 60,
+      service_mode: 'at_customer',
+      is_active: true,
+      category: {
+        id: 'cat-servis-elektronik',
+        name: 'Servis Elektronik',
+        slug: 'servis-elektronik',
+        is_active: true,
+      },
+    },
+  ],
+  availability: [
+    { day_of_week: 1, start_time: '08:00', end_time: '17:00' },
+    { day_of_week: 2, start_time: '08:00', end_time: '17:00' },
+  ],
+  portfolio: [],
+});
+
 const validationError = (field, message) =>
   json(
     {
@@ -287,6 +336,8 @@ export const fakeApi = {
   reviewError: null,
   /** Akun di balik endpoint /me; test bisa mengubah isinya (mis. `addresses = []`). */
   account: demoAccount(),
+  /** Data milik provider di balik endpoint /provider/*. */
+  provider: demoProviderState(),
   reset() {
     this.calls = [];
     this.offline = false;
@@ -295,12 +346,15 @@ export const fakeApi = {
     this.cancelError = null;
     this.reviewError = null;
     this.account = demoAccount();
+    this.provider = demoProviderState();
     bookingSeq = 0;
     addressSeq = 0;
+    providerServiceSeq = 0;
   },
 };
 
 let bookingSeq = 0;
+let providerServiceSeq = 0;
 
 export async function fakeFetch(input, init = {}) {
   const url = new URL(typeof input === 'string' ? input : input.url);
@@ -333,6 +387,79 @@ export async function fakeFetch(input, init = {}) {
   if (path === '/me' || path.startsWith('/me/')) {
     const response = accountRoute(method, path, body ?? {});
     if (response) return response;
+  }
+
+  if (path === '/provider/profile') {
+    if (method === 'GET') return json({ data: fakeApi.provider.profile });
+    if (method === 'PUT') {
+      fakeApi.provider.profile = { ...fakeApi.provider.profile, ...(body ?? {}) };
+      return json({ data: fakeApi.provider.profile });
+    }
+  }
+  if (path === '/provider/availability') {
+    if (method === 'GET') return json({ data: fakeApi.provider.availability });
+    if (method === 'PUT') {
+      fakeApi.provider.availability = body?.availability ?? [];
+      return json({ data: fakeApi.provider.availability });
+    }
+  }
+  if (path === '/provider/portfolio' && method === 'GET') {
+    return json({ data: fakeApi.provider.portfolio });
+  }
+  if (path === '/provider/services') {
+    if (method === 'GET') return json({ data: fakeApi.provider.services });
+    if (method === 'POST') {
+      providerServiceSeq += 1;
+      const cat = CATEGORIES.find((c) => `cat-${c.slug}` === body?.category_id);
+      const created = {
+        id: `svc-created-${providerServiceSeq}`,
+        ...body,
+        is_active: body?.is_active ?? true,
+        category: {
+          id: body?.category_id,
+          name: cat?.label ?? 'Layanan',
+          slug: cat?.slug ?? 'lainnya',
+          is_active: true,
+        },
+      };
+      fakeApi.provider.services = [created, ...fakeApi.provider.services];
+      return json({ data: created }, 201);
+    }
+  }
+  const ownServiceOne = /^\/provider\/services\/([^/]+)$/.exec(path);
+  if (ownServiceOne && method === 'PUT') {
+    const id = decodeURIComponent(ownServiceOne[1]);
+    const row = fakeApi.provider.services.find((s) => s.id === id);
+    if (!row) return notFound('Layanan tidak ditemukan.');
+    Object.assign(row, body ?? {});
+    return json({ data: { ...row } });
+  }
+
+  const bookingAction = /^\/bookings\/([^/]+)\/(accept|reject|start|complete)$/.exec(path);
+  if ((method === 'PUT' || method === 'POST') && bookingAction) {
+    const id = decodeURIComponent(bookingAction[1]);
+    const action = bookingAction[2];
+    const row = fakeApi.bookings.find((b) => b.id === id);
+    if (!row) return notFound('Pesanan tidak ditemukan.');
+    if (action === 'accept') {
+      row.status = 'accepted';
+    } else if (action === 'reject') {
+      row.status = 'rejected';
+      row.status_reason = body?.reason ?? null;
+    } else if (action === 'start') {
+      row.status = 'in_progress';
+    } else if (action === 'complete') {
+      row.status = 'completed';
+      if (body?.actual_quantity !== undefined) {
+        row.actual_quantity = body.actual_quantity;
+        row.final_total = Math.round(Number(row.unit_price_snapshot ?? 0) * body.actual_quantity);
+      } else if (body?.final_total !== undefined) {
+        row.final_total = body.final_total;
+      } else {
+        row.final_total = Number(row.estimated_total ?? 0);
+      }
+    }
+    return json({ data: { ...row } });
   }
 
   if (method === 'GET' && path === '/bookings') {

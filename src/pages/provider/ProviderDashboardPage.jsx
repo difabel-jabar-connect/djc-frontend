@@ -1,5 +1,4 @@
-import { Fragment, useState } from 'react';
-import { Link } from 'react-router';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import DashboardShell from '@/components/dashboard/DashboardShell';
 import { LineChart } from '@/components/dashboard/charts';
 import { PanelHead, StatCard, StatusBadge, Trend } from '@/components/dashboard/DashboardWidgets';
@@ -15,24 +14,53 @@ import {
   StarOutlineIcon,
   WalletIcon,
 } from '@/components/ui/icons';
-import { threadsForProvider, unreadCount } from '@/features/chat/chatStore';
+import { useAuth } from '@/context/useAuth';
+import { remoteThreads, threadsForProvider, unreadCount } from '@/features/chat/chatStore';
+import { isBackendId, useChatInbox } from '@/features/chat/chatSync';
 import { useChatStore } from '@/features/chat/useChat';
-import { providerNavItems } from './providerNav';
+import {
+  acceptBooking,
+  cancelProviderBooking,
+  completeBooking,
+  createOwnService,
+  getOwnAvailability,
+  getOwnProviderProfile,
+  listActiveCategories,
+  listOwnPortfolio,
+  listOwnServices,
+  listProviderBookings,
+  rejectBooking,
+  replaceOwnAvailability,
+  startBooking,
+  updateOwnProviderProfile,
+  updateOwnService,
+} from '@/features/dashboard/providerApi';
+import {
+  PROVIDER_ORDER_STATUS,
+  computeProviderMetrics,
+  fromApiProviderBooking,
+  fromSampleProviderOrder,
+  initialsOf,
+} from '@/features/dashboard/providerDashboardAdapters';
 import {
   LAST_7_DAYS,
   MONTH_STATS,
-  ORDER_STATUS,
   PROFILE_CHECKLIST,
   PROVIDER_ID,
+  TREND_TOTALS,
   profileCompleteness,
   sampleOrders,
-  TREND_TOTALS,
 } from '@/features/dashboard/providerDashboardData';
 import { getProviderProfile } from '@/features/providers/providerProfiles';
+import { CATEGORIES } from '@/features/search/catalog';
 import { addDays, startOfDay, toISODate } from '@/features/booking/schedule';
 import { formatRating, formatRupiah } from '@/lib/format';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { buildProviderPath } from '@/routes/paths';
+import { ProviderCompleteModal, ProviderReasonModal } from './ProviderOrderModals';
+import ProviderProfileSchedulePanel from './ProviderProfileSchedulePanel';
+import ProviderServicesPanel from './ProviderServicesPanel';
+import { providerNavItems } from './providerNav';
 import './providerDashboard.css';
 
 const WEEKDAY = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
@@ -64,8 +92,10 @@ function agendaState(order, now) {
   start.setHours(order.start);
   const end = new Date(start);
   end.setHours(order.start + order.hours);
-  if (now >= end) return { tone: 'neutral', label: 'Selesai' };
-  if (now >= start) return { tone: 'success', label: 'Berlangsung' };
+  if (order.status === 'completed' || now >= end) return { tone: 'neutral', label: 'Selesai' };
+  if (order.status === 'in_progress' || now >= start) {
+    return { tone: 'success', label: 'Berlangsung' };
+  }
   return { tone: 'info', label: 'Akan Datang' };
 }
 
@@ -154,38 +184,328 @@ function BannerArt() {
   );
 }
 
-/** Dashboard Penyedia Layanan (FR-PROV-*). Data contoh; aksi pesanan belum tersambung API. */
+function buildDemoServices(profile) {
+  return (profile.packages ?? []).map((pkg) => ({
+    id: `demo-svc-${pkg.id}`,
+    title: pkg.title,
+    description: pkg.description ?? '',
+    pricing_type: pkg.priceUnit === 'jam' ? 'hourly' : 'starting_from',
+    price_amount: pkg.priceFrom,
+    min_hours: pkg.priceUnit === 'jam' ? 1 : null,
+    duration_estimate_min: null,
+    service_mode: 'at_customer',
+    is_active: true,
+    category: { id: `cat-${profile.categorySlug}`, name: profile.category },
+  }));
+}
+
+function buildDemoCategories() {
+  return CATEGORIES.map((c) => ({ id: `cat-${c.slug}`, slug: c.slug, name: c.label }));
+}
+
+/**
+ * Dashboard Penyedia Layanan (FR-PROV-*, FE-05b).
+ * - Akun penyedia backend (id UUID) memuat & menyimpan data riil via `/provider/*` dan `/bookings/*`.
+ * - Akun demo lokal tetap menampilkan data contoh agar mode offline/unit test berjalan mulus.
+ */
 export default function ProviderDashboardPage() {
   useDocumentTitle('Dashboard Penyedia');
-  const profile = getProviderProfile(PROVIDER_ID);
+  const { user, signIn } = useAuth();
+  const live = isBackendId(user?.id);
+  const demoProfile = useMemo(() => getProviderProfile(PROVIDER_ID), []);
+
   const now = new Date();
   const today = startOfDay(now);
-  const [orders, setOrders] = useState(() => sampleOrders(today));
+
+  const [loadState, setLoadState] = useState(() => (live ? 'loading' : 'ready'));
+  const [loadError, setLoadError] = useState('');
+  const [reloadTick, setReloadTick] = useState(0);
+
+  const [apiProfile, setApiProfile] = useState(null);
+  const [orders, setOrders] = useState(() =>
+    live ? [] : sampleOrders(today).map(fromSampleProviderOrder),
+  );
+  const [services, setServices] = useState(() => (live ? [] : buildDemoServices(demoProfile)));
+  const [availability, setAvailability] = useState(() =>
+    live
+      ? []
+      : (demoProfile.workDays ?? [1, 2, 3, 4, 5, 6]).map((day) => ({
+          day_of_week: day,
+          start_time: '08:00',
+          end_time: '17:00',
+        })),
+  );
+  const [portfolio, setPortfolio] = useState([]);
+  const [categories, setCategories] = useState(() => (live ? [] : buildDemoCategories()));
+
   const [expanded, setExpanded] = useState('');
-  const [announcement, setAnnouncement] = useState('');
+  const [busyOrderId, setBusyOrderId] = useState('');
+  const [reasonModal, setReasonModal] = useState(null); // { order, mode: 'reject' | 'cancel' }
+  const [completeModal, setCompleteModal] = useState(null); // order
+  const [feedback, setFeedback] = useState(null); // { tone: 'success' | 'error', text }
   const [weekStart, setWeekStart] = useState(() => mondayOf(today));
   const [selectedDay, setSelectedDay] = useState(() => toISODate(today));
 
-  const newCount = orders.filter((o) => o.status === 'baru').length;
-  const needsAction = orders.filter((o) => o.status === 'baru' || o.status === 'menunggu').length;
-  const completeness = profileCompleteness();
+  useChatStore();
+  useChatInbox('provider', live);
+
+  useEffect(() => {
+    if (!live) return undefined;
+    const controller = new AbortController();
+    let ignore = false;
+    setLoadState('loading');
+    setLoadError('');
+
+    Promise.all([
+      getOwnProviderProfile({ signal: controller.signal }),
+      listProviderBookings({ signal: controller.signal }),
+      listOwnServices({ signal: controller.signal }),
+      getOwnAvailability({ signal: controller.signal }),
+      listActiveCategories({ signal: controller.signal }),
+      listOwnPortfolio({ signal: controller.signal }).catch(() => []),
+    ])
+      .then(([ownProfile, bookingRows, ownServices, ownSlots, activeCats, ownPortfolio]) => {
+        if (ignore) return;
+        setApiProfile(ownProfile);
+        setOrders(bookingRows.map(fromApiProviderBooking));
+        setServices(ownServices);
+        setAvailability(ownSlots);
+        setCategories(activeCats);
+        setPortfolio(ownPortfolio);
+        setLoadState('ready');
+      })
+      .catch((error) => {
+        if (ignore || error?.name === 'AbortError') return;
+        setLoadError(error?.message || 'Data dashboard penyedia belum bisa dimuat.');
+        setLoadState('error');
+      });
+
+    return () => {
+      ignore = true;
+      controller.abort();
+    };
+  }, [live, user?.id, reloadTick]);
+
+  const activeProfile = useMemo(() => {
+    if (live && apiProfile) {
+      return {
+        id: apiProfile.id,
+        name: apiProfile.display_name || user?.name || 'Penyedia Jasa',
+        initials: initialsOf(apiProfile.display_name || user?.name),
+        rating: apiProfile.rating_avg ?? 0,
+        reviewCount: apiProfile.rating_count ?? 0,
+        categoryIcon: demoProfile.categoryIcon,
+        raw: apiProfile,
+      };
+    }
+    return {
+      id: PROVIDER_ID,
+      name: demoProfile.name,
+      initials: demoProfile.initials,
+      rating: demoProfile.rating,
+      reviewCount: demoProfile.reviewCount,
+      categoryIcon: demoProfile.categoryIcon,
+      raw: {
+        display_name: demoProfile.name,
+        phone: '+6281234567890',
+        city: demoProfile.city,
+        district: demoProfile.district ?? '',
+        address_detail: demoProfile.address ?? '',
+        service_radius_km: 10,
+        disability_type: '',
+        bio: demoProfile.description ?? '',
+        communication_prefs: ['chat'],
+      },
+    };
+  }, [live, apiProfile, user?.name, demoProfile]);
+
+  const liveMetrics = useMemo(
+    () =>
+      computeProviderMetrics({
+        orders,
+        services,
+        profile: apiProfile,
+        portfolio,
+        today,
+      }),
+    [orders, services, apiProfile, portfolio, today],
+  );
+
+  const newCount = orders.filter((o) => o.status === 'requested').length;
+  const needsAction = orders.filter(
+    (o) => o.status === 'requested' || o.status === 'accepted',
+  ).length;
+  const completeness = live ? liveMetrics.completeness : profileCompleteness();
+  const checklistItems = live ? liveMetrics.checklist : PROFILE_CHECKLIST;
+
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   const ordersOn = (iso) =>
-    orders.filter((o) => toISODate(o.date) === iso && o.status !== 'selesai');
+    orders.filter(
+      (o) =>
+        toISODate(o.date) === iso &&
+        o.status !== 'completed' &&
+        o.status !== 'rejected' &&
+        o.status !== 'cancelled',
+    );
   const agenda = ordersOn(selectedDay);
   const selectedDate = days.find((d) => toISODate(d) === selectedDay) ?? new Date(selectedDay);
-  const trendLabels = LAST_7_DAYS.map((_, i) => addDays(today, i - 6));
-  const trendTotal = LAST_7_DAYS.reduce((a, b) => a + b, 0);
-  const trendMax = Math.max(...LAST_7_DAYS);
-  const peakDay = trendLabels[LAST_7_DAYS.lastIndexOf(trendMax)];
 
-  const advance = (order) => {
-    const status = ORDER_STATUS[order.status];
-    // TODO(API): kirim perubahan status pesanan ke backend.
-    setOrders((list) => list.map((o) => (o.id === order.id ? { ...o, status: status.next } : o)));
-    setAnnouncement(
-      `Pesanan ${order.customer} kini berstatus ${ORDER_STATUS[status.next].label.toLowerCase()}.`,
+  const chartData = live ? liveMetrics.last7Days : LAST_7_DAYS;
+  const trendLabels = chartData.map((_, i) => addDays(today, i - 6));
+  const trendTotal = chartData.reduce((a, b) => a + b, 0);
+  const trendMax = Math.max(...chartData, 0);
+  const chartMax = Math.max(3, trendMax);
+  const chartTicks = Array.from({ length: 4 }, (_, i) => Math.round((chartMax * i) / 3));
+  const peakDay = trendLabels[chartData.lastIndexOf(trendMax)];
+
+  const announce = (text, tone = 'success') => setFeedback({ tone, text });
+
+  const applyOrderUpdate = (updated) => {
+    setOrders((list) => list.map((o) => (o.id === updated.id ? updated : o)));
+  };
+
+  const handleAccept = async (order) => {
+    setBusyOrderId(order.id);
+    try {
+      if (live) {
+        const updated = await acceptBooking(order.id);
+        applyOrderUpdate(fromApiProviderBooking(updated));
+      } else {
+        applyOrderUpdate({ ...order, status: 'accepted' });
+      }
+      announce(`Pesanan ${order.customer} kini berstatus diterima.`);
+    } catch (err) {
+      announce(err?.message || 'Gagal menerima pesanan.', 'error');
+    } finally {
+      setBusyOrderId('');
+    }
+  };
+
+  const handleStart = async (order) => {
+    setBusyOrderId(order.id);
+    try {
+      if (live) {
+        const updated = await startBooking(order.id);
+        applyOrderUpdate(fromApiProviderBooking(updated));
+      } else {
+        applyOrderUpdate({ ...order, status: 'in_progress' });
+      }
+      announce(`Pesanan ${order.customer} kini berstatus diproses.`);
+    } catch (err) {
+      announce(err?.message || 'Gagal memulai pesanan.', 'error');
+    } finally {
+      setBusyOrderId('');
+    }
+  };
+
+  const handleReasonConfirm = async (reason) => {
+    const { order, mode } = reasonModal;
+    if (live) {
+      const updated =
+        mode === 'reject'
+          ? await rejectBooking(order.id, reason)
+          : await cancelProviderBooking(order.id, reason);
+      applyOrderUpdate(fromApiProviderBooking(updated));
+    } else {
+      applyOrderUpdate({
+        ...order,
+        status: mode === 'reject' ? 'rejected' : 'cancelled',
+        statusReason: reason,
+      });
+    }
+    setReasonModal(null);
+    announce(
+      mode === 'reject'
+        ? `Pesanan ${order.customer} telah ditolak.`
+        : `Pesanan ${order.customer} telah dibatalkan.`,
     );
+  };
+
+  const handleCompleteConfirm = async (payload) => {
+    const order = completeModal;
+    if (live) {
+      const updated = await completeBooking(order.id, payload);
+      applyOrderUpdate(fromApiProviderBooking(updated));
+    } else {
+      const finalTotal =
+        payload.final_total ??
+        (payload.actual_quantity
+          ? Math.round(order.unitPrice * payload.actual_quantity)
+          : order.estimatedTotal);
+      applyOrderUpdate({
+        ...order,
+        status: 'completed',
+        actualQuantity: payload.actual_quantity ?? order.actualQuantity,
+        finalTotal,
+      });
+    }
+    setCompleteModal(null);
+    announce(`Pesanan ${order.customer} kini berstatus selesai.`);
+  };
+
+  const handleSaveService = async (payload, serviceId) => {
+    if (live) {
+      const saved = serviceId
+        ? await updateOwnService(serviceId, payload)
+        : await createOwnService(payload);
+      setServices((prev) =>
+        serviceId ? prev.map((s) => (s.id === serviceId ? saved : s)) : [saved, ...prev],
+      );
+    } else {
+      const cat = categories.find((c) => c.id === payload.category_id) ?? {
+        id: payload.category_id,
+        name: 'Layanan',
+      };
+      const localItem = {
+        ...payload,
+        id: serviceId ?? `demo-svc-${Date.now()}`,
+        category: { id: cat.id, name: cat.name },
+      };
+      setServices((prev) =>
+        serviceId ? prev.map((s) => (s.id === serviceId ? localItem : s)) : [localItem, ...prev],
+      );
+    }
+    announce(
+      serviceId
+        ? `Layanan "${payload.title}" diperbarui.`
+        : `Layanan "${payload.title}" ditambahkan.`,
+    );
+  };
+
+  const handleToggleService = async (service) => {
+    const nextActive = !service.is_active;
+    if (live) {
+      const updated = await updateOwnService(service.id, { is_active: nextActive });
+      setServices((prev) => prev.map((s) => (s.id === service.id ? updated : s)));
+    } else {
+      setServices((prev) =>
+        prev.map((s) => (s.id === service.id ? { ...s, is_active: nextActive } : s)),
+      );
+    }
+    announce(`Layanan "${service.title}" ${nextActive ? 'diaktifkan' : 'dinonaktifkan'}.`);
+  };
+
+  const handleSaveProfile = async (payload) => {
+    if (live) {
+      const updated = await updateOwnProviderProfile(payload);
+      setApiProfile(updated);
+      if (user && updated?.display_name && updated.display_name !== user.name) {
+        signIn({ ...user, name: updated.display_name });
+      }
+    } else {
+      setApiProfile((prev) => ({ ...(prev ?? activeProfile.raw), ...payload }));
+    }
+    announce('Profil penyedia berhasil disimpan.');
+  };
+
+  const handleSaveAvailability = async (slots) => {
+    if (live) {
+      const saved = await replaceOwnAvailability(slots);
+      setAvailability(saved);
+    } else {
+      setAvailability(slots);
+    }
+    announce('Jadwal operasional mingguan berhasil disimpan.');
   };
 
   const shiftWeek = (delta) => {
@@ -194,12 +514,23 @@ export default function ProviderDashboardPage() {
     setSelectedDay(toISODate(next));
   };
 
-  useChatStore();
-  const chatUnread = threadsForProvider(PROVIDER_ID).reduce(
-    (sum, thread) => sum + unreadCount(thread, 'provider'),
-    0,
-  );
-  const navItems = providerNavItems({ page: 'dashboard', newCount, chatUnread });
+  const threads = live ? remoteThreads() : threadsForProvider(PROVIDER_ID);
+  const chatUnread = threads.reduce((sum, thread) => sum + unreadCount(thread, 'provider'), 0);
+  const navItems = providerNavItems({
+    page: 'dashboard',
+    providerId: activeProfile.id,
+    newCount,
+    chatUnread,
+  });
+
+  const statsMonthOrders = live ? liveMetrics.monthOrderCount : MONTH_STATS.orders.value;
+  const statsActiveServices = live
+    ? liveMetrics.activeServices
+    : services.filter((s) => s.is_active).length;
+  const statsTotalServices = live ? liveMetrics.totalServices : services.length;
+  const statsMonthIncome = live ? liveMetrics.monthIncome : MONTH_STATS.income.value;
+  const statsTotalOrders = live ? liveMetrics.totalOrderCount : TREND_TOTALS.orders.value;
+  const statsTotalIncome = live ? liveMetrics.totalIncome : TREND_TOTALS.income.value;
 
   return (
     <DashboardShell
@@ -207,12 +538,12 @@ export default function ProviderDashboardPage() {
       navLabel="Menu penyedia"
       navItems={navItems}
       user={{
-        name: profile.name,
-        initials: profile.initials,
+        name: activeProfile.name,
+        initials: activeProfile.initials,
         role: 'Penyedia Layanan',
         color: '#0b3c6e',
       }}
-      userMenuItems={[{ label: 'Lihat Profil Publik', to: buildProviderPath(PROVIDER_ID) }]}
+      userMenuItems={[{ label: 'Lihat Profil Publik', to: buildProviderPath(activeProfile.id) }]}
       notifications={{ count: needsAction, href: '#pesanan' }}
       sidebarNote={{
         text: 'Bersama Mewujudkan Jawa Barat yang Lebih Inklusif',
@@ -223,12 +554,12 @@ export default function ProviderDashboardPage() {
         <div className="welcome__text">
           <h1 id="welcome-title">
             <span>Selamat Datang,</span>
-            {profile.name}
+            {activeProfile.name}
           </h1>
           <p>
             Terima kasih sudah melayani pelanggan dengan sepenuh hati.{' '}
             {needsAction > 0
-              ? `Ada ${needsAction} pesanan yang menunggu konfirmasi Anda.`
+              ? `Ada ${needsAction} pesanan yang menunggu tindak lanjut Anda.`
               : 'Semua pesanan sudah Anda tanggapi.'}
           </p>
         </div>
@@ -240,10 +571,47 @@ export default function ProviderDashboardPage() {
         </div>
       </section>
 
+      {loadState === 'loading' && (
+        <p className="provider-feedback" role="status">
+          Memuat data dashboard penyedia dari server...
+        </p>
+      )}
+
+      {loadState === 'error' && (
+        <div className="provider-feedback provider-feedback--error" role="alert">
+          <span>{loadError}</span>
+          <button
+            type="button"
+            className="dash-btn dash-btn--outline"
+            onClick={() => setReloadTick((n) => n + 1)}
+          >
+            Muat Ulang
+          </button>
+        </div>
+      )}
+
+      {feedback && (
+        <div
+          className={`provider-feedback${feedback.tone === 'error' ? ' provider-feedback--error' : ''}`}
+          role={feedback.tone === 'error' ? 'alert' : 'status'}
+          aria-live="polite"
+        >
+          <span>{feedback.text}</span>
+          <button
+            type="button"
+            className="dash-btn dash-btn--outline"
+            onClick={() => setFeedback(null)}
+          >
+            Tutup
+          </button>
+        </div>
+      )}
+
       <section aria-label="Ringkasan bulan ini">
         <div className="provider-stats">
-          <StatCard label="Pesanan Bulan Ini" icon={BagIcon} value={MONTH_STATS.orders.value}>
-            <Trend value={MONTH_STATS.orders.trend} />
+          <StatCard label="Pesanan Bulan Ini" icon={BagIcon} value={statsMonthOrders}>
+            {!live && <Trend value={MONTH_STATS.orders.trend} />}
+            {live && <span className="dash-muted">Total tercatat: {statsTotalOrders} pesanan</span>}
           </StatCard>
           <StatCard
             label="Layanan Aktif"
@@ -251,15 +619,15 @@ export default function ProviderDashboardPage() {
             tone="teal"
             value={
               <>
-                {MONTH_STATS.services.active}{' '}
-                <span className="dash-stat__unit">dari {MONTH_STATS.services.total} layanan</span>
+                {statsActiveServices}{' '}
+                <span className="dash-stat__unit">dari {statsTotalServices} layanan</span>
               </>
             }
           >
-            <Link to={buildProviderPath(PROVIDER_ID)} className="dash-panel__link">
-              Lihat layanan di profil
+            <a href="#layanan" className="dash-panel__link">
+              Kelola layanan saya
               <ArrowRightIcon size={16} />
-            </Link>
+            </a>
           </StatCard>
           <StatCard
             label="Rating Rata-rata"
@@ -267,29 +635,24 @@ export default function ProviderDashboardPage() {
             tone="amber"
             value={
               <span className="dash-stat__rating">
-                {formatRating(profile.rating)}
-                <RatingStars value={profile.rating} size={16} />
+                {formatRating(activeProfile.rating)}
+                <RatingStars value={activeProfile.rating} size={16} />
               </span>
             }
           >
-            <span className="dash-muted">Dari {profile.reviewCount} ulasan</span>
+            <span className="dash-muted">Dari {activeProfile.reviewCount} ulasan</span>
           </StatCard>
           <StatCard
             label="Pendapatan Bulan Ini"
             icon={WalletIcon}
             tone="green"
-            value={
-              <span className="dash-stat__money">{formatRupiah(MONTH_STATS.income.value)}</span>
-            }
+            value={<span className="dash-stat__money">{formatRupiah(statsMonthIncome)}</span>}
           >
-            <Trend value={MONTH_STATS.income.trend} />
+            {!live && <Trend value={MONTH_STATS.income.trend} />}
+            {live && <span className="dash-muted">Dari pesanan selesai bulan ini</span>}
           </StatCard>
         </div>
       </section>
-
-      <p className="visually-hidden" aria-live="polite">
-        {announcement}
-      </p>
 
       <div className="provider-grid">
         <section
@@ -303,105 +666,169 @@ export default function ProviderDashboardPage() {
               <>Pesanan Masuk {newCount > 0 && <span className="dash-new">{newCount} baru</span>}</>
             }
           />
-          <div className="dash-table-wrap">
-            <table className="dash-table orders-table">
-              <thead>
-                <tr>
-                  <th scope="col">Pelanggan</th>
-                  <th scope="col">Layanan</th>
-                  <th scope="col">Tanggal</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {orders.map((order) => {
-                  const status = ORDER_STATUS[order.status];
-                  const detailId = `pesanan-${order.id}`;
-                  const open = expanded === order.id;
-                  return (
-                    <Fragment key={order.id}>
-                      <tr>
-                        <td>
-                          <span className="dash-person">
-                            <span
-                              className="dash-avatar dash-avatar--md"
-                              style={{ backgroundColor: order.color }}
-                              aria-hidden="true"
-                            >
-                              {order.initials}
+          {orders.length ? (
+            <div className="dash-table-wrap">
+              <table className="dash-table orders-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Pelanggan</th>
+                    <th scope="col">Layanan</th>
+                    <th scope="col">Tanggal</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orders.map((order) => {
+                    const status = PROVIDER_ORDER_STATUS[order.status] ?? {
+                      label: order.status,
+                      tone: 'neutral',
+                    };
+                    const detailId = `pesanan-${order.id}`;
+                    const open = expanded === order.id;
+                    const busy = busyOrderId === order.id;
+                    return (
+                      <Fragment key={order.id}>
+                        <tr>
+                          <td>
+                            <span className="dash-person">
+                              <span
+                                className="dash-avatar dash-avatar--md"
+                                style={{ backgroundColor: order.color }}
+                                aria-hidden="true"
+                              >
+                                {order.initials}
+                              </span>
+                              <span>
+                                <strong>{order.customer}</strong>
+                                <span className="dash-muted">{order.city}</span>
+                              </span>
                             </span>
-                            <span>
-                              <strong>{order.customer}</strong>
-                              <span className="dash-muted">{order.city}</span>
+                          </td>
+                          <td>
+                            <span className="dash-person">
+                              <img src={activeProfile.categoryIcon} alt="" width="18" height="18" />
+                              <span>
+                                <strong>{order.service}</strong>
+                                <span className="dash-muted">
+                                  {formatRupiah(order.finalTotal ?? order.estimatedTotal)}
+                                </span>
+                              </span>
                             </span>
-                          </span>
-                        </td>
-                        <td>
-                          <span className="dash-person">
-                            <img src={profile.categoryIcon} alt="" width="18" height="18" />
-                            {order.service}
-                          </span>
-                        </td>
-                        <td>
-                          <strong className="dash-block">{dateLabel(order.date, today)}</strong>
-                          <span className="dash-muted">{pad(order.start)}.00</span>
-                        </td>
-                        <td>
-                          <StatusBadge tone={status.tone}>{status.label}</StatusBadge>
-                        </td>
-                        <td>
-                          <div className="orders-table__actions">
-                            <button
-                              type="button"
-                              className="dash-btn dash-btn--outline"
-                              aria-expanded={open}
-                              aria-controls={detailId}
-                              aria-label={`Lihat pesanan ${order.customer}`}
-                              onClick={() => setExpanded(open ? '' : order.id)}
-                            >
-                              Lihat
-                            </button>
-                            {status.action && (
+                          </td>
+                          <td>
+                            <strong className="dash-block">{dateLabel(order.date, today)}</strong>
+                            <span className="dash-muted">{order.startTime}</span>
+                          </td>
+                          <td>
+                            <StatusBadge tone={status.tone}>{status.label}</StatusBadge>
+                          </td>
+                          <td>
+                            <div className="orders-table__actions">
                               <button
                                 type="button"
-                                className="dash-btn dash-btn--primary"
-                                aria-label={`${status.action} pesanan ${order.customer}`}
-                                onClick={() => advance(order)}
+                                className="dash-btn dash-btn--outline"
+                                aria-expanded={open}
+                                aria-controls={detailId}
+                                aria-label={`Lihat pesanan ${order.customer}`}
+                                onClick={() => setExpanded(open ? '' : order.id)}
                               >
-                                {status.action}
+                                Lihat
                               </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                      <tr id={detailId} className="orders-table__detail" hidden={!open}>
-                        <td colSpan={5}>
-                          <dl>
-                            <div>
-                              <dt>Jadwal</dt>
-                              <dd>
-                                {WEEKDAY_LONG[order.date.getDay()]}, {dateLabel(order.date, today)}{' '}
-                                · {pad(order.start)}.00–{pad(order.start + order.hours)}.00
-                              </dd>
+                              {order.status === 'requested' && (
+                                <>
+                                  <button
+                                    type="button"
+                                    className="dash-btn dash-btn--primary"
+                                    aria-label={`Terima pesanan ${order.customer}`}
+                                    disabled={busy}
+                                    onClick={() => handleAccept(order)}
+                                  >
+                                    Terima
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="dash-btn dash-btn--danger"
+                                    aria-label={`Tolak pesanan ${order.customer}`}
+                                    disabled={busy}
+                                    onClick={() => setReasonModal({ order, mode: 'reject' })}
+                                  >
+                                    Tolak
+                                  </button>
+                                </>
+                              )}
+                              {order.status === 'accepted' && (
+                                <>
+                                  <button
+                                    type="button"
+                                    className="dash-btn dash-btn--primary"
+                                    aria-label={`Mulai pesanan ${order.customer}`}
+                                    disabled={busy}
+                                    onClick={() => handleStart(order)}
+                                  >
+                                    Mulai
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="dash-btn dash-btn--danger"
+                                    aria-label={`Batalkan pesanan ${order.customer}`}
+                                    disabled={busy}
+                                    onClick={() => setReasonModal({ order, mode: 'cancel' })}
+                                  >
+                                    Batalkan
+                                  </button>
+                                </>
+                              )}
+                              {order.status === 'in_progress' && (
+                                <button
+                                  type="button"
+                                  className="dash-btn dash-btn--primary"
+                                  aria-label={`Selesai pesanan ${order.customer}`}
+                                  disabled={busy}
+                                  onClick={() => setCompleteModal(order)}
+                                >
+                                  Selesai
+                                </button>
+                              )}
                             </div>
-                            <div>
-                              <dt>Alamat</dt>
-                              <dd>{order.address}</dd>
-                            </div>
-                            <div>
-                              <dt>Catatan</dt>
-                              <dd>{order.note || 'Tidak ada catatan.'}</dd>
-                            </div>
-                          </dl>
-                        </td>
-                      </tr>
-                    </Fragment>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                          </td>
+                        </tr>
+                        <tr id={detailId} className="orders-table__detail" hidden={!open}>
+                          <td colSpan={5}>
+                            <dl>
+                              <div>
+                                <dt>Jadwal & Kode</dt>
+                                <dd>
+                                  {order.code} · {WEEKDAY_LONG[order.date.getDay()]},{' '}
+                                  {dateLabel(order.date, today)} · {order.startTime}
+                                </dd>
+                              </div>
+                              <div>
+                                <dt>Alamat & Kontak</dt>
+                                <dd>
+                                  {order.address}
+                                  {order.customerPhone ? ` · ${order.customerPhone}` : ''}
+                                </dd>
+                              </div>
+                              <div>
+                                <dt>Catatan</dt>
+                                <dd>
+                                  {order.note || 'Tidak ada catatan.'}
+                                  {order.statusReason ? ` (Alasan: ${order.statusReason})` : ''}
+                                </dd>
+                              </div>
+                            </dl>
+                          </td>
+                        </tr>
+                      </Fragment>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="agenda__empty">Belum ada pesanan masuk saat ini.</p>
+          )}
         </section>
 
         <section id="jadwal" className="dash-card dash-panel" aria-labelledby="jadwal-title">
@@ -468,7 +895,7 @@ export default function ProviderDashboardPage() {
                 return (
                   <li key={order.id} className={`agenda__item agenda__item--${state.tone}`}>
                     <span className="icon-tile icon-tile--soft-teal" aria-hidden="true">
-                      <img src={profile.categoryIcon} alt="" width="20" height="20" />
+                      <img src={activeProfile.categoryIcon} alt="" width="20" height="20" />
                     </span>
                     <span className="agenda__text">
                       <span className="agenda__time">
@@ -488,6 +915,13 @@ export default function ProviderDashboardPage() {
         </section>
       </div>
 
+      <ProviderServicesPanel
+        services={services}
+        categories={categories}
+        onSave={handleSaveService}
+        onToggleActive={handleToggleService}
+      />
+
       <div className="provider-grid provider-grid--stretch">
         <section className="dash-card dash-panel" aria-labelledby="tren-title">
           <PanelHead id="tren-title" title="Tren Pesanan">
@@ -498,10 +932,10 @@ export default function ProviderDashboardPage() {
           <div className="trend">
             <figure className="dash-chart trend__chart">
               <LineChart
-                data={LAST_7_DAYS}
+                data={chartData}
                 min={0}
-                max={3}
-                ticks={[0, 1, 2, 3]}
+                max={chartMax}
+                ticks={chartTicks}
                 left={44}
                 width={440}
                 height={250}
@@ -510,7 +944,7 @@ export default function ProviderDashboardPage() {
                     ? `${d.getDate()} ${MONTH[d.getMonth()]}`
                     : String(d.getDate()),
                 )}
-                ariaLabel={`Pesanan harian ${trendLabels[0].getDate()} sampai ${trendLabels[6].getDate()} ${MONTH[trendLabels[6].getMonth()]}: ${LAST_7_DAYS.join(', ')} pesanan`}
+                ariaLabel={`Pesanan harian ${trendLabels[0].getDate()} sampai ${trendLabels[6].getDate()} ${MONTH[trendLabels[6].getMonth()]}: ${chartData.join(', ')} pesanan`}
               />
               <figcaption>
                 Total 7 hari terakhir: <strong>{trendTotal} pesanan</strong>, tertinggi {trendMax}{' '}
@@ -520,13 +954,13 @@ export default function ProviderDashboardPage() {
             <div className="trend__totals">
               <div>
                 <span>Total Pesanan</span>
-                <strong>{TREND_TOTALS.orders.value}</strong>
-                <Trend value={TREND_TOTALS.orders.trend} note="" />
+                <strong>{statsTotalOrders}</strong>
+                {!live && <Trend value={TREND_TOTALS.orders.trend} note="" />}
               </div>
               <div>
                 <span>Pendapatan Total</span>
-                <strong className="trend__money">{formatRupiah(TREND_TOTALS.income.value)}</strong>
-                <Trend value={TREND_TOTALS.income.trend} note="" />
+                <strong className="trend__money">{formatRupiah(statsTotalIncome)}</strong>
+                {!live && <Trend value={TREND_TOTALS.income.trend} note="" />}
               </div>
             </div>
           </div>
@@ -554,7 +988,7 @@ export default function ProviderDashboardPage() {
             Profil lengkap membuat pelanggan lebih percaya dan peluang dipesan lebih besar.
           </p>
           <ul className="checklist">
-            {PROFILE_CHECKLIST.map((item) => (
+            {checklistItems.map((item) => (
               <li key={item.label}>
                 {item.done ? (
                   <CheckBadgeIcon className="checklist__done" />
@@ -568,13 +1002,38 @@ export default function ProviderDashboardPage() {
                 {item.done ? (
                   <span className="checklist__status">Lengkap</span>
                 ) : (
-                  <span className="dash-soon">Segera</span>
+                  <a href="#pengaturan" className="dash-soon">
+                    Lengkapi
+                  </a>
                 )}
               </li>
             ))}
           </ul>
         </section>
       </div>
+
+      <ProviderProfileSchedulePanel
+        key={`${activeProfile.id}-${loadState}`}
+        profile={activeProfile.raw}
+        availability={availability}
+        onSaveProfile={handleSaveProfile}
+        onSaveAvailability={handleSaveAvailability}
+      />
+
+      <ProviderReasonModal
+        key={reasonModal ? `${reasonModal.mode}-${reasonModal.order.id}` : 'reason-closed'}
+        order={reasonModal?.order ?? null}
+        mode={reasonModal?.mode ?? 'reject'}
+        onClose={() => setReasonModal(null)}
+        onConfirm={handleReasonConfirm}
+      />
+
+      <ProviderCompleteModal
+        key={completeModal ? `complete-${completeModal.id}` : 'complete-closed'}
+        order={completeModal}
+        onClose={() => setCompleteModal(null)}
+        onConfirm={handleCompleteConfirm}
+      />
     </DashboardShell>
   );
 }

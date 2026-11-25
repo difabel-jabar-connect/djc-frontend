@@ -12,10 +12,10 @@ import { PROVIDER_ID } from '@/features/dashboard/providerDashboardData';
 import { PATHS, buildProviderPath } from '@/routes/paths';
 
 /**
- * Menu sidebar penyedia. Di halaman Dashboard tautan bagian memakai anchor (#pesanan);
- * dari halaman lain (Chat) mengarah ke rute Dashboard.
+ * Menu sidebar penyedia. Di halaman Dashboard tautan bagian memakai anchor (#pesanan, #layanan,
+ * #jadwal, #pengaturan); dari halaman lain (Chat) mengarah ke rute Dashboard.
  */
-export function providerNavItems({ page, newCount = 0, chatUnread = 0 }) {
+export function providerNavItems({ page, providerId = PROVIDER_ID, newCount = 0, chatUnread = 0 }) {
   const onDashboard = page === 'dashboard';
   const section = (hash) =>
     onDashboard ? { href: hash } : { to: `${PATHS.providerDashboard}${hash}`, end: true };
@@ -27,8 +27,8 @@ export function providerNavItems({ page, newCount = 0, chatUnread = 0 }) {
         ? { href: '#ringkasan', current: true }
         : { to: PATHS.providerDashboard, end: true }),
     },
-    { label: 'Profil Saya', icon: UserIcon, to: buildProviderPath(PROVIDER_ID) },
-    { label: 'Layanan Saya', icon: BriefcaseIcon },
+    { label: 'Profil Saya', icon: UserIcon, to: buildProviderPath(providerId) },
+    { label: 'Layanan Saya', icon: BriefcaseIcon, ...section('#layanan') },
     {
       label: 'Pesanan Masuk',
       icon: InboxIcon,
@@ -44,7 +44,7 @@ export function providerNavItems({ page, newCount = 0, chatUnread = 0 }) {
       badgeLabel: 'belum dibaca',
     },
     { label: 'Jadwal', icon: CalendarIcon, ...section('#jadwal') },
-    { label: 'Ulasan', icon: StarOutlineIcon, to: `${buildProviderPath(PROVIDER_ID)}#ulasan` },
-    { label: 'Pengaturan', icon: SettingsIcon },
+    { label: 'Ulasan', icon: StarOutlineIcon, to: `${buildProviderPath(providerId)}#ulasan` },
+    { label: 'Pengaturan', icon: SettingsIcon, ...section('#pengaturan') },
   ];
 }
