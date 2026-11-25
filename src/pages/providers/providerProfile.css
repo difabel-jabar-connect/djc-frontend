@@ -25,8 +25,6 @@
 .profile-card__banner {
   position: relative;
   height: 200px;
-  position: relative;
-  overflow: clip;
   background: var(--color-accent-soft);
 }
 
@@ -77,6 +75,7 @@
   position: absolute;
   bottom: -56px;
   left: 32px;
+  z-index: 2;
   display: grid;
   place-items: center;
   width: 112px;

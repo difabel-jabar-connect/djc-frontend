@@ -160,6 +160,96 @@
   gap: 14px;
 }
 
+.provider-settings-form .form-field,
+.dialog__form .form-field {
+  display: grid;
+  gap: 6px;
+}
+
+.provider-settings-form .form-label,
+.dialog__form .form-label {
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+}
+
+.provider-settings-form .form-input,
+.provider-settings-form .form-textarea,
+.dialog__form .form-input,
+.dialog__form .form-textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--color-border-strong, #c3cad4);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.provider-settings-form .form-textarea,
+.dialog__form .form-textarea {
+  min-height: 88px;
+  resize: vertical;
+}
+
+.provider-settings-form .form-input:focus-visible,
+.provider-settings-form .form-textarea:focus-visible,
+.dialog__form .form-input:focus-visible,
+.dialog__form .form-textarea:focus-visible {
+  border-color: var(--color-primary);
+  outline: 0;
+  box-shadow: 0 0 0 3px rgb(11 60 110 / 16%);
+}
+
+.provider-settings-form .form-input:disabled,
+.provider-settings-form .form-textarea:disabled,
+.dialog__form .form-input:disabled,
+.dialog__form .form-textarea:disabled {
+  background: var(--color-paper);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.provider-settings-form .form-field__error,
+.dialog__form .form-field__error {
+  margin: 0;
+  color: #b91c1c;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.provider-reviews-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 24px;
+}
+
+.provider-reviews-summary__score {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.provider-reviews-summary__score strong {
+  color: var(--color-primary);
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.provider-reviews-summary .dash-panel__note {
+  flex: 1 1 280px;
+  margin: 0;
+}
+
 .provider-checkbox {
   display: inline-flex;
   align-items: center;

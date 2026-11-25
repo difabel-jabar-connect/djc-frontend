@@ -39,12 +39,9 @@ const changedKeys = (saved, draft) =>
     (key) => String(saved[key]).trim() !== String(draft[key]).trim(),
   );
 
-/** Pengaturan · Profil Saya (desain Pengaturan · Profil Saya). */
-export default function ProfileSettings() {
-  useDocumentTitle('Pengaturan · Profil Saya');
+/** Form isi Profil Saya, di-reset otomatis bila data user live selesai dimuat. */
+function ProfileSettingsForm({ self, updateProfile, run, notify }) {
   const id = useId();
-  const { users, actor, updateProfile, run, notify } = useAdmin();
-  const self = users.find((u) => u.id === actor.id);
   const saved = fromUser(self);
   const [draft, setDraft] = useState(saved);
   const [submitted, setSubmitted] = useState(false);
@@ -183,5 +180,21 @@ export default function ProfileSettings() {
 
       <SaveBar dirty={dirty} saving={saving} onReset={reset} onSave={save} />
     </>
+  );
+}
+
+/** Pengaturan · Profil Saya (desain Pengaturan · Profil Saya). */
+export default function ProfileSettings() {
+  useDocumentTitle('Pengaturan · Profil Saya');
+  const { users, actor, loadState, updateProfile, run, notify } = useAdmin();
+  const self = users.find((u) => u.id === actor.id) ?? actor;
+  return (
+    <ProfileSettingsForm
+      key={`${self.id}-${loadState}-${self.phone ?? ''}`}
+      self={self}
+      updateProfile={updateProfile}
+      run={run}
+      notify={notify}
+    />
   );
 }

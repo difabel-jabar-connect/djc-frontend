@@ -919,8 +919,9 @@
 
 .strength__text {
   display: flex;
-  align-items: center;
-  gap: 6px;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 6px;
 }
 
 .strength__text--strong strong,

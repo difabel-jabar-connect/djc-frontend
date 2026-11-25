@@ -49,8 +49,9 @@ describe('Dashboard Penyedia', () => {
     );
     expect(within(nav).getByRole('link', { name: /profil saya/i })).toHaveAttribute(
       'href',
-      '/provider/deni-setiawan',
+      '#profil',
     );
+    expect(within(nav).getByRole('link', { name: /ulasan/i })).toHaveAttribute('href', '#ulasan');
     expect(within(nav).getByRole('link', { name: /layanan saya/i })).toHaveAttribute(
       'href',
       '#layanan',
@@ -203,7 +204,7 @@ describe('Dashboard Penyedia', () => {
     ).toBeVisible();
 
     const scheduleSection = within(
-      screen.getByRole('region', { name: /atur jadwal operasional/i }),
+      screen.getByRole('region', { name: /pengaturan jadwal operasional/i }),
     );
     expect(scheduleSection.getByLabelText('Jam mulai Senin sesi 1')).toHaveValue('08:00');
     expect(scheduleSection.getByLabelText('Jam mulai Senin sesi 2')).toHaveValue('13:00');

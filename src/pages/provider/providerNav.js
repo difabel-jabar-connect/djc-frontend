@@ -8,26 +8,28 @@ import {
   StarOutlineIcon,
   UserIcon,
 } from '@/components/ui/icons';
-import { PROVIDER_ID } from '@/features/dashboard/providerDashboardData';
-import { PATHS, buildProviderPath } from '@/routes/paths';
+import { PATHS } from '@/routes/paths';
 
 /**
- * Menu sidebar penyedia. Di halaman Dashboard tautan bagian memakai anchor (#pesanan, #layanan,
- * #jadwal, #pengaturan); dari halaman lain (Chat) mengarah ke rute Dashboard.
+ * Menu sidebar penyedia. Seluruh item tetap berada di dalam area DashboardShell
+ * (tidak melempar penyedia keluar ke halaman publik pelanggan).
  */
-export function providerNavItems({ page, providerId = PROVIDER_ID, newCount = 0, chatUnread = 0 }) {
+export function providerNavItems({ page, activeHash = '', newCount = 0, chatUnread = 0 }) {
   const onDashboard = page === 'dashboard';
+  const normalizedHash = activeHash || '#ringkasan';
   const section = (hash) =>
-    onDashboard ? { href: hash } : { to: `${PATHS.providerDashboard}${hash}`, end: true };
+    onDashboard
+      ? { href: hash, current: normalizedHash === hash }
+      : { to: `${PATHS.providerDashboard}${hash}`, end: true };
   return [
     {
       label: 'Dashboard',
       icon: DashboardIcon,
       ...(onDashboard
-        ? { href: '#ringkasan', current: true }
+        ? { href: '#ringkasan', current: normalizedHash === '#ringkasan' }
         : { to: PATHS.providerDashboard, end: true }),
     },
-    { label: 'Profil Saya', icon: UserIcon, to: buildProviderPath(providerId) },
+    { label: 'Profil Saya', icon: UserIcon, ...section('#profil') },
     { label: 'Layanan Saya', icon: BriefcaseIcon, ...section('#layanan') },
     {
       label: 'Pesanan Masuk',
@@ -44,7 +46,7 @@ export function providerNavItems({ page, providerId = PROVIDER_ID, newCount = 0,
       badgeLabel: 'belum dibaca',
     },
     { label: 'Jadwal', icon: CalendarIcon, ...section('#jadwal') },
-    { label: 'Ulasan', icon: StarOutlineIcon, to: `${buildProviderPath(providerId)}#ulasan` },
+    { label: 'Ulasan', icon: StarOutlineIcon, ...section('#ulasan') },
     { label: 'Pengaturan', icon: SettingsIcon, ...section('#pengaturan') },
   ];
 }

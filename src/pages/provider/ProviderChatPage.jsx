@@ -92,7 +92,7 @@ export default function ProviderChatPage() {
     <DashboardShell
       subtitle="Talenta Difabel, Jabar Inklusif"
       navLabel="Menu penyedia"
-      navItems={providerNavItems({ page: 'chat', providerId, newCount, chatUnread })}
+      navItems={providerNavItems({ page: 'chat', newCount, chatUnread })}
       user={{
         name: displayName,
         initials: live ? user.initials : profile.initials,
