@@ -209,7 +209,8 @@ export const SAMPLE_BOOKINGS = [
   },
 ];
 
-export const bookingTotal = (booking) => booking.unitPrice * booking.quantity;
+export const bookingTotal = (booking) =>
+  booking.finalTotal ?? booking.estimatedTotal ?? booking.unitPrice * booking.quantity;
 
 /** Pesanan selesai terakhir per penyedia (untuk "Pesan Lagi"). */
 export function lastCompletedPerProvider(bookings) {
@@ -232,6 +233,10 @@ export const findReviewable = (bookings) =>
   bookings.find((b) => b.status === 'selesai' && !b.reviewed);
 
 const hourLabel = (hour) => `${String(hour).padStart(2, '0')}.00`;
+const startLabel = (b) =>
+  b.startTime && /^\d{2}:\d{2}/.test(b.startTime)
+    ? b.startTime.slice(0, 5).replace(':', '.')
+    : hourLabel(b.start);
 
 /** "27 Okt 2026" */
 export function formatDay(iso) {
@@ -243,18 +248,19 @@ export function formatDay(iso) {
 const formatShortDay = (iso) => `${WEEKDAY_SHORT[parseISODate(iso).getDay()]}, ${formatDay(iso)}`;
 
 /** "Sel, 27 Okt 2026 · 09.00 WIB" */
-export const formatBookingDate = (b) => `${formatShortDay(b.date)} · ${hourLabel(b.start)} WIB`;
+export const formatBookingDate = (b) => `${formatShortDay(b.date)} · ${startLabel(b)} WIB`;
 
 /** "Sel, 27 Okt 2026 · 09.00–11.00" */
 export const formatBookingRange = (b) =>
-  `${formatShortDay(b.date)} · ${hourLabel(b.start)}–${hourLabel(b.start + b.hours)}`;
+  `${formatShortDay(b.date)} · ${startLabel(b)}–${hourLabel(b.start + b.hours)}`;
 
 /** "Senin, 19 Oktober 2026 · 10.00 WIB" */
 export const formatBookingLong = (b) =>
-  `${formatLongDate(parseISODate(b.date))} · ${hourLabel(b.start)} WIB`;
+  `${formatLongDate(parseISODate(b.date))} · ${startLabel(b)} WIB`;
 
 /** "19 Okt 2026, 11.40 WIB" (dari stempel `YYYY-MM-DDTHH:mm`) */
-export const formatStamp = (at) => `${formatDay(at)}, ${at.slice(11, 13)}.${at.slice(14, 16)} WIB`;
+export const formatStamp = (at) =>
+  at ? `${formatDay(at)}, ${at.slice(11, 13)}.${at.slice(14, 16)} WIB` : '';
 
 /** Kode pesanan berikutnya: BK-0012 → BK-0013. TODO(API): kode dibuat backend. */
 export function nextBookingCode(bookings) {

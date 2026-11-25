@@ -27,16 +27,41 @@ export async function createBooking(payload) {
  *
  * @param {Object} [filters]
  * @param {string} [filters.status] - Filter tab status ('requested', 'accepted', 'in_progress', 'completed', 'cancelled', 'rejected')
+ * @param {number} [filters.page]
+ * @param {number} [filters.limit]
+ * @param {{ signal?: AbortSignal }} [options]
  */
-export async function getBookings(filters = {}) {
+export async function getBookings(filters = {}, { signal } = {}) {
   const params = new URLSearchParams();
   if (filters.status && filters.status !== 'semua') {
     params.set('status', filters.status);
   }
+  if (filters.page) params.set('page', String(filters.page));
+  if (filters.limit) params.set('limit', String(filters.limit));
   const query = params.toString();
   const path = query ? `/bookings?${query}` : '/bookings';
-  const res = await api.get(path);
+  const res = await api.get(path, { signal });
   return res?.data ?? [];
+}
+
+const MAX_BOOKING_PAGES = 4;
+const BOOKINGS_PAGE_LIMIT = 50;
+
+/**
+ * Mengambil seluruh daftar pesanan pelanggan (maks. 4 halaman × 50 item) dari GET /bookings.
+ */
+export async function listCustomerBookings({ signal } = {}) {
+  const items = [];
+  let page = 1;
+  let totalPages = 1;
+  do {
+    const res = await api.get(`/bookings?page=${page}&limit=${BOOKINGS_PAGE_LIMIT}`, { signal });
+    const batch = res?.data ?? [];
+    items.push(...batch);
+    totalPages = Number(res?.meta?.total_pages ?? 1);
+    page += 1;
+  } while (page <= Math.min(totalPages, MAX_BOOKING_PAGES));
+  return items;
 }
 
 /**
@@ -44,9 +69,10 @@ export async function getBookings(filters = {}) {
  * Kontak & alamat lawan transaksi hanya dibuka jika status pesanan adalah 'accepted' atau 'in_progress'.
  *
  * @param {string} id - UUID booking
+ * @param {{ signal?: AbortSignal }} [options]
  */
-export async function getBookingDetail(id) {
-  const res = await api.get(`/bookings/${id}`);
+export async function getBookingDetail(id, { signal } = {}) {
+  const res = await api.get(`/bookings/${encodeURIComponent(id)}`, { signal });
   return res?.data;
 }
 
@@ -56,10 +82,10 @@ export async function getBookingDetail(id) {
  * Provider dapat membatalkan saat 'accepted' dengan alasan wajib.
  *
  * @param {string} id - UUID booking
- * @param {string} reason - Alasan pembatalan (min. 10 karakter)
+ * @param {string} reason - Alasan pembatalan
  */
 export async function cancelBooking(id, reason) {
-  const res = await api.put(`/bookings/${id}/cancel`, { reason });
+  const res = await api.put(`/bookings/${encodeURIComponent(id)}/cancel`, { reason });
   return res?.data;
 }
 

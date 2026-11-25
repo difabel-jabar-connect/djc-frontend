@@ -2,8 +2,60 @@ import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DEMO_ACCOUNTS } from '@/features/auth/session';
 import { renderAt } from '@/test/renderWithRouter';
+import { fakeApi } from '@/test/fakeApi';
 
 const customer = { user: DEMO_ACCOUNTS.customer };
+const backendCustomer = {
+  user: {
+    id: '11111111-1111-4111-8111-111111111101',
+    name: 'Ani Wijaya',
+    email: 'ani@djc.test',
+    role: 'customer',
+  },
+};
+
+const apiBooking = (overrides = {}) => ({
+  id: '22222222-2222-4222-8222-222222222202',
+  code: 'DJC-0002',
+  status: 'accepted',
+  service: { id: '33333333-3333-4333-8333-333333333301', title: 'Permak celana' },
+  provider: {
+    id: '44444444-4444-4444-8444-444444444401',
+    display_name: 'Siti Rahmawati',
+    city: 'Kota Bandung',
+    district: 'Coblong',
+    phone: '+6281234567891',
+    address_detail: 'Jl. Dago No. 10, Coblong, Kota Bandung',
+  },
+  scheduled_date: '2026-11-28',
+  start_time: '10:00',
+  service_mode: 'at_provider',
+  customer_note: 'Potong 3 cm.',
+  pricing_type_snapshot: 'fixed',
+  unit_price_snapshot: 35000,
+  quantity: 1,
+  estimated_total: 35000,
+  final_total: null,
+  can_review: false,
+  created_at: '2026-11-25T03:00:00.000Z',
+  history: [
+    {
+      from_status: null,
+      to_status: 'requested',
+      changed_by_role: 'customer',
+      reason: null,
+      created_at: '2026-11-25T03:00:00.000Z',
+    },
+    {
+      from_status: 'requested',
+      to_status: 'accepted',
+      changed_by_role: 'provider',
+      reason: null,
+      created_at: '2026-11-25T04:00:00.000Z',
+    },
+  ],
+  ...overrides,
+});
 
 describe('Halaman Detail Pesanan', () => {
   it('pesanan diterima: banner status, rincian, riwayat, dan kontak terbuka', () => {
@@ -115,5 +167,97 @@ describe('Halaman Detail Pesanan', () => {
       'href',
       '/bookings',
     );
+  });
+
+  it('FE-04 backend: memuat detail GET /bookings/:id, buka kontak saat accepted, dan batal via PUT /cancel', async () => {
+    const user = userEvent.setup();
+    fakeApi.bookings = [apiBooking()];
+
+    renderAt('/bookings/DJC-0002', backendCustomer);
+    expect(await screen.findByRole('heading', { level: 1 })).toHaveTextContent(
+      'Detail pesanan DJC-0002',
+    );
+
+    // Kontak (telepon + alamat) terbuka saat status accepted.
+    const contact = within(screen.getByRole('region', { name: 'Kontak & Lokasi' }));
+    expect(await contact.findByRole('link', { name: '+6281234567891' })).toHaveAttribute(
+      'href',
+      'tel:+6281234567891',
+    );
+    expect(contact.getByText('Jl. Dago No. 10, Coblong, Kota Bandung')).toBeInTheDocument();
+
+    // Batalkan via PUT /bookings/:id/cancel.
+    await user.click(screen.getByRole('button', { name: 'Batalkan pesanan DJC-0002' }));
+    const dialog = screen.getByRole('dialog', { name: 'Batalkan pesanan?' });
+    await user.type(within(dialog).getByLabelText(/alasan pembatalan/i), 'Ada keperluan mendadak');
+    await user.click(within(dialog).getByRole('button', { name: 'Ya, Batalkan' }));
+
+    expect(await screen.findByRole('status')).toHaveTextContent(
+      'Pesanan DJC-0002 berhasil dibatalkan',
+    );
+    expect(
+      fakeApi.calls.some(
+        (c) =>
+          c.method === 'PUT' &&
+          c.path === '/bookings/22222222-2222-4222-8222-222222222202/cancel' &&
+          c.body?.reason === 'Ada keperluan mendadak',
+      ),
+    ).toBe(true);
+    // Kontak terkunci kembali setelah dibatalkan.
+    expect(screen.getByRole('region', { name: 'Kontak & Lokasi' })).toHaveTextContent(/terkunci/i);
+  });
+
+  it('FE-05a backend: mengirim ulasan via POST /bookings/:id/reviews dan menampilkan error jika 409', async () => {
+    const user = userEvent.setup();
+    fakeApi.bookings = [
+      apiBooking({
+        id: '22222222-2222-4222-8222-222222222205',
+        code: 'DJC-0005',
+        status: 'completed',
+        can_review: true,
+        provider: {
+          ...apiBooking().provider,
+          display_name: 'Deni Setiawan',
+          phone: null,
+          address_detail: null,
+        },
+      }),
+    ];
+
+    renderAt('/bookings/DJC-0005', backendCustomer);
+    expect(await screen.findByRole('heading', { level: 1 })).toHaveTextContent(
+      'Detail pesanan DJC-0005',
+    );
+
+    // Simulasi error 409 terlebih dahulu — dialog tetap terbuka dan tampilkan pesan error.
+    fakeApi.reviewError = [
+      { error: { code: 'CONFLICT', message: 'Pesanan ini sudah diberi ulasan.' } },
+      409,
+    ];
+    await user.click(screen.getByRole('button', { name: 'Beri ulasan untuk Deni Setiawan' }));
+    const dialog = screen.getByRole('dialog', { name: 'Beri Ulasan' });
+    await user.click(within(dialog).getByRole('radio', { name: '5 bintang, Sangat Baik' }));
+    await user.type(within(dialog).getByLabelText(/ceritakan pengalaman/i), 'Sangat memuaskan!');
+    await user.click(within(dialog).getByRole('button', { name: 'Kirim Ulasan' }));
+
+    expect(await within(dialog).findByRole('alert')).toHaveTextContent(
+      'Pesanan ini sudah diberi ulasan.',
+    );
+
+    // Sukses kirim ulasan.
+    fakeApi.reviewError = null;
+    await user.click(within(dialog).getByRole('button', { name: 'Kirim Ulasan' }));
+
+    expect(await screen.findByRole('status')).toHaveTextContent(/ulasan anda untuk deni setiawan/i);
+    expect(
+      fakeApi.calls.some(
+        (c) =>
+          c.method === 'POST' &&
+          c.path === '/bookings/22222222-2222-4222-8222-222222222205/reviews' &&
+          c.body?.rating === 5 &&
+          c.body?.comment === 'Sangat memuaskan!',
+      ),
+    ).toBe(true);
+    expect(screen.queryByRole('button', { name: /beri ulasan/i })).not.toBeInTheDocument();
   });
 });
