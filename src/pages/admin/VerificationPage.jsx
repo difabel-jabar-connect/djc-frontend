@@ -1,5 +1,5 @@
-import { useMemo, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useSearchParams } from 'react-router';
 import {
   CheckCircleIcon,
   FilterIcon,
@@ -76,7 +76,11 @@ export default function VerificationPage() {
   useDocumentTitle('Verifikasi Penyedia');
   const { live, verifications, categories, approveProvider, rejectProvider, run, notify } =
     useAdmin();
+  const location = useLocation();
   const [params, setParams] = useSearchParams();
+  const [selectedId, setSelectedId] = useState(
+    () => location.state?.reviewId ?? params.get('tinjau') ?? null,
+  );
   const [tab, setTab] = useState(() =>
     ADMIN_TABS.includes(params.get('tab')) ? params.get('tab') : 'menunggu',
   );
@@ -87,7 +91,20 @@ export default function VerificationPage() {
   const [dialog, setDialog] = useState(null);
   const headingRef = useRef(null);
 
-  const selected = verifications.find((v) => v.id === params.get('tinjau')) ?? null;
+  // Bersihkan parameter lama `?tinjau=<uuid>` dari URL bar setelah dibaca ke state.
+  useEffect(() => {
+    if (!params.has('tinjau')) return;
+    setParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete('tinjau');
+        return next;
+      },
+      { replace: true },
+    );
+  }, [params, setParams]);
+
+  const selected = verifications.find((v) => v.id === selectedId) ?? null;
   const categoryOf = (id) => categories.find((c) => c.id === id);
 
   const counts = Object.fromEntries(
@@ -119,22 +136,9 @@ export default function VerificationPage() {
     paging.resetPage();
   };
 
-  const openReview = (id) =>
-    setParams((prev) => {
-      const next = new URLSearchParams(prev);
-      next.set('tinjau', id);
-      return next;
-    });
+  const openReview = (id) => setSelectedId(id);
 
-  const closeReview = () =>
-    setParams(
-      (prev) => {
-        const next = new URLSearchParams(prev);
-        next.delete('tinjau');
-        return next;
-      },
-      { replace: true },
-    );
+  const closeReview = () => setSelectedId(null);
 
   const finish = (message) => {
     setDialog(null);

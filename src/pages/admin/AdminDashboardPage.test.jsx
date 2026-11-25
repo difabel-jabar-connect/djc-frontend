@@ -51,7 +51,7 @@ describe('Dashboard Admin', () => {
     expect(rows[0]).toHaveTextContent('Rudi Hartono');
     expect(queue.getByRole('link', { name: 'Tinjau pendaftaran Rudi Hartono' })).toHaveAttribute(
       'href',
-      '/admin/verifikasi?tinjau=v-rudi',
+      '/admin/verifikasi',
     );
 
     const activity = within(screen.getByRole('region', { name: /aktivitas terbaru/i }));

@@ -98,6 +98,8 @@ describe('Lupa Kata Sandi · atur ulang', () => {
     vi.stubGlobal('fetch', fetchMock);
     const user = userEvent.setup();
     const { router } = renderAt('/reset-kata-sandi?token=abc123');
+    // OWASP A02/A07: ?token= langsung dihapus dari URL bar setelah disimpan di memori React.
+    await vi.waitFor(() => expect(router.state.location.search).toBe(''));
 
     const submit = screen.getByRole('button', { name: 'Simpan Kata Sandi' });
     const requirements = () =>

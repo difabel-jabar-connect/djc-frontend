@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router';
+import { Link, useLocation, useParams, useSearchParams } from 'react-router';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useCustomer } from '@/context/useCustomer';
 import {
@@ -267,14 +267,23 @@ export default function BookingDetailPage() {
   const booking = findBooking(bookings, code) ?? bookings.find((b) => b.id === code);
   useDocumentTitle(booking ? `Pesanan ${booking.code}` : 'Pesanan tidak ditemukan');
 
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const canReview = booking?.status === 'selesai' && !booking.reviewed;
-  const askedRating = Number(searchParams.get('ulasan'));
+  const askedRating = Number(location.state?.reviewRating ?? searchParams.get('ulasan'));
+  const wantsReview = Boolean(location.state?.openReview) || searchParams.has('ulasan');
   const [dialog, setDialog] = useState(() =>
-    canReview && searchParams.has('ulasan')
+    canReview && wantsReview
       ? { type: 'review', rating: askedRating >= 1 && askedRating <= 5 ? askedRating : 0, key: 1 }
       : { type: null, key: 0 },
   );
+
+  // Bersihkan parameter lama `?ulasan=` dari address bar setelah dibaca ke state.
+  useEffect(() => {
+    if (searchParams.has('ulasan')) {
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
   const [flash, setFlash] = useState('');
   const [detailLoading, setDetailLoading] = useState(false);
   const flashRef = useRef(null);

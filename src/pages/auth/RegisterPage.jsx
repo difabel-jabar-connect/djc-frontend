@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router';
+import { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useAuth } from '@/context/useAuth';
 import { homePathFor } from '@/features/auth/session';
@@ -9,8 +9,13 @@ import { PASSWORD_MIN, passwordStrength } from '@/features/auth/password';
 import { PHONE_PATTERN, normalizePhone } from '@/features/auth/phone';
 import { DOMICILE_OPTIONS } from '@/features/auth/registerOptions';
 import { CATEGORIES } from '@/features/search/catalog';
-import { PATHS, buildAuthPath, isBookingNext } from '@/routes/paths';
-import { safeRedirectPath } from '@/features/auth/redirect';
+import { PATHS, isBookingNext } from '@/routes/paths';
+import {
+  clearAuthRedirect,
+  readAuthRedirect,
+  safeRedirectPath,
+  saveAuthRedirect,
+} from '@/features/auth/redirect';
 import {
   CheckIcon,
   ChevronDownIcon,
@@ -98,10 +103,26 @@ function StrengthMeter({ password }) {
 /** Halaman Daftar Akun (US-CUST-01) — Pengguna atau Mitra Penyedia Layanan (?peran=mitra). */
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { signIn } = useAuth();
   const [searchParams] = useSearchParams();
-  // Tujuan setelah akun siap (mis. lanjut pemesanan) — diteruskan sampai halaman Masuk.
-  const next = searchParams.get('next') ? safeRedirectPath(searchParams.get('next')) : null;
+  // Tujuan setelah akun siap (mis. lanjut pemesanan) — dibawa lewat location.state, bukan `?next=`.
+  const legacyNext = searchParams.get('next');
+  const next =
+    readAuthRedirect(location.state) ?? (legacyNext ? safeRedirectPath(legacyNext, null) : null);
+  const loginState = next ? { from: next } : undefined;
+
+  useEffect(() => {
+    if (!legacyNext) return;
+    const safe = saveAuthRedirect(legacyNext);
+    const cleanParams = new URLSearchParams(searchParams);
+    cleanParams.delete('next');
+    const qs = cleanParams.toString();
+    navigate(qs ? `${PATHS.register}?${qs}` : PATHS.register, {
+      replace: true,
+      state: safe ? { from: safe } : undefined,
+    });
+  }, [legacyNext, navigate, searchParams]);
   const [form, setForm] = useState({
     role: searchParams.get('peran') === 'mitra' ? 'mitra' : 'pengguna',
     name: '',
@@ -147,7 +168,7 @@ export default function RegisterPage() {
         password: form.password,
         ...(isMitra && { city: form.city, category: form.category }),
       });
-      navigate(PATHS.registerSuccess, { state: { email, role: form.role, next } });
+      navigate(PATHS.registerSuccess, { state: { email, role: form.role, from: next } });
     } catch (error) {
       const message =
         error?.status === 409
@@ -168,6 +189,7 @@ export default function RegisterPage() {
           state: { email: user?.email, role: 'mitra', via: 'google' },
         });
       } else {
+        clearAuthRedirect();
         navigate(next ?? homePathFor(signIn(user)?.role), { replace: true });
       }
     },
@@ -449,7 +471,7 @@ export default function RegisterPage() {
             onClick={handleGoogle}
             action={
               google.errorCode === 409 && (
-                <Link to={buildAuthPath(PATHS.login, next)} className="auth-link auth-link--strong">
+                <Link to={PATHS.login} state={loginState} className="auth-link auth-link--strong">
                   Masuk
                 </Link>
               )
@@ -459,7 +481,7 @@ export default function RegisterPage() {
           <div className="auth-card__foot">
             <p>
               Sudah punya akun?{' '}
-              <Link to={buildAuthPath(PATHS.login, next)} className="auth-link auth-link--strong">
+              <Link to={PATHS.login} state={loginState} className="auth-link auth-link--strong">
                 Masuk
               </Link>
             </p>
