@@ -1,5 +1,6 @@
 import { useId, useState } from 'react';
 import Drawer from '@/components/ui/Drawer';
+import { useAdmin } from '@/context/useAdmin';
 import {
   AlertCircleIcon,
   BriefcaseIcon,
@@ -74,6 +75,7 @@ export default function VerificationDrawer({
   onRequestRevision,
 }) {
   const id = useId();
+  const { live } = useAdmin();
   const [previewNote, setPreviewNote] = useState(false);
   const open = Boolean(item);
   const done = item ? completeness(item) : 0;
@@ -167,15 +169,17 @@ export default function VerificationDrawer({
                     <strong>{item.alumni.file}</strong>
                     <span>{item.alumni.detail}</span>
                   </span>
-                  <button
-                    type="button"
-                    className="btn btn--outline ad-btn-sm"
-                    aria-label={`Lihat ${item.alumni.file}`}
-                    onClick={() => setPreviewNote(true)}
-                  >
-                    <ExternalLinkIcon size={18} strokeWidth={2.25} />
-                    Lihat
-                  </button>
+                  {!live && (
+                    <button
+                      type="button"
+                      className="btn btn--outline ad-btn-sm"
+                      aria-label={`Lihat ${item.alumni.file}`}
+                      onClick={() => setPreviewNote(true)}
+                    >
+                      <ExternalLinkIcon size={18} strokeWidth={2.25} />
+                      Lihat
+                    </button>
+                  )}
                 </div>
               ) : (
                 <p className="ad-callout tone-danger">
@@ -183,9 +187,12 @@ export default function VerificationDrawer({
                   Bukti alumni belum diunggah.
                 </p>
               )}
-              <p className="ad-hint" role="status">
-                {previewNote && 'Pratinjau dokumen tersedia setelah aplikasi terhubung ke server.'}
-              </p>
+              {!live && (
+                <p className="ad-hint" role="status">
+                  {previewNote &&
+                    'Pratinjau dokumen tersedia setelah aplikasi terhubung ke server.'}
+                </p>
+              )}
             </DrawerSection>
 
             <DrawerSection id={`${id}-layanan`} title="Keahlian & Layanan" icon={BriefcaseIcon}>

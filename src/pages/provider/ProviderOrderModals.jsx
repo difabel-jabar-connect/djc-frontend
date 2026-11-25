@@ -2,6 +2,7 @@ import { useId, useState } from 'react';
 import Dialog from '@/components/ui/Dialog';
 import { XIcon } from '@/components/ui/icons';
 import { buildCompletePayload } from '@/features/dashboard/providerDashboardAdapters';
+import { apiErrorMessage } from '@/lib/api/client';
 import { formatRupiah } from '@/lib/format';
 
 /** Dialog tolak pesanan (`requested` → `rejected`) atau batalkan (`accepted` → `cancelled`). */
@@ -30,7 +31,7 @@ export function ProviderReasonModal({ order, mode, onClose, onConfirm }) {
     try {
       await onConfirm(trimmed);
     } catch (err) {
-      setError(err?.message || 'Gagal memperbarui pesanan. Silakan coba lagi.');
+      setError(apiErrorMessage(err, 'Gagal memperbarui pesanan. Silakan coba lagi.'));
     } finally {
       setBusy(false);
     }
@@ -144,7 +145,7 @@ export function ProviderCompleteModal({ order, onClose, onConfirm }) {
     try {
       await onConfirm(result.payload);
     } catch (err) {
-      setError(err?.message || 'Gagal menyelesaikan pesanan.');
+      setError(apiErrorMessage(err, 'Gagal menyelesaikan pesanan.'));
     } finally {
       setBusy(false);
     }

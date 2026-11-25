@@ -187,6 +187,39 @@ describe('Dashboard Penyedia', () => {
     );
   });
 
+  it('mempertahankan multi-sesi jadwal harian saat disimpan dan menampilkan banner verifikasi pending', async () => {
+    fakeApi.provider.profile.verification_status = 'pending';
+    fakeApi.provider.availability = [
+      { day_of_week: 1, start_time: '08:00', end_time: '12:00' },
+      { day_of_week: 1, start_time: '13:00', end_time: '17:00' },
+    ];
+    vi.stubGlobal('fetch', vi.fn(fakeFetch));
+
+    const user = userEvent.setup();
+    renderAt('/dashboard/provider', { user: LIVE_PROVIDER });
+
+    expect(
+      await screen.findByText(/profil anda sedang menunggu verifikasi admin uptd ppsghd/i),
+    ).toBeVisible();
+
+    const scheduleSection = within(
+      screen.getByRole('region', { name: /atur jadwal operasional/i }),
+    );
+    expect(scheduleSection.getByLabelText('Jam mulai Senin sesi 1')).toHaveValue('08:00');
+    expect(scheduleSection.getByLabelText('Jam mulai Senin sesi 2')).toHaveValue('13:00');
+
+    await user.click(scheduleSection.getByRole('button', { name: 'Simpan Jadwal' }));
+    expect(await screen.findByText(/jadwal operasional mingguan berhasil disimpan/i)).toBeVisible();
+
+    const putAvail = fakeApi.calls.find(
+      (c) => c.method === 'PUT' && c.path === '/provider/availability',
+    );
+    expect(putAvail.body.availability).toEqual([
+      { day_of_week: 1, start_time: '08:00', end_time: '12:00' },
+      { day_of_week: 1, start_time: '13:00', end_time: '17:00' },
+    ]);
+  });
+
   it('jadwal mingguan: agenda hari terpilih & navigasi minggu', async () => {
     const user = userEvent.setup();
     renderAt('/dashboard/provider', { user: DEMO_ACCOUNTS.provider });

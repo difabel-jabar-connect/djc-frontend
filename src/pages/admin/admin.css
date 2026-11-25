@@ -2282,3 +2282,39 @@
     flex-direction: column;
   }
 }
+
+/* Distribusi status pesanan live pada Dashboard Admin */
+.ad-breakdown {
+  display: grid;
+  flex: 1 1 320px;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ad-breakdown__item {
+  display: grid;
+  gap: 6px;
+}
+
+.ad-breakdown__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ad-breakdown__track {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--color-surface);
+}
+
+.ad-breakdown__bar {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--badge-border, var(--color-primary));
+}

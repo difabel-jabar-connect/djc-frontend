@@ -14,6 +14,12 @@ export class ApiError extends Error {
   }
 }
 
+/** Ambil pesan error spesifik per field dari `ApiError.details` bila tersedia. */
+export function apiErrorMessage(error, fallback = 'Permintaan gagal diproses. Silakan coba lagi.') {
+  const detail = Array.isArray(error?.details) ? error.details.find((item) => item?.message) : null;
+  return detail?.message || error?.message || fallback;
+}
+
 /**
  * Wrapper fetch minimal.
  * - `credentials: 'include'` → sesi memakai HttpOnly cookie dari backend.

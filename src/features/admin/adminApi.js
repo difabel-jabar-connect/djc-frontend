@@ -32,6 +32,12 @@ export async function verifyAdminProvider(id, { status, note }) {
   return res?.data ?? null;
 }
 
+/** Buat akun mitra penyedia baru (`POST /admin/providers`, keputusan API-04). */
+export async function createAdminProvider(payload) {
+  const res = await api.post('/admin/providers', payload);
+  return res?.data ?? null;
+}
+
 /** Daftar seluruh kategori termasuk nonaktif (`GET /admin/categories`). */
 export async function listAdminCategories({ signal } = {}) {
   const res = await api.get('/admin/categories', { signal });

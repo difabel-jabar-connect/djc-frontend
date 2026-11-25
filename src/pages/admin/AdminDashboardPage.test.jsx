@@ -124,10 +124,12 @@ describe('Dashboard Admin', () => {
     const user = userEvent.setup();
     renderAt('/admin', { user: LIVE_ADMIN });
 
-    // 1. Dashboard memuat metrik dari GET /admin/dashboard dan antrean Yusuf Hidayat
+    // 1. Dashboard memuat metrik dari GET /admin/dashboard dan distribusi status live (bukan grafik dummy)
     expect(await screen.findByText('Yusuf Hidayat')).toBeVisible();
     const stats = within(screen.getByRole('region', { name: /ringkasan platform/i }));
     expect(stats.getByText('7')).toBeInTheDocument();
+    expect(screen.getByRole('list', { name: /distribusi status pesanan database/i })).toBeVisible();
+    expect(screen.queryByText(/207 pesanan/)).not.toBeInTheDocument();
 
     // 2. Verifikasi penyedia → PUT /admin/providers/:id/verify
     const nav = screen.getByRole('navigation', { name: /menu admin/i });
@@ -164,8 +166,21 @@ describe('Dashboard Admin', () => {
     await user.click(revDialog.getByRole('button', { name: 'Ya, Sembunyikan' }));
     expect(await screen.findByText(/ulasan bk-eeee1111 disembunyikan/i)).toBeInTheDocument();
 
-    // 5. Suspensi akun → PUT /admin/users/:id/suspend
+    // 5. Tambah Mitra Penyedia → POST /admin/providers & Suspensi akun → PUT /admin/users/:id/suspend
     await user.click(within(nav).getByRole('link', { name: 'Kelola User' }));
+    await user.click(screen.getByRole('button', { name: /tambah mitra penyedia/i }));
+    const addProvDialog = within(
+      screen.getByRole('dialog', { name: 'Tambah Akun Mitra Penyedia' }),
+    );
+    await user.type(addProvDialog.getByLabelText(/nama lengkap/i), 'Agus Salim');
+    await user.type(addProvDialog.getByLabelText(/email/i), 'agus@djc.test');
+    await user.clear(addProvDialog.getByLabelText(/nomor whatsapp/i));
+    await user.type(addProvDialog.getByLabelText(/nomor whatsapp/i), '+6281234567899');
+    await user.type(addProvDialog.getByLabelText(/nomor registrasi alumni/i), 'AL-2026-099');
+    await user.type(addProvDialog.getByLabelText(/kata sandi awal/i), 'Rahasia123');
+    await user.click(addProvDialog.getByRole('button', { name: 'Buat Akun Mitra' }));
+    expect(await screen.findByText(/akun mitra agus salim berhasil dibuat/i)).toBeInTheDocument();
+
     const budiRow = (await screen.findByText('Budi Santoso')).closest('tr');
     await user.click(within(budiRow).getByRole('button', { name: 'Aksi lain untuk Budi Santoso' }));
     await user.click(screen.getByRole('menuitem', { name: 'Suspensi akun' }));
@@ -182,6 +197,7 @@ describe('Dashboard Admin', () => {
       expect.arrayContaining([
         'GET /admin/dashboard',
         'GET /admin/providers',
+        'POST /admin/providers',
         'GET /admin/categories',
         'GET /admin/reviews',
         'GET /admin/users',

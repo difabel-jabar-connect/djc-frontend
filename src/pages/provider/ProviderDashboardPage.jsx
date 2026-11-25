@@ -54,6 +54,7 @@ import {
 import { getProviderProfile } from '@/features/providers/providerProfiles';
 import { CATEGORIES } from '@/features/search/catalog';
 import { addDays, startOfDay, toISODate } from '@/features/booking/schedule';
+import { apiErrorMessage } from '@/lib/api/client';
 import { formatRating, formatRupiah } from '@/lib/format';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { buildProviderPath } from '@/routes/paths';
@@ -375,7 +376,7 @@ export default function ProviderDashboardPage() {
       }
       announce(`Pesanan ${order.customer} kini berstatus diterima.`);
     } catch (err) {
-      announce(err?.message || 'Gagal menerima pesanan.', 'error');
+      announce(apiErrorMessage(err, 'Gagal menerima pesanan.'), 'error');
     } finally {
       setBusyOrderId('');
     }
@@ -392,7 +393,7 @@ export default function ProviderDashboardPage() {
       }
       announce(`Pesanan ${order.customer} kini berstatus diproses.`);
     } catch (err) {
-      announce(err?.message || 'Gagal memulai pesanan.', 'error');
+      announce(apiErrorMessage(err, 'Gagal memulai pesanan.'), 'error');
     } finally {
       setBusyOrderId('');
     }
@@ -575,6 +576,24 @@ export default function ProviderDashboardPage() {
         <p className="provider-feedback" role="status">
           Memuat data dashboard penyedia dari server...
         </p>
+      )}
+
+      {live && apiProfile?.verification_status === 'pending' && (
+        <div className="provider-feedback provider-feedback--warning" role="status">
+          <span>
+            Profil Anda sedang menunggu verifikasi admin UPTD PPSGHD. Lengkapi alamat, lokasi, dan
+            layanan agar profil segera tampil di pencarian publik.
+          </span>
+        </div>
+      )}
+
+      {live && apiProfile?.verification_status === 'rejected' && (
+        <div className="provider-feedback provider-feedback--error" role="alert">
+          <span>
+            Verifikasi profil penyedia Anda belum disetujui. Perbarui data profil Anda di bagian
+            Pengaturan atau hubungi admin UPTD PPSGHD.
+          </span>
+        </div>
       )}
 
       {loadState === 'error' && (

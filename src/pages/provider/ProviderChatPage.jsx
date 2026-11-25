@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import DashboardShell from '@/components/dashboard/DashboardShell';
 import ChatPanel from '@/components/chat/ChatPanel';
@@ -11,6 +12,7 @@ import {
 import { isBackendId, useChatInbox } from '@/features/chat/chatSync';
 import { useChatStore } from '@/features/chat/useChat';
 import { useAuth } from '@/context/useAuth';
+import { getOwnProviderProfile, listProviderBookings } from '@/features/dashboard/providerApi';
 import { PROVIDER_ID, sampleOrders } from '@/features/dashboard/providerDashboardData';
 import { getProviderProfile } from '@/features/providers/providerProfiles';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
@@ -54,25 +56,50 @@ export default function ProviderChatPage() {
   // Akun demo → percakapan contoh lokal seperti sebelumnya.
   const live = isBackendId(user?.id);
   useChatInbox('provider', live);
+  const [liveMeta, setLiveMeta] = useState({ providerId: null, newCount: 0 });
+
+  useEffect(() => {
+    if (!live) return undefined;
+    const controller = new AbortController();
+    let ignore = false;
+    Promise.all([
+      getOwnProviderProfile({ signal: controller.signal }).catch(() => null),
+      listProviderBookings({ signal: controller.signal }).catch(() => []),
+    ]).then(([ownProfile, bookings]) => {
+      if (ignore) return;
+      setLiveMeta({
+        providerId: ownProfile?.id ?? null,
+        newCount: bookings.filter((b) => b.status === 'requested').length,
+      });
+    });
+    return () => {
+      ignore = true;
+      controller.abort();
+    };
+  }, [live, user?.id]);
+
   const profile = getProviderProfile(PROVIDER_ID);
+  const providerId = live ? (liveMeta.providerId ?? PROVIDER_ID) : PROVIDER_ID;
   const displayName = live ? user.name : profile.name;
   const threads = live ? remoteThreads() : threadsForProvider(PROVIDER_ID);
   const active = threads.find((thread) => thread.code === code) ?? null;
   const chatUnread = threads.reduce((sum, thread) => sum + unreadCount(thread, 'provider'), 0);
-  const newCount = sampleOrders().filter((o) => o.status === 'baru').length;
+  const newCount = live
+    ? liveMeta.newCount
+    : sampleOrders().filter((o) => o.status === 'baru').length;
 
   return (
     <DashboardShell
       subtitle="Talenta Difabel, Jabar Inklusif"
       navLabel="Menu penyedia"
-      navItems={providerNavItems({ page: 'chat', newCount, chatUnread })}
+      navItems={providerNavItems({ page: 'chat', providerId, newCount, chatUnread })}
       user={{
         name: displayName,
         initials: live ? user.initials : profile.initials,
         role: 'Penyedia Layanan',
         color: '#0b3c6e',
       }}
-      userMenuItems={[{ label: 'Lihat Profil Publik', to: buildProviderPath(PROVIDER_ID) }]}
+      userMenuItems={[{ label: 'Lihat Profil Publik', to: buildProviderPath(providerId) }]}
       sidebarNote={{ text: 'Bersama Mewujudkan Jawa Barat yang Lebih Inklusif' }}
     >
       <div className={`pchat${active ? ' has-active' : ''}`}>

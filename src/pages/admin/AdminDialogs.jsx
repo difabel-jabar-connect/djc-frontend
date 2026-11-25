@@ -2,6 +2,7 @@ import { useId, useRef, useState } from 'react';
 import Dialog from '@/components/ui/Dialog';
 import { CheckIcon, HistoryIcon, SpinnerIcon, XIcon } from '@/components/ui/icons';
 import { REASON_MAX, isReasonValid, reasonError } from '@/features/admin/adminFormat';
+import { apiErrorMessage } from '@/lib/api/client';
 import { Avatar } from './AdminParts';
 
 function CloseButton({ onClick, disabled }) {
@@ -104,7 +105,7 @@ function ReasonForm({
     try {
       await onConfirm(reason.trim());
     } catch (err) {
-      setSubmitError(err?.message || 'Aksi gagal diproses. Silakan coba lagi.');
+      setSubmitError(apiErrorMessage(err, 'Aksi gagal diproses. Silakan coba lagi.'));
     } finally {
       setBusy(false);
     }
@@ -291,7 +292,7 @@ export function ConfirmDialog({
     try {
       await onConfirm();
     } catch (err) {
-      setSubmitError(err?.message || 'Aksi gagal diproses. Silakan coba lagi.');
+      setSubmitError(apiErrorMessage(err, 'Aksi gagal diproses. Silakan coba lagi.'));
     } finally {
       setBusy(false);
     }

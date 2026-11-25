@@ -17,6 +17,23 @@ const USER_STATUS_MAP = {
   suspended: 'disuspensi',
 };
 
+const CATEGORY_ICON_ALIAS = {
+  kebersihan: 'sparkle',
+  'servis-elektronik': 'wrench',
+  jahit: 'scissors',
+  kuliner: 'food',
+  kerajinan: 'gift',
+  desain: 'palette',
+  terapi: 'hand',
+  lainnya: 'tag',
+};
+
+/** Petakan ikon/slug backend ke kunci ikon yang dikenal `CategoryIcon`. */
+export function mapCategoryIcon(icon, slug) {
+  const key = String(icon || slug || '').toLowerCase();
+  return CATEGORY_ICON_ALIAS[key] ?? (icon || 'tag');
+}
+
 /** Mengubah baris `GET /admin/providers` ke bentuk item verifikasi di AdminContext. */
 export function fromApiAdminProvider(row) {
   const name = row.display_name || row.user?.name || 'Penyedia Jasa';
@@ -75,7 +92,7 @@ export function fromApiAdminCategory(row) {
     id: row.id,
     name: row.name,
     slug: row.slug,
-    icon: row.icon || 'tag',
+    icon: mapCategoryIcon(row.icon, row.slug),
     description: row.slug ? `Slug: ${row.slug}` : '',
     services: Number(row.services_count ?? 0),
     active: Boolean(row.is_active),

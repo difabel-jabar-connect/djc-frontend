@@ -57,8 +57,9 @@ export default function CategoriesPage({
       <section className="dash-card dash-panel ad-list-card" aria-label="Daftar kategori">
         <p className="ad-info">
           <InfoIcon size={18} />
-          Kategori hanya bisa dihapus bila tidak memiliki layanan. Kategori yang masih punya layanan
-          cukup dinonaktifkan.
+          {live
+            ? 'Kategori dikelola melalui status Aktif/Nonaktif. Menonaktifkan kategori menyembunyikannya dari pencarian dan Beranda tanpa menghapus layanan di dalamnya.'
+            : 'Kategori hanya bisa dihapus bila tidak memiliki layanan. Kategori yang masih punya layanan cukup dinonaktifkan.'}
         </p>
         <div className="dash-table-wrap">
           <table className="dash-table ad-table">
