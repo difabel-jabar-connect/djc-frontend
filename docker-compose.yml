@@ -1,0 +1,39 @@
+# Development server Frontend di Docker (Node 22 + Vite 6 HMR via Docker Compose v5 Watch).
+#
+#   docker compose up --watch     -> Frontend di http://localhost:5173 dengan HMR instan
+#
+# Gunakan bersama djc-backend (`docker compose --profile full up --watch`) agar seluruh
+# tim memakai versi Node, MySQL, dan Redis yang identik di Windows/Mac/Linux.
+name: djc-frontend
+
+services:
+  frontend:
+    build:
+      context: .
+      target: dev
+    env_file:
+      - path: .env.local
+        required: false
+    environment:
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:5000/api/v1}
+      VITE_APP_NAME: ${VITE_APP_NAME:-Difabel Jabar Connect}
+    ports:
+      - '5173:5173'
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app/src
+        - action: sync
+          path: ./public
+          target: /app/public
+        - action: sync
+          path: ./index.html
+          target: /app/index.html
+        - action: rebuild
+          path: ./package.json
+        - action: rebuild
+          path: ./package-lock.json
+        - action: rebuild
+          path: ./vite.config.js
+    restart: unless-stopped
