@@ -43,6 +43,8 @@ Atau jalankan di Docker dengan environment Node 22 yang seragam (HMR aktif via D
 docker compose up --watch
 ```
 
+> **Pengguna Windows yang sudah clone sebelum `.gitattributes` ditambahkan:** jika `npm run format:check` gagal karena CRLF, pastikan tidak ada perubahan belum ter-commit lalu jalankan sekali `git rm -r --cached . -q && git reset --hard` untuk checkout ulang dengan LF (`.env.local` tidak ikut terhapus).
+
 Buka `http://localhost:5173`. Beranda menampilkan panel **Status koneksi API** yang memanggil `GET {VITE_API_BASE_URL}/health`.
 
 ## 3. Perintah yang Tersedia
