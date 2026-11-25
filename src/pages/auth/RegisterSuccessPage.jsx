@@ -3,8 +3,8 @@ import { Link, useLocation } from 'react-router';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { resendVerification } from '@/features/auth/authApi';
 import { maskEmail } from '@/features/auth/password';
-import { PATHS, buildAuthPath } from '@/routes/paths';
-import { safeRedirectPath } from '@/features/auth/redirect';
+import { PATHS } from '@/routes/paths';
+import { readAuthRedirect, safeRedirectPath } from '@/features/auth/redirect';
 import { ArrowRightIcon, ClockSmallIcon } from '@/components/ui/icons';
 import AuthIntro, { AuthPageFooter } from './AuthIntro';
 import './auth.css';
@@ -63,8 +63,8 @@ export default function RegisterSuccessPage() {
   const isMitra = state?.role === 'mitra';
   // Daftar dengan Google: email sudah terverifikasi Google, tidak perlu tautan verifikasi.
   const viaGoogle = state?.via === 'google';
-  // Daftar di tengah pemesanan → setelah masuk langsung lanjut ke pemesanan.
-  const next = state?.next ? safeRedirectPath(state.next) : null;
+  // Daftar di tengah pemesanan → setelah masuk langsung lanjut ke pemesanan (via state, bukan URL).
+  const next = readAuthRedirect(state) ?? (state?.next ? safeRedirectPath(state.next, null) : null);
   const [resend, setResend] = useState({ state: 'idle', message: '' });
 
   const handleResend = async () => {
@@ -132,7 +132,8 @@ export default function RegisterSuccessPage() {
           )}
 
           <Link
-            to={buildAuthPath(PATHS.login, next)}
+            to={PATHS.login}
+            state={next ? { from: next } : undefined}
             className="btn btn--primary btn--block auth-submit"
           >
             Masuk Sekarang

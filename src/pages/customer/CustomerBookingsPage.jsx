@@ -80,7 +80,8 @@ function BookingCard({ booking, linkId }) {
         <div className="order-card__actions">
           {booking.status === 'selesai' && !booking.reviewed && (
             <Link
-              to={buildBookingDetailPath(booking.code, { ulasan: 'tulis' })}
+              to={detailPath}
+              state={{ openReview: true }}
               className="btn btn--primary"
               aria-label={`Beri ulasan untuk ${provider.name}`}
             >

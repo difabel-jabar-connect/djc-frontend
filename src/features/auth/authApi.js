@@ -10,9 +10,15 @@ export async function login({ email, password, remember }) {
   return res?.data;
 }
 
-/** POST /auth/logout — backend menghapus cookie sesi. */
+/** POST /auth/logout — backend mencabut JWT dan menghapus cookie sesi. */
 export async function logout() {
   await api.post('/auth/logout');
+}
+
+/** GET /auth/me — validasi sesi cookie HttpOnly di backend. */
+export async function getMe({ signal } = {}) {
+  const res = await api.get('/auth/me', { signal });
+  return res?.data;
 }
 
 /**

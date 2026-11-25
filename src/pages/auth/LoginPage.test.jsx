@@ -53,7 +53,8 @@ describe('Halaman Masuk', () => {
     expect(toggle).toHaveAttribute('aria-pressed', 'true');
   });
 
-  it('login berhasil mengirim kredensial lalu kembali ke halaman tujuan', async () => {
+  it('login berhasil mengirim kredensial lalu kembali ke halaman tujuan tanpa ?next= di URL', async () => {
+    sessionStorage.clear();
     const fetchMock = vi
       .fn()
       .mockImplementation(() =>
@@ -61,8 +62,12 @@ describe('Halaman Masuk', () => {
       );
     vi.stubGlobal('fetch', fetchMock);
     const user = userEvent.setup();
-    const { router } = renderAt('/login?next=%2Fpesan%2Frizki-maulana');
+    const { router } = renderAt({
+      pathname: '/login',
+      state: { from: '/pesan/rizki-maulana' },
+    });
 
+    expect(router.state.location.search).toBe('');
     await user.click(screen.getByLabelText(/ingat saya/i));
     await fillAndSubmit(user);
 
@@ -77,13 +82,15 @@ describe('Halaman Masuk', () => {
     await vi.waitFor(() => expect(router.state.location.pathname).toBe('/pesan/rizki-maulana'));
   });
 
-  it('menolak redirect ke domain luar setelah login', async () => {
+  it('menolak redirect ke domain luar dan membersihkan ?next= lama dari address bar', async () => {
+    sessionStorage.clear();
     vi.stubGlobal(
       'fetch',
       vi.fn().mockImplementation(() => Promise.resolve(jsonResponse({ data: {} }))),
     );
     const user = userEvent.setup();
     const { router } = renderAt('/login?next=https%3A%2F%2Fjahat.example');
+    await vi.waitFor(() => expect(router.state.location.search).toBe(''));
     await fillAndSubmit(user);
     await vi.waitFor(() => expect(router.state.location.pathname).toBe('/'));
   });

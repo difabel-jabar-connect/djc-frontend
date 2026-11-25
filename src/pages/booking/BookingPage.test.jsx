@@ -64,13 +64,14 @@ describe('Pesan Layanan', () => {
     // Langkah 3 lewat URL tetap ditahan di langkah 2 selama belum masuk.
     await user.click(screen.getByRole('button', { name: /masuk untuk lanjut/i }));
     expect(router.state.location.pathname).toBe('/login');
-    expect(new URLSearchParams(router.state.location.search).get('next')).toBe(
-      '/pesan/rizki-maulana?langkah=3',
-    );
+    expect(router.state.location.search).toBe('');
+    expect(router.state.location.state).toEqual({
+      from: '/pesan/rizki-maulana?langkah=3',
+    });
     expect(screen.getByRole('status')).toHaveTextContent(/melanjutkan pemesanan/i);
     expect(screen.getByRole('link', { name: 'Daftar sekarang' })).toHaveAttribute(
       'href',
-      '/register?next=%2Fpesan%2Frizki-maulana%3Flangkah%3D3',
+      '/register',
     );
 
     // Setelah masuk → kembali ke Detail Pesanan dengan jadwal yang tadi dipilih.
@@ -348,9 +349,10 @@ describe('Pesan Layanan', () => {
     await fillAndSend(user);
 
     await vi.waitFor(() => expect(router.state.location.pathname).toBe('/login'));
-    expect(new URLSearchParams(router.state.location.search).get('next')).toBe(
-      '/pesan/rizki-maulana?langkah=4',
-    );
+    expect(router.state.location.search).toBe('');
+    expect(router.state.location.state).toEqual({
+      from: '/pesan/rizki-maulana?langkah=4',
+    });
   });
 
   it('server tidak bisa dihubungi saat memuat profil → Coba Lagi', async () => {

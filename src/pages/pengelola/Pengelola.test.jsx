@@ -1,10 +1,25 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderAt } from '@/test/renderWithRouter';
+import { DEMO_ACCOUNTS } from '@/features/auth/session';
+import { renderAt as baseRenderAt } from '@/test/renderWithRouter';
 
+const renderAt = (path, opts) => baseRenderAt(path, { user: DEMO_ACCOUNTS.admin, ...opts });
 const nav = () => within(screen.getByRole('navigation', { name: 'Menu pengelola' }));
 
 describe('Panel Pengelola', () => {
+  it('OWASP A01: menolak tamu dan non-admin mengakses /pengelola', () => {
+    const guest = baseRenderAt('/pengelola');
+    expect(guest.router.state.location.pathname).toBe('/login');
+    expect(guest.router.state.location.search).toBe('');
+    guest.unmount();
+
+    const customer = baseRenderAt('/pengelola/alumni', { user: DEMO_ACCOUNTS.customer });
+    expect(customer.router.state.location.pathname).toBe('/');
+    customer.unmount();
+
+    const provider = baseRenderAt('/pengelola/pesanan', { user: DEMO_ACCOUNTS.provider });
+    expect(provider.router.state.location.pathname).toBe('/dashboard/provider');
+  });
   it('sidebar Pengelola menautkan semua halaman dan menandai halaman aktif', async () => {
     const user = userEvent.setup();
     renderAt('/pengelola');

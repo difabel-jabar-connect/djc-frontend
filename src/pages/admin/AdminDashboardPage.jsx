@@ -414,7 +414,8 @@ export default function AdminDashboardPage() {
                         </td>
                         <td>
                           <Link
-                            to={buildAdminPath(PATHS.adminVerification, { tinjau: item.id })}
+                            to={PATHS.adminVerification}
+                            state={{ reviewId: item.id }}
                             className="btn btn--primary ad-btn-sm"
                             aria-label={`Tinjau pendaftaran ${item.name}`}
                           >

@@ -21,12 +21,15 @@ const cardLinks = () =>
     .map((heading) => within(heading).getByRole('link'));
 
 describe('Halaman Pesanan Saya', () => {
-  it('meminta masuk dulu bila belum login, lalu kembali ke halaman ini', () => {
+  it('meminta masuk dulu bila belum login, lalu kembali ke halaman ini tanpa ?next= di URL', () => {
+    sessionStorage.clear();
     const { router } = renderAt('/bookings?status=selesai');
     expect(
       screen.getByRole('heading', { level: 1, name: /selamat datang kembali/i }),
     ).toBeVisible();
-    expect(router.state.location.search).toBe('?next=%2Fbookings%3Fstatus%3Dselesai');
+    expect(router.state.location.pathname).toBe('/login');
+    expect(router.state.location.search).toBe('');
+    expect(router.state.location.state).toEqual({ from: '/bookings?status=selesai' });
   });
 
   it('menampilkan tab status beserta jumlah dan 5 pesanan pertama', () => {
@@ -58,7 +61,7 @@ describe('Halaman Pesanan Saya', () => {
     expect(screen.getByText('Estimasi Rp105.000')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Beri ulasan untuk Siti Nurjanah' })).toHaveAttribute(
       'href',
-      '/bookings/BK-0009?ulasan=tulis',
+      '/bookings/BK-0009',
     );
   });
 

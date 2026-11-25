@@ -56,6 +56,9 @@ describe('Routing dasar', () => {
     ['/admin/ulasan', /selamat datang kembali/i],
     ['/admin/pesanan', /selamat datang kembali/i],
     ['/admin/audit', /selamat datang kembali/i],
+    ['/pengelola', /selamat datang kembali/i],
+    ['/pengelola/alumni', /selamat datang kembali/i],
+    ['/pengelola/pesanan', /selamat datang kembali/i],
   ])('rute %s merender halaman placeholder', async (path, heading) => {
     renderAt(path);
     // Profil & Pesan Layanan memuat data penyedia dari backend (tiruan) lebih dulu.

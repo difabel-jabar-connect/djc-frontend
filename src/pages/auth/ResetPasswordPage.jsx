@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { ALLOW_OFFLINE_AUTH_FALLBACK } from '@/config/devFlags';
@@ -22,10 +22,17 @@ export default function ResetPasswordPage() {
   useDocumentTitle('Atur Ulang Kata Sandi');
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const token = searchParams.get('token') ?? '';
+  // Simpan token ke memori React lalu segera bersihkan `?token=` dari URL bar & riwayat (OWASP A02/A07).
+  const [token] = useState(() => searchParams.get('token') ?? '');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [status, setStatus] = useState({ state: token ? 'idle' : 'expired', message: '' });
+
+  useEffect(() => {
+    if (searchParams.has('token')) {
+      navigate(PATHS.resetPassword, { replace: true });
+    }
+  }, [navigate, searchParams]);
 
   const check = checkPasswordRequirements(password);
   const matches = confirm.length > 0 && confirm === password;

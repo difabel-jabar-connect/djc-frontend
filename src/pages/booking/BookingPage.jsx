@@ -33,10 +33,11 @@ import { findBooking } from '@/features/booking/customerBookings';
 import { useAddressBook } from '@/features/booking/addressBook';
 import { findPaymentMethod, seededDigits } from '@/features/booking/payment';
 import { homePathFor } from '@/features/auth/session';
+import { saveAuthRedirect } from '@/features/auth/redirect';
 import { lastVisitedPath } from '@/hooks/useNavigationTrail';
 import { ensureThread } from '@/features/chat/chatStore';
 import { isBackendId } from '@/features/chat/chatSync';
-import { PATHS, buildAuthPath, buildBookingPath, buildProviderPath } from '@/routes/paths';
+import { PATHS, buildBookingPath, buildProviderPath } from '@/routes/paths';
 import { ArrowLeftIcon, ArrowRightIcon, LogInIcon, WalletIcon } from '@/components/ui/icons';
 import ProviderStatus from '@/pages/providers/ProviderStatus';
 import BookingStepper from './BookingStepper';
@@ -247,10 +248,11 @@ function BookingFlow({ profile, user }) {
     }
     if (!user && step >= GUEST_LAST_STEP) {
       // Simpan draf sekarang (efek penyimpanan belum tentu jalan sebelum pindah halaman),
-      // lalu minta masuk; setelah berhasil kembali ke Detail Pesanan.
+      // lalu minta masuk lewat location.state (tanpa `?next=` di URL).
       saveDraft(profile.id, draft);
       const resume = buildBookingPath(profile.id, { langkah: String(GUEST_LAST_STEP + 1) });
-      navigate(buildAuthPath(PATHS.login, resume));
+      saveAuthRedirect(resume);
+      navigate(PATHS.login, { state: { from: resume } });
       return;
     }
     if (step < 4) {
@@ -274,9 +276,11 @@ function BookingFlow({ profile, user }) {
       setSubmitting(false);
       setPaying(null);
       if (error?.status === 401) {
-        // Sesi di server habis: masuk lagi, lalu kembali ke langkah 4 dengan draf yang sama.
+        // Sesi di server habis: masuk lagi lewat location.state, lalu kembali ke langkah 4.
         saveDraft(profile.id, draft);
-        navigate(buildAuthPath(PATHS.login, buildBookingPath(profile.id, { langkah: '4' })));
+        const resume = buildBookingPath(profile.id, { langkah: '4' });
+        saveAuthRedirect(resume);
+        navigate(PATHS.login, { state: { from: resume } });
         return;
       }
       setSubmitError(submitErrorOf(error));

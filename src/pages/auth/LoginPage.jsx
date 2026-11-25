@@ -1,13 +1,18 @@
-import { useRef, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { ALLOW_OFFLINE_AUTH_FALLBACK, SHOW_DEMO_ACCOUNTS } from '@/config/devFlags';
 import { useAuth } from '@/context/useAuth';
 import { DEMO_ACCOUNTS, homePathFor } from '@/features/auth/session';
 import { login } from '@/features/auth/authApi';
 import { useGoogleAuth } from '@/features/auth/useGoogleAuth';
-import { safeRedirectPath } from '@/features/auth/redirect';
-import { PATHS, buildAuthPath, isBookingNext } from '@/routes/paths';
+import {
+  clearAuthRedirect,
+  readAuthRedirect,
+  safeRedirectPath,
+  saveAuthRedirect,
+} from '@/features/auth/redirect';
+import { PATHS, isBookingNext } from '@/routes/paths';
 import {
   EyeIcon,
   EyeOffIcon,
@@ -49,6 +54,7 @@ function validate({ email, password }) {
 export default function LoginPage() {
   useDocumentTitle('Masuk');
   const navigate = useNavigate();
+  const location = useLocation();
   const { signIn } = useAuth();
   const [searchParams] = useSearchParams();
   const [form, setForm] = useState({ email: '', password: '', remember: false });
@@ -56,9 +62,17 @@ export default function LoginPage() {
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState({ state: 'idle', message: '' });
   const fieldRefs = { email: useRef(null), sandi: useRef(null) };
-  const nextParam = searchParams.get('next');
-  const next = nextParam ? safeRedirectPath(nextParam) : null;
-  const registerPath = buildAuthPath(PATHS.register, next);
+  const legacyNext = searchParams.get('next');
+  const next =
+    readAuthRedirect(location.state) ?? (legacyNext ? safeRedirectPath(legacyNext, null) : null);
+  const registerState = next ? { from: next } : undefined;
+
+  // Jika pengguna membuka tautan lama `?next=...`, pindahkan ke location.state & bersihkan URL bar.
+  useEffect(() => {
+    if (!legacyNext) return;
+    const safe = saveAuthRedirect(legacyNext);
+    navigate(PATHS.login, { replace: true, state: safe ? { from: safe } : undefined });
+  }, [legacyNext, navigate]);
 
   const update = (key) => (event) => {
     const value = key === 'remember' ? event.target.checked : event.target.value;
@@ -68,8 +82,9 @@ export default function LoginPage() {
     }
   };
 
-  /** Kembali ke halaman tujuan (`?next=`) atau halaman awal sesuai peran. */
+  /** Kembali ke halaman tujuan (dari location.state/sessionStorage) atau halaman awal sesuai peran. */
   const goAfterLogin = (sessionUser) => {
+    clearAuthRedirect();
     navigate(next ?? homePathFor(sessionUser?.role), { replace: true });
   };
 
@@ -292,7 +307,11 @@ export default function LoginPage() {
               onClick={() => google.start()}
               action={
                 google.errorCode === 404 && (
-                  <Link to={registerPath} className="auth-link auth-link--strong">
+                  <Link
+                    to={PATHS.register}
+                    state={registerState}
+                    className="auth-link auth-link--strong"
+                  >
                     Daftar dengan Google
                   </Link>
                 )
@@ -302,7 +321,11 @@ export default function LoginPage() {
             <div className="auth-card__foot">
               <p>
                 Belum punya akun?{' '}
-                <Link to={registerPath} className="auth-link auth-link--strong">
+                <Link
+                  to={PATHS.register}
+                  state={registerState}
+                  className="auth-link auth-link--strong"
+                >
                   Daftar sekarang
                 </Link>
               </p>

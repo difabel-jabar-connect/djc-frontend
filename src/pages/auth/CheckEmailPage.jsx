@@ -113,7 +113,7 @@ export default function CheckEmailPage() {
         <div className="auth-success__text auth-success__text--compact">
           <h1 id="cek-title">Cek Email Anda</h1>
           <p>
-            Kami telah mengirim tautan reset ke{' '}
+            Jika email terdaftar, kami telah mengirim tautan reset ke{' '}
             {email ? <strong>{maskEmail(email)}</strong> : 'email Anda'}. Tautan berlaku selama{' '}
             <strong>30 menit</strong>.
           </p>
