@@ -16,6 +16,7 @@ import {
 import {
   activateAdminUser,
   createAdminCategory,
+  createAdminProvider,
   getAdminDashboard,
   listAdminCategories,
   listAdminProviders,
@@ -428,6 +429,54 @@ export function AdminProvider({ actor, initialState, children }) {
 
       suspendUser: (id, reason) => setUserStatus(id, 'disuspensi', reason),
       activateUser: (id, reason) => setUserStatus(id, 'aktif', reason),
+
+      /** Buat akun Mitra Penyedia lewat backend (`POST /admin/providers`, keputusan API-04). */
+      createProviderAccount: async (form) => {
+        const res = await createAdminProvider({
+          name: form.name.trim(),
+          email: form.email.trim().toLowerCase(),
+          phone: form.phone.trim(),
+          password: form.password,
+          alumni_reg_no: form.alumni_reg_no.trim(),
+          city: form.city.trim(),
+        });
+        const nowIso = new Date().toISOString();
+        const createdUser = fromApiAdminUser({
+          id: res.user.id,
+          role: 'provider',
+          name: res.user.name,
+          email: res.user.email,
+          phone: res.user.phone,
+          status: res.user.status ?? 'active',
+          created_at: nowIso,
+        });
+        const createdProvider = fromApiAdminProvider({
+          id: res.provider_profile.id,
+          display_name: res.user.name,
+          alumni_reg_no: form.alumni_reg_no.trim(),
+          city: form.city.trim(),
+          district: null,
+          has_location: false,
+          verification_status: res.provider_profile.verification_status ?? 'pending',
+          verified_at: null,
+          created_at: nowIso,
+          user: res.user,
+        });
+        commit(
+          (prev) => ({
+            ...prev,
+            users: [createdUser, ...prev.users],
+            verifications: [createdProvider, ...prev.verifications],
+          }),
+          {
+            action: 'buat_akun',
+            target: { type: 'user', label: res.user.name },
+            reason: `Akun mitra penyedia dibuat (No. Alumni ${form.alumni_reg_no.trim()}).`,
+          },
+        );
+        await refreshStats();
+        return createdUser;
+      },
 
       /** Buat akun Pengguna/Pengelola (demo lokal); mengembalikan user baru. */
       createAccount: (form) => {

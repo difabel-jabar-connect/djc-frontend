@@ -95,7 +95,7 @@ function ActorCell({ actor }) {
 /** Audit Log (desain Audit Log): hanya baca, filter aktor/aksi/tanggal, baris bisa dibuka. */
 export default function AuditLogPage() {
   useDocumentTitle('Audit Log');
-  const { audit } = useAdmin();
+  const { audit, live } = useAdmin();
   const [actor, setActor] = useState('');
   const [action, setAction] = useState('');
   const [range, setRange] = useState('');
@@ -206,15 +206,23 @@ export default function AuditLogPage() {
         {rows.length === 0 ? (
           <EmptyState
             icon={HistoryIcon}
-            title="Tidak ada log untuk filter ini"
+            title={
+              live && chips.length === 0 && audit.length === 0
+                ? 'Belum ada aktivitas admin pada sesi ini'
+                : 'Tidak ada log untuk filter ini'
+            }
             action={
-              <button type="button" className="btn btn--primary" onClick={resetFilters}>
-                <ResetIcon size={18} />
-                Reset Filter
-              </button>
+              chips.length > 0 && (
+                <button type="button" className="btn btn--primary" onClick={resetFilters}>
+                  <ResetIcon size={18} />
+                  Reset Filter
+                </button>
+              )
             }
           >
-            Coba ubah rentang tanggal atau jenis aksi.
+            {live && chips.length === 0 && audit.length === 0
+              ? 'Setiap aksi verifikasi, moderasi ulasan, pengelolaan kategori, atau suspensi akan tercatat di sini.'
+              : 'Coba ubah rentang tanggal atau jenis aksi.'}
           </EmptyState>
         ) : (
           <>

@@ -2,9 +2,10 @@ import { useId, useState } from 'react';
 import Dialog from '@/components/ui/Dialog';
 import { AlertCircleIcon, XIcon } from '@/components/ui/icons';
 import { CATEGORY_ICON_LABELS } from '@/features/admin/adminData';
+import { apiErrorMessage } from '@/lib/api/client';
 import { CategoryIcon } from './AdminParts';
 
-const NAME_MAX = 40;
+const NAME_MAX = 50;
 const DESCRIPTION_MAX = 120;
 
 function CategoryForm({ ids, category, takenNames, onClose, onSave }) {
@@ -19,12 +20,15 @@ function CategoryForm({ ids, category, takenNames, onClose, onSave }) {
   const [submitError, setSubmitError] = useState('');
   const name = values.name.trim();
   const duplicate = takenNames.includes(name.toLowerCase());
+  const tooShort = touched && name.length > 0 && name.length < 2;
   const error = duplicate
     ? 'Nama kategori sudah ada.'
     : touched && !name
       ? 'Nama kategori wajib diisi.'
-      : '';
-  const valid = Boolean(name) && !duplicate;
+      : tooShort
+        ? 'Nama kategori minimal 2 karakter.'
+        : '';
+  const valid = name.length >= 2 && !duplicate;
   const set = (key, value) => setValues((prev) => ({ ...prev, [key]: value }));
 
   return (
@@ -40,7 +44,7 @@ function CategoryForm({ ids, category, takenNames, onClose, onSave }) {
         try {
           await onSave(values);
         } catch (err) {
-          setSubmitError(err?.message || 'Gagal menyimpan kategori.');
+          setSubmitError(apiErrorMessage(err, 'Gagal menyimpan kategori.'));
         } finally {
           setBusy(false);
         }

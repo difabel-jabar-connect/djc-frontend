@@ -175,6 +175,43 @@ const RANGE_OPTIONS = [
   { value: '7', label: '7 Hari Terakhir' },
 ];
 
+const LIVE_BOOKING_ROWS = [
+  { key: 'requested', label: 'Menunggu Konfirmasi', tone: 'warning' },
+  { key: 'accepted', label: 'Diterima', tone: 'info' },
+  { key: 'in_progress', label: 'Sedang Dikerjakan', tone: 'navy' },
+  { key: 'completed', label: 'Selesai', tone: 'success' },
+  { key: 'rejected', label: 'Ditolak', tone: 'neutral' },
+  { key: 'cancelled', label: 'Dibatalkan', tone: 'danger' },
+];
+
+function LiveBookingBreakdown({ bookings }) {
+  const total = Math.max(1, bookings?.total ?? 0);
+  return (
+    <ul className="ad-breakdown" aria-label="Distribusi status pesanan database">
+      {LIVE_BOOKING_ROWS.map(({ key, label, tone }) => {
+        const count = bookings?.[key] ?? 0;
+        const pct = Math.round((count / total) * 100);
+        return (
+          <li key={key} className="ad-breakdown__item">
+            <div className="ad-breakdown__head">
+              <Badge tone={tone}>{label}</Badge>
+              <strong>
+                {fmt(count)} <span className="dash-muted">({pct}%)</span>
+              </strong>
+            </div>
+            <div className="ad-breakdown__track" aria-hidden="true">
+              <span
+                className={`ad-breakdown__bar tone-${tone}`}
+                style={{ width: `${count > 0 ? Math.max(4, pct) : 0}%` }}
+              />
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 function activitySentence(entry) {
   const [before, after] = AUDIT_ACTIONS[entry.action].verb.split('{t}');
   return (
@@ -426,19 +463,25 @@ export default function AdminDashboardPage() {
         <section className="dash-card dash-panel" aria-labelledby="tren-title">
           <div className="dash-panel__head">
             <h2 id="tren-title" className="dash-panel__title">
-              Tren Pesanan
+              {live ? 'Distribusi Status Pesanan' : 'Tren Pesanan'}
             </h2>
-            <FilterSelect
-              label="Rentang waktu"
-              hideLabel
-              icon={CalendarIcon}
-              value={range}
-              onChange={setRange}
-              options={RANGE_OPTIONS}
-            />
+            {!live && (
+              <FilterSelect
+                label="Rentang waktu"
+                hideLabel
+                icon={CalendarIcon}
+                value={range}
+                onChange={setRange}
+                options={RANGE_OPTIONS}
+              />
+            )}
           </div>
           <div className="ad-trend">
-            <TrendChart values={ORDER_TREND.values.slice(-Number(range))} end={ORDER_TREND.end} />
+            {live ? (
+              <LiveBookingBreakdown bookings={dashboardStats?.bookings} />
+            ) : (
+              <TrendChart values={ORDER_TREND.values.slice(-Number(range))} end={ORDER_TREND.end} />
+            )}
             <div className="ad-trend__side">
               <div className="ad-mini-stat">
                 <span>Pesanan Selesai</span>

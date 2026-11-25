@@ -532,6 +532,44 @@ export async function fakeFetch(input, init = {}) {
       meta: { page: 1, limit: 50, total_items: fakeApi.admin.providers.length, total_pages: 1 },
     });
   }
+  if (path === '/admin/providers' && method === 'POST') {
+    const newUserId = `u-prov-${Date.now().toString(36)}`;
+    const newProfileId = `p-prov-${Date.now().toString(36)}`;
+    const userObj = {
+      id: newUserId,
+      role: 'provider',
+      name: body?.name,
+      email: body?.email,
+      phone: body?.phone,
+      status: 'active',
+      created_at: '2026-11-25T08:00:00.000Z',
+    };
+    const providerObj = {
+      id: newProfileId,
+      display_name: body?.name,
+      alumni_reg_no: body?.alumni_reg_no,
+      city: body?.city,
+      district: null,
+      has_location: false,
+      verification_status: 'pending',
+      verified_at: null,
+      rating_avg: 0,
+      rating_count: 0,
+      created_at: '2026-11-25T08:00:00.000Z',
+      user: userObj,
+    };
+    fakeApi.admin.users = [userObj, ...fakeApi.admin.users];
+    fakeApi.admin.providers = [providerObj, ...fakeApi.admin.providers];
+    return json(
+      {
+        data: {
+          user: userObj,
+          provider_profile: { id: newProfileId, verification_status: 'pending' },
+        },
+      },
+      201,
+    );
+  }
   const adminVerify = /^\/admin\/providers\/([^/]+)\/verify$/.exec(path);
   if (adminVerify && method === 'PUT') {
     const id = decodeURIComponent(adminVerify[1]);

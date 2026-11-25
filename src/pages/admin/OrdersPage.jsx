@@ -22,10 +22,19 @@ import { useInitialParam, usePagedList } from './usePagedList';
 
 const PAGE_SIZE = 10;
 
+const LIVE_BOOKING_KEY = {
+  menunggu: 'requested',
+  diterima: 'accepted',
+  berlangsung: 'in_progress',
+  selesai: 'completed',
+  ditolak: 'rejected',
+  dibatalkan: 'cancelled',
+};
+
 /** Monitoring Pesanan (desain Monitoring Pesanan + Drawer Detail). Admin hanya memantau. */
 export default function OrdersPage() {
   useDocumentTitle('Monitoring Pesanan');
-  const { orders, categories } = useAdmin();
+  const { orders, categories, live, dashboardStats } = useAdmin();
   const initialStatus = useInitialParam('status');
   const initialQuery = useInitialParam('cari');
   const [query, setQuery] = useState(initialQuery);
@@ -90,7 +99,11 @@ export default function OrdersPage() {
         {Object.entries(BOOKING_STATUS).map(([key, meta]) => (
           <li key={key} className="dash-card">
             <Badge tone={meta.tone}>{meta.label}</Badge>
-            <strong>{orders.filter((o) => o.status === key).length}</strong>
+            <strong>
+              {live && dashboardStats?.bookings
+                ? (dashboardStats.bookings[LIVE_BOOKING_KEY[key]] ?? 0)
+                : orders.filter((o) => o.status === key).length}
+            </strong>
           </li>
         ))}
       </ul>
@@ -145,7 +158,11 @@ export default function OrdersPage() {
         {rows.length === 0 ? (
           <EmptyState
             icon={ClipboardListIcon}
-            title="Tidak ada pesanan untuk filter ini"
+            title={
+              live && !filtered && orders.length === 0
+                ? 'Tabel rincian pesanan lintas akun belum tersedia di API'
+                : 'Tidak ada pesanan untuk filter ini'
+            }
             action={
               filtered && (
                 <button type="button" className="btn btn--primary" onClick={resetFilters}>
@@ -155,7 +172,9 @@ export default function OrdersPage() {
               )
             }
           >
-            Coba ubah kode pesanan, status, atau tanggal.
+            {live && !filtered && orders.length === 0
+              ? 'Ringkasan jumlah pesanan per status di atas sudah menampilkan angka riil dari database.'
+              : 'Coba ubah kode pesanan, status, atau tanggal.'}
           </EmptyState>
         ) : (
           <>

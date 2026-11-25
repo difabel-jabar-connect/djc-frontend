@@ -39,7 +39,7 @@ describe('adminAdapters', () => {
       id: 'c-1',
       name: 'Kebersihan',
       slug: 'kebersihan',
-      icon: 'sparkle',
+      icon: 'kebersihan',
       sort_order: 1,
       is_active: false,
       services_count: 3,

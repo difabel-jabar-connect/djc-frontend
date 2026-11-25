@@ -27,6 +27,7 @@ import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import AccountSuccessDialog from './AccountSuccessDialog';
 import ActionMenu from './ActionMenu';
 import AddAccountDrawer from './AddAccountDrawer';
+import AddProviderDialog from './AddProviderDialog';
 import { ConfirmDialog, ReasonDialog } from './AdminDialogs';
 import {
   Badge,
@@ -62,7 +63,7 @@ const TAB_LABELS = {
 export default function UsersPage() {
   useDocumentTitle('Kelola User');
   const admin = useAdmin();
-  const { users, audit, actor, run, notify } = admin;
+  const { users, audit, actor, live, run, notify } = admin;
   const selfId = actor.id;
   const headingRef = useRef(null);
 
@@ -74,6 +75,7 @@ export default function UsersPage() {
   const [city, setCity] = useState('');
 
   const [addType, setAddType] = useState(null);
+  const [addProviderOpen, setAddProviderOpen] = useState(false);
   const [pendingStaff, setPendingStaff] = useState(null);
   const [created, setCreated] = useState(null);
   const [highlightId, setHighlightId] = useState(null);
@@ -180,42 +182,54 @@ export default function UsersPage() {
         title="Kelola User"
         lead="Kelola akun pengguna, penyedia, dan pengelola di platform."
       >
-        <ActionMenu
-          label="Tambah Akun"
-          menuLabel="Pilih jenis akun"
-          buttonClassName="btn btn--primary btn--md ad-split-btn"
-          width={360}
-          buttonContent={
-            <>
-              <PlusIcon size={18} strokeWidth={2.5} />
-              Tambah Akun
-              <span className="ad-split-btn__divider" aria-hidden="true" />
-              <ChevronDownIcon size={18} strokeWidth={2.5} />
-            </>
-          }
-          items={[
-            {
-              label: 'Akun Pengguna',
-              description: ACCOUNT_TYPES.pengguna.menuHelp,
-              icon: UserIcon,
-              tone: 'navy',
-              onSelect: () => setAddType('pengguna'),
-            },
-            {
-              label: 'Akun Pengelola',
-              description: ACCOUNT_TYPES.pengelola.menuHelp,
-              icon: ShieldIcon,
-              tone: 'indigo',
-              onSelect: () => setAddType('pengelola'),
-            },
-          ]}
-          note={
-            <>
-              <InfoIcon size={18} />
-              Akun Penyedia dibuat melalui pendaftaran mitra dan verifikasi.
-            </>
-          }
-        />
+        {live ? (
+          <button
+            type="button"
+            className="btn btn--primary btn--md"
+            aria-haspopup="dialog"
+            onClick={() => setAddProviderOpen(true)}
+          >
+            <PlusIcon size={18} strokeWidth={2.5} />
+            Tambah Mitra Penyedia
+          </button>
+        ) : (
+          <ActionMenu
+            label="Tambah Akun"
+            menuLabel="Pilih jenis akun"
+            buttonClassName="btn btn--primary btn--md ad-split-btn"
+            width={360}
+            buttonContent={
+              <>
+                <PlusIcon size={18} strokeWidth={2.5} />
+                Tambah Akun
+                <span className="ad-split-btn__divider" aria-hidden="true" />
+                <ChevronDownIcon size={18} strokeWidth={2.5} />
+              </>
+            }
+            items={[
+              {
+                label: 'Akun Pengguna',
+                description: ACCOUNT_TYPES.pengguna.menuHelp,
+                icon: UserIcon,
+                tone: 'navy',
+                onSelect: () => setAddType('pengguna'),
+              },
+              {
+                label: 'Akun Pengelola',
+                description: ACCOUNT_TYPES.pengelola.menuHelp,
+                icon: ShieldIcon,
+                tone: 'indigo',
+                onSelect: () => setAddType('pengelola'),
+              },
+            ]}
+            note={
+              <>
+                <InfoIcon size={18} />
+                Akun Penyedia dibuat melalui pendaftaran mitra dan verifikasi.
+              </>
+            }
+          />
+        )}
       </PageHeader>
 
       <section className="dash-card ad-list-card" aria-label="Daftar user">
@@ -314,6 +328,7 @@ export default function UsersPage() {
                   <tbody>
                     {paging.pageItems.map((user) => {
                       const self = user.id === selfId;
+                      const lockedAdmin = self || (live && user.rawRole === 'admin');
                       const meta = USER_STATUS[user.status];
                       return (
                         <tr
@@ -378,8 +393,8 @@ export default function UsersPage() {
                                 label={`Aksi lain untuk ${user.name}`}
                                 buttonClassName="ad-icon-btn"
                                 buttonContent={<MoreVerticalIcon size={20} />}
-                                disabled={self}
-                                describedBy={self ? 'user-self-tip' : undefined}
+                                disabled={lockedAdmin}
+                                describedBy={lockedAdmin ? 'user-self-tip' : undefined}
                                 items={rowActions(user)}
                               />
                             </div>
@@ -398,6 +413,21 @@ export default function UsersPage() {
           )}
         </div>
       </section>
+
+      <AddProviderDialog
+        key={addProviderOpen ? 'open' : 'closed'}
+        open={addProviderOpen}
+        onClose={() => setAddProviderOpen(false)}
+        onCreate={async (form) => {
+          const createdUser = await admin.createProviderAccount(form);
+          setAddProviderOpen(false);
+          setHighlightId(createdUser.id);
+          setTab('semua');
+          resetFilters();
+          notify(`Akun mitra ${createdUser.name} berhasil dibuat dan masuk antrean verifikasi.`);
+          focusHeading();
+        }}
+      />
 
       <AddAccountDrawer
         type={addType}

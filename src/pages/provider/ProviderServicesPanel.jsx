@@ -6,6 +6,7 @@ import {
   PRICING_TYPE_LABELS,
   SERVICE_MODE_LABELS,
 } from '@/features/dashboard/providerDashboardAdapters';
+import { apiErrorMessage } from '@/lib/api/client';
 import { formatRupiah } from '@/lib/format';
 
 function ServiceFormDialog({ open, service, categories, onClose, onSave }) {
@@ -79,7 +80,7 @@ function ServiceFormDialog({ open, service, categories, onClose, onSave }) {
       );
       onClose();
     } catch (err) {
-      setError(err?.message || 'Gagal menyimpan layanan.');
+      setError(apiErrorMessage(err, 'Gagal menyimpan layanan.'));
     } finally {
       setBusy(false);
     }
@@ -294,7 +295,7 @@ export default function ProviderServicesPanel({ services, categories, onSave, on
     try {
       await onToggleActive(service);
     } catch (err) {
-      setError(err?.message || 'Gagal mengubah status layanan.');
+      setError(apiErrorMessage(err, 'Gagal mengubah status layanan.'));
     } finally {
       setBusyId('');
     }
