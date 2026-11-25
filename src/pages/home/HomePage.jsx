@@ -1,6 +1,6 @@
 import ApiStatus from '@/components/common/ApiStatus';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
-import { isDev } from '@/config/env';
+import { SHOW_API_STATUS } from '@/config/devFlags';
 import { useAuth } from '@/context/useAuth';
 import HeroSection from './HeroSection';
 import FeaturedProvidersSection from './FeaturedProvidersSection';
@@ -24,8 +24,8 @@ export default function HomePage() {
       <FeaturedProvidersSection />
       <AccessibilitySection />
 
-      {/* Panel cek koneksi backend (SP1-01) hanya untuk development, tidak ada di desain. */}
-      {isDev && (
+      {/* Panel cek koneksi backend (SP1-01) hanya untuk development, dikontrol lewat src/config/devFlags.js. */}
+      {SHOW_API_STATUS && (
         <div className="container home-dev-status">
           <ApiStatus />
         </div>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
-import { isDev } from '@/config/env';
+import { ALLOW_OFFLINE_AUTH_FALLBACK } from '@/config/devFlags';
 import { resetPassword } from '@/features/auth/authApi';
 import { checkPasswordRequirements } from '@/features/auth/password';
 import { PATHS } from '@/routes/paths';
@@ -43,7 +43,11 @@ export default function ResetPasswordPage() {
     } catch (error) {
       if (error?.status === 410 || error?.status === 400) {
         setStatus({ state: 'expired', message: '' });
-      } else if (isDev && token === 'demo' && error?.code === 'ERR_NET_FAIL') {
+      } else if (
+        ALLOW_OFFLINE_AUTH_FALLBACK &&
+        token === 'demo' &&
+        error?.code === 'ERR_NET_FAIL'
+      ) {
         navigate(PATHS.resetPasswordSuccess, { replace: true });
       } else {
         setStatus({

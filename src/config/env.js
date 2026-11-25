@@ -1,6 +1,7 @@
 /**
  * Satu-satunya pintu masuk untuk membaca environment variable di frontend.
  * URL backend TIDAK boleh ditulis langsung di source code — selalu lewat VITE_API_BASE_URL.
+ * Seluruh fitur debug/demo/simulasi dikontrol terpusat di `src/config/devFlags.js`.
  */
 
 const trimTrailingSlash = (value) => value.replace(/\/+$/, '');
@@ -17,6 +18,11 @@ export function getApiBaseUrl() {
   return trimTrailingSlash(String(raw).trim());
 }
 
+/** OAuth Client ID Google (publik) dari Google Cloud Console; kosong = fitur nonaktif. */
+export const getGoogleClientId = () => String(import.meta.env.VITE_GOOGLE_CLIENT_ID ?? '').trim();
+
 export const appName = import.meta.env.VITE_APP_NAME || 'Difabel Jabar Connect';
 
 export const isDev = import.meta.env.DEV;
+
+export const isTest = import.meta.env.MODE === 'test';

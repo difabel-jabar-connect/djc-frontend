@@ -37,6 +37,35 @@ export default [
     },
   },
   {
+    files: ['src/**/*.{js,jsx}'],
+    ignores: ['src/config/**', 'src/test/**', '**/*.test.{js,jsx}'],
+    rules: {
+      // Paksa seluruh pembacaan env & fitur debug lewat src/config/env.js dan src/config/devFlags.js.
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            'MemberExpression[object.type="MetaProperty"][object.meta.name="import"][object.property.name="meta"][property.name="env"]',
+          message:
+            'Jangan baca import.meta.env langsung di luar src/config/. Gunakan src/config/env.js atau daftarkan saklar di src/config/devFlags.js.',
+        },
+      ],
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['**/config/env', '**/config/env.js'],
+              importNames: ['isDev'],
+              message:
+                'Jangan impor isDev langsung di komponen. Daftarkan fitur debug/demo di src/config/devFlags.js agar terkontrol terpusat.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     files: ['**/*.test.{js,jsx}', 'src/test/**'],
     languageOptions: { globals: { ...globals.vitest } },
   },

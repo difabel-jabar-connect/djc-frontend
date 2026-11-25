@@ -25,10 +25,11 @@ import {
   SAMPLE_REVISIONS,
   SAMPLE_SERVICES,
 } from '@/features/pengelola/pengelolaData';
+import { isTest } from '@/config/env';
 import { AdminContext } from './useAdmin';
 
 /** Jeda tiruan "Memproses..." agar tombol tidak terkirim dua kali (0 saat test). */
-const LATENCY = import.meta.env.MODE === 'test' ? 0 : 600;
+const LATENCY = isTest ? 0 : 600;
 const TOAST_MS = 6000;
 
 /** Pastikan akun admin yang masuk ada di daftar user (sumber data Profil Saya). */
