@@ -2,6 +2,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { logout as logoutRequest } from '@/features/auth/authApi';
 import { SESSION_STORAGE_KEY as STORAGE_KEY, toSessionUser } from '@/features/auth/session';
 import { resetAddressBook } from '@/features/booking/addressBook';
+import { resetChatSync } from '@/features/chat/chatSync';
 import { AuthContext } from './useAuth';
 
 function readStoredUser() {
@@ -26,7 +27,10 @@ export function AuthProvider({ children, initialUser }) {
   const signIn = useCallback((raw) => {
     const next = toSessionUser(raw);
     // Masuk (bukan sekadar memperbarui profil): alamat dimuat ulang dengan sesi yang baru.
-    if (next?.id !== userIdRef.current) resetAddressBook();
+    if (next?.id !== userIdRef.current) {
+      resetAddressBook();
+      resetChatSync();
+    }
     userIdRef.current = next?.id ?? null;
     setUser(next);
     try {
@@ -44,6 +48,7 @@ export function AuthProvider({ children, initialUser }) {
       // Sesi tetap diakhiri di sisi klien walau server tidak merespons.
     }
     resetAddressBook();
+    resetChatSync();
     userIdRef.current = null;
     setUser(null);
     try {
