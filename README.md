@@ -37,6 +37,12 @@ cp .env.example .env.local        # Windows (PowerShell): Copy-Item .env.example
 npm run dev
 ```
 
+Atau jalankan di Docker dengan environment Node 22 yang seragam (HMR aktif via Docker Compose v5 Watch):
+
+```bash
+docker compose up --watch
+```
+
 Buka `http://localhost:5173`. Beranda menampilkan panel **Status koneksi API** yang memanggil `GET {VITE_API_BASE_URL}/health`.
 
 ## 3. Perintah yang Tersedia
