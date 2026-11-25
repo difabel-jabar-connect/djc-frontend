@@ -1,8 +1,9 @@
-import { CATEGORIES } from '@/features/search/catalog';
+import { useCategories } from '@/features/search/useCategories';
 import { CheckIcon } from '@/components/ui/icons';
 
-/** Section 4. CHIP KATEGORI — toggle cepat filter kategori (sinkron dengan dropdown). */
+/** Section 4. CHIP KATEGORI — toggle cepat filter kategori (sinkron dengan dropdown & API). */
 export default function CategoryChips({ value, onChange }) {
+  const categories = useCategories();
   return (
     <div className="container category-filter">
       <div role="group" aria-label="Kategori layanan" className="category-filter__list">
@@ -15,7 +16,7 @@ export default function CategoryChips({ value, onChange }) {
           {!value && <CheckIcon />}
           Semua
         </button>
-        {CATEGORIES.map((category) => {
+        {categories.map((category) => {
           const pressed = value === category.slug;
           return (
             <button
@@ -25,7 +26,11 @@ export default function CategoryChips({ value, onChange }) {
               aria-pressed={pressed}
               onClick={() => onChange(pressed ? '' : category.slug)}
             >
-              {pressed ? <CheckIcon /> : <img src={category.icon} alt="" width="20" height="20" />}
+              {pressed ? (
+                <CheckIcon />
+              ) : (
+                category.icon && <img src={category.icon} alt="" width="20" height="20" />
+              )}
               {category.label}
             </button>
           );

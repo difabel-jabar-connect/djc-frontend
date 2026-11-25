@@ -103,7 +103,7 @@ function BookingCard({ booking, linkId }) {
 /** Halaman Pesanan Saya (FR-CUST-08) — daftar pesanan dengan filter status. */
 export default function CustomerBookingsPage() {
   useDocumentTitle('Pesanan Saya');
-  const { bookings } = useCustomer();
+  const { bookings, bookingsStatus, bookingsError, refreshBookings } = useCustomer();
   const [searchParams, setSearchParams] = useSearchParams();
   const requested = searchParams.get('status');
   const tab = BOOKING_TABS.some((t) => t.value === requested) ? requested : 'semua';
@@ -195,7 +195,19 @@ export default function CustomerBookingsPage() {
         </div>
 
         <div id="booking-panel" role="tabpanel" aria-labelledby={`tab-${tab}`}>
-          {filtered.length === 0 ? (
+          {bookingsStatus === 'loading' && bookings.length === 0 ? (
+            <div className="booking-empty" role="status" aria-live="polite">
+              <p>Memuat daftar pesanan Anda…</p>
+            </div>
+          ) : bookingsStatus === 'error' && bookings.length === 0 ? (
+            <div className="booking-empty" role="alert">
+              <p>{bookingsError || 'Daftar pesanan belum bisa dimuat.'}</p>
+              <button type="button" className="btn btn--primary" onClick={refreshBookings}>
+                <RefreshIcon />
+                Coba Lagi
+              </button>
+            </div>
+          ) : filtered.length === 0 ? (
             <div className="booking-empty">
               <InboxIcon size={32} />
               <p>

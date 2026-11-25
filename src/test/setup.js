@@ -4,6 +4,7 @@ import { cleanup } from '@testing-library/react';
 import { MotionGlobalConfig } from 'motion';
 import { resetChatStore } from '@/features/chat/chatStore';
 import { clearSearchCache } from '@/features/search/useProviderSearch';
+import { clearCategoriesCache } from '@/features/search/useCategories';
 import { resetAddressBook } from '@/features/booking/addressBook';
 import { fakeApi, fakeFetch } from './fakeApi';
 
@@ -59,6 +60,7 @@ afterEach(() => {
   cleanup();
   fakeApi.reset();
   clearSearchCache();
+  clearCategoriesCache();
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
   vi.unstubAllEnvs();

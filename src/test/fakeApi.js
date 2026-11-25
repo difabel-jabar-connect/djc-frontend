@@ -1,6 +1,6 @@
 import { SAMPLE_PROVIDERS } from '@/features/providers/sampleProviders';
 import { getProviderProfile as getSampleProfile } from '@/features/providers/providerProfiles';
-import { getCategory } from '@/features/search/catalog';
+import { CATEGORIES, getCategory } from '@/features/search/catalog';
 
 /**
  * Backend tiruan untuk test: menjawab GET /services, GET /providers/:id, POST /bookings, dan
@@ -280,12 +280,20 @@ export const fakeApi = {
   offline: false,
   /** Respons kustom untuk POST /bookings (mis. error validasi), atau null. */
   bookingResponse: null,
+  /** Daftar booking mentah (format backend) untuk GET/PUT /bookings & POST /reviews. */
+  bookings: [],
+  /** Respons error kustom untuk cancel/review, atau null. */
+  cancelError: null,
+  reviewError: null,
   /** Akun di balik endpoint /me; test bisa mengubah isinya (mis. `addresses = []`). */
   account: demoAccount(),
   reset() {
     this.calls = [];
     this.offline = false;
     this.bookingResponse = null;
+    this.bookings = [];
+    this.cancelError = null;
+    this.reviewError = null;
     this.account = demoAccount();
     bookingSeq = 0;
     addressSeq = 0;
@@ -304,6 +312,16 @@ export async function fakeFetch(input, init = {}) {
   if (fakeApi.offline) throw new TypeError('Failed to fetch');
 
   if (method === 'GET' && path === '/health') return json({ data: { status: 'ok' } });
+  if (method === 'GET' && path === '/categories') {
+    return json({
+      data: CATEGORIES.map((c, idx) => ({
+        id: `cat-${c.slug}`,
+        slug: c.slug,
+        name: c.label,
+        sort_order: idx + 1,
+      })),
+    });
+  }
   if (method === 'GET' && path === '/services') return json(searchServices(url.searchParams));
 
   const provider = /^\/providers\/([^/]+)$/.exec(path);
@@ -315,6 +333,70 @@ export async function fakeFetch(input, init = {}) {
   if (path === '/me' || path.startsWith('/me/')) {
     const response = accountRoute(method, path, body ?? {});
     if (response) return response;
+  }
+
+  if (method === 'GET' && path === '/bookings') {
+    return json({
+      data: fakeApi.bookings,
+      meta: {
+        page: 1,
+        limit: 50,
+        total_items: fakeApi.bookings.length,
+        total_pages: fakeApi.bookings.length ? 1 : 0,
+      },
+    });
+  }
+
+  const bookingOne = /^\/bookings\/([^/]+)$/.exec(path);
+  if (method === 'GET' && bookingOne) {
+    const id = decodeURIComponent(bookingOne[1]);
+    const row = fakeApi.bookings.find((b) => b.id === id);
+    return row ? json({ data: row }) : notFound('Pesanan tidak ditemukan.');
+  }
+
+  const bookingCancel = /^\/bookings\/([^/]+)\/cancel$/.exec(path);
+  if ((method === 'PUT' || method === 'POST') && bookingCancel) {
+    if (fakeApi.cancelError) return json(...fakeApi.cancelError);
+    const id = decodeURIComponent(bookingCancel[1]);
+    const row = fakeApi.bookings.find((b) => b.id === id);
+    if (!row) return notFound('Pesanan tidak ditemukan.');
+    row.status = 'cancelled';
+    row.cancelled_by = 'customer';
+    row.status_reason = body?.reason ?? null;
+    if (row.provider) {
+      row.provider = { ...row.provider, phone: null, address_detail: null };
+    }
+    row.history = [
+      ...(row.history ?? []),
+      {
+        from_status: 'accepted',
+        to_status: 'cancelled',
+        changed_by_role: 'customer',
+        reason: body?.reason ?? null,
+        created_at: '2026-11-25T07:30:00.000Z',
+      },
+    ];
+    return json({ data: row });
+  }
+
+  const bookingReview = /^\/bookings\/([^/]+)\/reviews?$/.exec(path);
+  if (method === 'POST' && bookingReview) {
+    if (fakeApi.reviewError) return json(...fakeApi.reviewError);
+    const id = decodeURIComponent(bookingReview[1]);
+    const row = fakeApi.bookings.find((b) => b.id === id);
+    if (!row) return notFound('Pesanan tidak ditemukan.');
+    row.can_review = false;
+    return json(
+      {
+        data: {
+          id: 'rev-1',
+          booking_id: row.id,
+          rating: body?.rating,
+          comment: body?.comment ?? null,
+        },
+      },
+      201,
+    );
   }
 
   if (method === 'POST' && path === '/bookings') {

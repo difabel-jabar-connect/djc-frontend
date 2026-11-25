@@ -30,12 +30,14 @@ import {
   MapPinIcon,
   NoteIcon,
   PencilIcon,
+  PhoneIcon,
   ReceiptIcon,
   RotateCcwIcon,
   RouteIcon,
   TagIcon,
   XCircleIcon,
 } from '@/components/ui/icons';
+import { isBackendBooking } from '@/features/booking/bookingAdapters';
 import { CancelBookingDialog, ReviewDialog } from './BookingDialogs';
 import { ProviderAvatar, StatusBadge, StatusIcon } from './BookingParts';
 import './customer.css';
@@ -65,14 +67,16 @@ function bannerCopy(booking, provider) {
       return {
         title: 'Layanan selesai',
         text: booking.reviewed
-          ? `Selesai pada ${formatStamp(last.at)}. Terima kasih sudah memberi ulasan.`
-          : `Selesai pada ${formatStamp(last.at)}. Bagikan pengalaman Anda lewat ulasan.`,
+          ? `Selesai pada ${formatStamp(last?.at)}. Terima kasih sudah memberi ulasan.`
+          : `Selesai pada ${formatStamp(last?.at)}. Bagikan pengalaman Anda lewat ulasan.`,
       };
-    case 'dibatalkan':
+    case 'dibatalkan': {
+      const actor = last?.by === 'Anda' ? 'Anda' : last?.by === 'Sistem' ? 'sistem' : 'penyedia';
       return {
         title: 'Pesanan dibatalkan',
-        text: `Dibatalkan oleh ${last.by === 'Anda' ? 'Anda' : 'penyedia'} pada ${formatStamp(last.at)}.${booking.cancelReason ? ` Alasan: “${booking.cancelReason}”` : ''}`,
+        text: `Dibatalkan oleh ${actor} pada ${formatStamp(last?.at)}.${booking.cancelReason ? ` Alasan: “${booking.cancelReason}”` : ''}`,
       };
+    }
     case 'ditolak':
       return {
         title: 'Pesanan ditolak penyedia',
@@ -172,7 +176,8 @@ function ChatButton({ booking, provider }) {
 }
 
 function ContactCard({ booking, provider }) {
-  const visible = CONTACT_VISIBLE.includes(booking.status) && booking.contact;
+  const hasContact = Boolean(booking.contact?.phone || booking.contact?.address);
+  const visible = CONTACT_VISIBLE.includes(booking.status) && hasContact;
   return (
     <section className="detail-card" aria-labelledby="contact-title">
       <h2 id="contact-title" className="contact-card__title">
@@ -181,23 +186,38 @@ function ContactCard({ booking, provider }) {
       <ChatButton booking={booking} provider={provider} />
       {visible ? (
         <>
-          <div className="contact-row contact-row--split">
-            <span className="contact-row__icon" aria-hidden="true">
-              <MapPinIcon />
-            </span>
-            <div>
-              <span className="contact-row__label">Alamat penyedia</span>
-              <span className="contact-row__address">{booking.contact.address}</span>
-              <a
-                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(booking.contact.address)}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Buka di peta
-                <span className="visually-hidden"> (membuka tab baru)</span>
-              </a>
+          {booking.contact.phone && (
+            <div className="contact-row contact-row--split">
+              <span className="contact-row__icon" aria-hidden="true">
+                <PhoneIcon />
+              </span>
+              <div>
+                <span className="contact-row__label">Nomor telepon penyedia</span>
+                <a href={`tel:${booking.contact.phone}`} className="contact-row__address">
+                  {booking.contact.phone}
+                </a>
+              </div>
             </div>
-          </div>
+          )}
+          {booking.contact.address && (
+            <div className="contact-row contact-row--split">
+              <span className="contact-row__icon" aria-hidden="true">
+                <MapPinIcon />
+              </span>
+              <div>
+                <span className="contact-row__label">Alamat penyedia</span>
+                <span className="contact-row__address">{booking.contact.address}</span>
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(booking.contact.address)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Buka di peta
+                  <span className="visually-hidden"> (membuka tab baru)</span>
+                </a>
+              </div>
+            </div>
+          )}
         </>
       ) : (
         <div className="contact-locked">
@@ -207,7 +227,7 @@ function ContactCard({ booking, provider }) {
           <div>
             <span className="contact-locked__city">
               <MapPinIcon size={16} />
-              {provider.city}, Jawa Barat
+              {provider.city ? `${provider.city}, Jawa Barat` : 'Jawa Barat'}
             </span>
             <span className="contact-locked__text">
               <span className="visually-hidden">Terkunci. </span>
@@ -242,8 +262,9 @@ function BookingNotFound({ code }) {
 /** Halaman Detail Pesanan pelanggan (desain Detail Pesanan, Batalkan, Beri Ulasan). */
 export default function BookingDetailPage() {
   const { code } = useParams();
-  const { bookings, cancelBooking, reviewBooking, markRead } = useCustomer();
-  const booking = findBooking(bookings, code);
+  const { bookings, bookingsStatus, loadBookingDetail, cancelBooking, reviewBooking, markRead } =
+    useCustomer();
+  const booking = findBooking(bookings, code) ?? bookings.find((b) => b.id === code);
   useDocumentTitle(booking ? `Pesanan ${booking.code}` : 'Pesanan tidak ditemukan');
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -255,7 +276,30 @@ export default function BookingDetailPage() {
       : { type: null, key: 0 },
   );
   const [flash, setFlash] = useState('');
+  const [detailLoading, setDetailLoading] = useState(false);
   const flashRef = useRef(null);
+
+  // Muat detail lengkap (riwayat status & status kontak terbaru) dari GET /bookings/:id.
+  const bookingId = booking?.id ?? null;
+  const isRemote = isBackendBooking(booking);
+  useEffect(() => {
+    if (!loadBookingDetail) return undefined;
+    if (!isRemote && bookingsStatus === 'ready') return undefined;
+    const controller = new AbortController();
+    let ignore = false;
+    setDetailLoading(true);
+    loadBookingDetail(bookingId ?? code, { signal: controller.signal })
+      .catch(() => {
+        // Tetap tampilkan data ringkas dari daftar jika detail sementara gagal.
+      })
+      .finally(() => {
+        if (!ignore) setDetailLoading(false);
+      });
+    return () => {
+      ignore = true;
+      controller.abort();
+    };
+  }, [bookingId, isRemote, code, bookingsStatus, loadBookingDetail]);
 
   useEffect(() => {
     if (booking?.unread) markRead(booking.code);
@@ -264,6 +308,18 @@ export default function BookingDetailPage() {
   useEffect(() => {
     if (flash) flashRef.current?.focus();
   }, [flash]);
+
+  if (!booking && (bookingsStatus === 'loading' || detailLoading)) {
+    return (
+      <div className="customer-page">
+        <div className="container customer-page__inner">
+          <div className="booking-empty" role="status" aria-live="polite">
+            <p>Memuat detail pesanan…</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!booking) return <BookingNotFound code={code} />;
 
@@ -277,14 +333,14 @@ export default function BookingDetailPage() {
     if (searchParams.has('ulasan')) setSearchParams({}, { replace: true });
   };
 
-  const handleCancel = (reason) => {
-    cancelBooking(booking.code, reason);
+  const handleCancel = async (reason) => {
+    await cancelBooking(booking.code, reason);
     closeDialog();
     setFlash(`Pesanan ${booking.code} berhasil dibatalkan. Penyedia sudah diberi tahu.`);
   };
 
-  const handleReview = (review) => {
-    reviewBooking(booking.code, review);
+  const handleReview = async (review) => {
+    await reviewBooking(booking.code, review);
     closeDialog();
     setFlash(`Terima kasih! Ulasan Anda untuk ${provider.name} sudah terkirim.`);
   };

@@ -2,9 +2,18 @@ import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DEMO_ACCOUNTS } from '@/features/auth/session';
 import { renderAt } from '@/test/renderWithRouter';
+import { fakeApi } from '@/test/fakeApi';
 import { SAMPLE_BOOKINGS } from '@/features/booking/customerBookings';
 
 const customer = { user: DEMO_ACCOUNTS.customer };
+const backendCustomer = {
+  user: {
+    id: '11111111-1111-4111-8111-111111111101',
+    name: 'Ani Wijaya',
+    email: 'ani@djc.test',
+    role: 'customer',
+  },
+};
 const bookingList = () => screen.getByRole('list', { name: /daftar pesanan/i });
 const cardLinks = () =>
   within(bookingList())
@@ -110,5 +119,45 @@ describe('Halaman Pesanan Saya', () => {
     ]);
     expect(within(bookingList()).getByText('Asep Gunawan · Penyedia')).toBeInTheDocument();
     expect(within(bookingList()).getByText('Penyedia layanan · Penyedia')).toBeInTheDocument();
+  });
+
+  it('akun backend (UUID) memuat riwayat dari GET /bookings dan menangani error + coba lagi', async () => {
+    const user = userEvent.setup();
+    fakeApi.bookings = [
+      {
+        id: '22222222-2222-4222-8222-222222222202',
+        code: 'DJC-0002',
+        status: 'accepted',
+        service: { id: '33333333-3333-4333-8333-333333333301', title: 'Permak celana' },
+        provider: {
+          id: '44444444-4444-4444-8444-444444444401',
+          display_name: 'Siti Rahmawati',
+          city: 'Kota Bandung',
+          phone: '+6281234567891',
+          address_detail: 'Jl. Dago No. 10',
+        },
+        scheduled_date: '2026-11-28',
+        start_time: '10:00',
+        service_mode: 'at_provider',
+        pricing_type_snapshot: 'fixed',
+        unit_price_snapshot: 35000,
+        quantity: 1,
+        estimated_total: 35000,
+        can_review: false,
+        created_at: '2026-11-25T03:00:00.000Z',
+      },
+    ];
+
+    fakeApi.offline = true;
+    renderAt('/bookings', backendCustomer);
+    expect(await screen.findByRole('alert')).toHaveTextContent(/tidak dapat terhubung ke server/i);
+
+    fakeApi.offline = false;
+    await user.click(screen.getByRole('button', { name: /coba lagi/i }));
+    expect(await screen.findByText('DJC-0002')).toBeInTheDocument();
+    expect(cardLinks().map((link) => link.textContent)).toEqual([
+      'Permak celana, DJC-0002, status Diterima',
+    ]);
+    expect(fakeApi.calls.some((c) => c.method === 'GET' && c.path === '/bookings')).toBe(true);
   });
 });

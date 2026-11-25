@@ -23,24 +23,34 @@ export function CancelBookingDialog({ open, booking, provider, onClose, onConfir
   const id = useId();
   const [reason, setReason] = useState('');
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const fieldRef = useRef(null);
 
   const close = () => {
+    if (submitting) return;
     setReason('');
     setError('');
     onClose();
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+    if (submitting) return;
     if (!reason.trim()) {
       setError('Tuliskan alasan pembatalan terlebih dahulu.');
       fieldRef.current?.focus();
       return;
     }
-    onConfirm(reason.trim());
-    setReason('');
+    setSubmitting(true);
     setError('');
+    try {
+      await onConfirm(reason.trim());
+      setReason('');
+    } catch (err) {
+      setError(err?.message || 'Pesanan belum dapat dibatalkan. Silakan coba lagi.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -107,11 +117,11 @@ export function CancelBookingDialog({ open, booking, provider, onClose, onConfir
         </div>
 
         <div className="dialog__actions">
-          <button type="button" className="btn btn--outline" onClick={close}>
+          <button type="button" className="btn btn--outline" disabled={submitting} onClick={close}>
             Kembali
           </button>
-          <button type="submit" className="btn btn--danger-solid">
-            Ya, Batalkan
+          <button type="submit" className="btn btn--danger-solid" disabled={submitting}>
+            {submitting ? 'Membatalkan…' : 'Ya, Batalkan'}
           </button>
         </div>
       </form>
@@ -124,17 +134,29 @@ export function ReviewDialog({ open, booking, provider, initialRating = 0, onClo
   const id = useId();
   const [rating, setRating] = useState(initialRating);
   const [text, setText] = useState('');
+  const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const close = () => {
+    if (submitting) return;
     setText('');
+    setError('');
     onClose();
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!rating) return;
-    onSubmit({ rating, text: text.trim() });
-    setText('');
+    if (!rating || submitting) return;
+    setSubmitting(true);
+    setError('');
+    try {
+      await onSubmit({ rating, text: text.trim() });
+      setText('');
+    } catch (err) {
+      setError(err?.message || 'Ulasan gagal dikirim. Silakan coba lagi.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -202,12 +224,18 @@ export function ReviewDialog({ open, booking, provider, initialRating = 0, onClo
           Ulasan Anda membantu alumni difabel berkembang.
         </p>
 
+        {error && (
+          <p className="form-field__error" role="alert">
+            {error}
+          </p>
+        )}
+
         <div className="dialog__actions">
-          <button type="button" className="btn btn--outline" onClick={close}>
+          <button type="button" className="btn btn--outline" disabled={submitting} onClick={close}>
             Batal
           </button>
-          <button type="submit" className="btn btn--primary" disabled={!rating}>
-            Kirim Ulasan
+          <button type="submit" className="btn btn--primary" disabled={!rating || submitting}>
+            {submitting ? 'Mengirim…' : 'Kirim Ulasan'}
           </button>
         </div>
       </form>
