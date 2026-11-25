@@ -344,7 +344,7 @@ a.dash-side__item:hover {
 }
 
 .dash-main [id] {
-  scroll-margin-top: var(--space-4);
+  scroll-margin-top: calc(var(--dash-topbar-h, 64px) + var(--space-4));
 }
 
 .dash-card {
@@ -859,6 +859,7 @@ a.dash-side__item:hover {
   --radius: 10px;
   --radius-lg: 12px;
   --radius-xl: 16px;
+  --dash-topbar-h: 64px;
   --dash-frame: #eef1f5;
   --dash-edge: #e1e6ec;
 
@@ -866,12 +867,23 @@ a.dash-side__item:hover {
 }
 
 .dash-topbar {
-  min-height: 64px;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  min-height: var(--dash-topbar-h);
   border-bottom: 0;
   background: var(--dash-frame);
 }
 
 .dash-side {
+  position: sticky;
+  top: var(--dash-topbar-h);
+  align-self: flex-start;
+  height: calc(100vh - var(--dash-topbar-h));
+  height: calc(100dvh - var(--dash-topbar-h));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
   border-right: 0;
   background: var(--dash-frame);
 }
@@ -955,7 +967,13 @@ a.dash-side__item:hover {
 @media (max-width: 1024px) {
   /* Menu tidak lagi digeser keluar layar: item membungkus di dalam margin. */
   .dash-side {
-    overflow-x: visible;
+    position: relative;
+    top: auto;
+    align-self: stretch;
+    height: auto;
+    overflow: visible;
+    overscroll-behavior: auto;
+    scrollbar-gutter: auto;
     border-bottom: 0;
   }
 
