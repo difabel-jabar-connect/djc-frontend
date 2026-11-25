@@ -13,6 +13,25 @@ import {
   generateTempPassword,
   regionShort,
 } from '@/features/admin/accountForm';
+import {
+  activateAdminUser,
+  createAdminCategory,
+  getAdminDashboard,
+  listAdminCategories,
+  listAdminProviders,
+  listAdminReviews,
+  listAdminUsers,
+  moderateAdminReview,
+  suspendAdminUser,
+  updateAdminCategory,
+  verifyAdminProvider,
+} from '@/features/admin/adminApi';
+import {
+  fromApiAdminCategory,
+  fromApiAdminProvider,
+  fromApiAdminReview,
+  fromApiAdminUser,
+} from '@/features/admin/adminAdapters';
 import { avatarColor, initialsOf } from '@/features/admin/adminFormat';
 import {
   SAMPLE_NOTIFICATION_PREFS,
@@ -25,10 +44,11 @@ import {
   SAMPLE_REVISIONS,
   SAMPLE_SERVICES,
 } from '@/features/pengelola/pengelolaData';
+import { isBackendId } from '@/features/chat/chatSync';
 import { isTest } from '@/config/env';
 import { AdminContext } from './useAdmin';
 
-/** Jeda tiruan "Memproses..." agar tombol tidak terkirim dua kali (0 saat test). */
+/** Jeda tiruan "Memproses..." pada mode demo lokal agar tombol tidak terkirim dua kali. */
 const LATENCY = isTest ? 0 : 600;
 const TOAST_MS = 6000;
 
@@ -57,7 +77,7 @@ function withSelf(users, actor) {
   ];
 }
 
-const initialData = (actor) => ({
+const initialDemoData = (actor) => ({
   verifications: [...SAMPLE_VERIFICATIONS, ...SAMPLE_REVISIONS],
   alumni: SAMPLE_ALUMNI,
   services: SAMPLE_SERVICES,
@@ -70,6 +90,21 @@ const initialData = (actor) => ({
   reviews: SAMPLE_REVIEWS,
   orders: SAMPLE_ORDERS,
   audit: SAMPLE_AUDIT_LOG,
+});
+
+const emptyLiveData = (actor) => ({
+  verifications: [],
+  alumni: SAMPLE_ALUMNI,
+  services: SAMPLE_SERVICES,
+  reports: SAMPLE_REPORTS,
+  users: withSelf([], actor),
+  sessions: SAMPLE_SESSIONS,
+  notificationPrefs: SAMPLE_NOTIFICATION_PREFS,
+  platformInfo: SAMPLE_PLATFORM_INFO,
+  categories: [],
+  reviews: [],
+  orders: [],
+  audit: [],
 });
 
 /** "LOG-2026-10-28-00419": tanggal WIB + nomor urut berikutnya. */
@@ -136,15 +171,75 @@ const REVIEW_TONE = { dilaporkan: 'warning', ditampilkan: 'success', disembunyik
 
 /**
  * State area Admin: antrean verifikasi, user, kategori, ulasan, pesanan, dan audit log.
- * Setiap aksi admin menambah entri Audit Log. Sementara data contoh + state lokal;
- * TODO(API): ganti setiap aksi dengan panggilan endpoint admin.
+ * - Sesi admin backend (actor.id UUID, FE-05c): memuat & menyimpan langsung ke API `/admin/*`.
+ * - Sesi demo lokal (`u-andi`) atau `initialState` pada unit test: memakai data contoh lokal.
  */
 export function AdminProvider({ actor, initialState, children }) {
-  const [data, setData] = useState(() => ({ ...initialData(actor), ...initialState }));
+  const live = initialState === undefined && isBackendId(actor?.id);
+  const [data, setData] = useState(() => ({
+    ...(live ? emptyLiveData(actor) : initialDemoData(actor)),
+    ...initialState,
+  }));
+  const [dashboardStats, setDashboardStats] = useState(null);
+  const [loadState, setLoadState] = useState(() => (live ? 'loading' : 'ready'));
+  const [loadError, setLoadError] = useState('');
+  const [reloadTick, setReloadTick] = useState(0);
   const [toast, setToast] = useState(null);
   const toastTimer = useRef(null);
 
   useEffect(() => () => clearTimeout(toastTimer.current), []);
+
+  useEffect(() => {
+    if (!live) return undefined;
+    const controller = new AbortController();
+    let ignore = false;
+    setLoadState('loading');
+    setLoadError('');
+
+    Promise.all([
+      getAdminDashboard({ signal: controller.signal }),
+      listAdminProviders({ limit: 50, signal: controller.signal }),
+      listAdminCategories({ signal: controller.signal }),
+      listAdminReviews({ limit: 50, signal: controller.signal }),
+      listAdminUsers({ limit: 50, signal: controller.signal }),
+    ])
+      .then(([stats, providers, categories, reviews, users]) => {
+        if (ignore) return;
+        setDashboardStats(stats);
+        setData((prev) => ({
+          ...prev,
+          verifications: providers.map(fromApiAdminProvider),
+          categories: categories.map(fromApiAdminCategory),
+          reviews: reviews.map(fromApiAdminReview),
+          users: withSelf(users.map(fromApiAdminUser), actor),
+        }));
+        setLoadState('ready');
+      })
+      .catch((error) => {
+        if (ignore || error?.name === 'AbortError') return;
+        setLoadError(error?.message || 'Data dashboard admin belum bisa dimuat.');
+        setLoadState('error');
+      });
+
+    return () => {
+      ignore = true;
+      controller.abort();
+    };
+  }, [live, actor, reloadTick]);
+
+  const refreshAdmin = useCallback(() => {
+    if (live) setReloadTick((n) => n + 1);
+  }, [live]);
+
+  const refreshStats = useCallback(async () => {
+    if (!live) return;
+    try {
+      const stats = await getAdminDashboard();
+      setDashboardStats(stats);
+    } catch {
+      // Abaikan kegagalan refresh angka ringkasan setelah mutasi utama berhasil.
+    }
+  }, [live]);
 
   const notify = useCallback((message) => {
     clearTimeout(toastTimer.current);
@@ -192,15 +287,26 @@ export function AdminProvider({ actor, initialState, children }) {
     [actor, self],
   );
 
-  /** Jalankan aksi setelah jeda tiruan (status "Memproses..." di dialog). */
+  /** Jalankan aksi async (langsung ke API saat live, atau jeda tiruan pada demo lokal). */
   const run = useCallback(
-    (fn) => new Promise((resolve) => setTimeout(() => resolve(fn()), LATENCY)),
-    [],
+    async (fn) => {
+      if (!live && LATENCY > 0) {
+        await new Promise((resolve) => setTimeout(resolve, LATENCY));
+      }
+      return fn();
+    },
+    [live],
   );
 
   const actions = useMemo(() => {
-    const decide = (id, status, note, action, change) => {
+    const decide = async (id, status, note, action, change) => {
       const item = data.verifications.find((v) => v.id === id);
+      if (live) {
+        await verifyAdminProvider(id, {
+          status: status === 'disetujui' ? 'verified' : 'rejected',
+          note,
+        });
+      }
       commit(
         (prev, now) => {
           const verifications = prev.verifications.map((v) =>
@@ -208,9 +314,9 @@ export function AdminProvider({ actor, initialState, children }) {
               ? { ...v, status, decision: { by: me.name, at: now.toISOString(), note } }
               : v,
           );
-          // Penyedia yang disetujui langsung muncul di Kelola User.
+          // Pada mode demo lokal, penyedia yang disetujui ikut dimasukkan ke Kelola User.
           const users =
-            status === 'disetujui' && !prev.users.some((u) => u.id === `p-${id}`)
+            !live && status === 'disetujui' && !prev.users.some((u) => u.id === `p-${id}`)
               ? [
                   {
                     id: `p-${id}`,
@@ -237,18 +343,22 @@ export function AdminProvider({ actor, initialState, children }) {
           action,
           target: { type: 'verifikasi', label: item.name },
           reason: note,
-          // Dari tab "Perlu Perbaikan" status awalnya bukan Menunggu.
           change:
             item.status === 'perbaikan'
               ? { ...change, before: 'Perlu Perbaikan', beforeTone: 'orange' }
               : change,
         },
       );
+      await refreshStats();
     };
 
-    const setUserStatus = (id, status, reason) => {
+    const setUserStatus = async (id, status, reason) => {
       const item = data.users.find((u) => u.id === id);
       const suspend = status === 'disuspensi';
+      if (live) {
+        if (suspend) await suspendAdminUser(id, reason);
+        else await activateAdminUser(id, reason);
+      }
       commit(
         (prev, now) => ({
           ...prev,
@@ -269,10 +379,17 @@ export function AdminProvider({ actor, initialState, children }) {
           change: suspend ? STATUS_CHANGE.aktifKeSuspensi : STATUS_CHANGE.suspensiKeAktif,
         },
       );
+      await refreshStats();
     };
 
-    const setReviewStatus = (id, status, reason, action) => {
+    const setReviewStatus = async (id, status, reason, action) => {
       const item = data.reviews.find((r) => r.id === id);
+      if (live) {
+        await moderateAdminReview(id, {
+          is_hidden: status === 'disembunyikan',
+          reason,
+        });
+      }
       commit(
         (prev, now) => ({
           ...prev,
@@ -300,6 +417,7 @@ export function AdminProvider({ actor, initialState, children }) {
           },
         },
       );
+      await refreshStats();
     };
 
     return {
@@ -311,7 +429,7 @@ export function AdminProvider({ actor, initialState, children }) {
       suspendUser: (id, reason) => setUserStatus(id, 'disuspensi', reason),
       activateUser: (id, reason) => setUserStatus(id, 'aktif', reason),
 
-      /** Buat akun Pengguna/Pengelola; mengembalikan user baru (beserta undangan/sandi). */
+      /** Buat akun Pengguna/Pengelola (demo lokal); mengembalikan user baru. */
       createAccount: (form) => {
         const now = new Date();
         const name = form.name.trim();
@@ -386,9 +504,26 @@ export function AdminProvider({ actor, initialState, children }) {
       dismissReport: (id, reason) => setReviewStatus(id, 'ditampilkan', reason, 'abaikan_laporan'),
 
       /** Tambah (tanpa `id`) atau ubah kategori. */
-      saveCategory: (values, id) => {
+      saveCategory: async (values, id) => {
         const name = values.name.trim();
         if (!id) {
+          if (live) {
+            const saved = await createAdminCategory({
+              name,
+              icon: values.icon || null,
+              is_active: values.active,
+            });
+            const mapped = {
+              ...fromApiAdminCategory(saved),
+              description: values.description.trim() || `Slug: ${saved.slug}`,
+            };
+            commit((prev) => ({ ...prev, categories: [...prev.categories, mapped] }), {
+              action: 'tambah_kategori',
+              target: { type: 'kategori', label: name },
+              reason: `Kategori baru${values.active ? '' : ' (nonaktif)'} ditambahkan.`,
+            });
+            return;
+          }
           const created = {
             id: `k-${Date.now().toString(36)}`,
             name,
@@ -406,6 +541,13 @@ export function AdminProvider({ actor, initialState, children }) {
           return;
         }
         const before = data.categories.find((c) => c.id === id);
+        if (live) {
+          await updateAdminCategory(id, {
+            name,
+            icon: values.icon || null,
+            is_active: values.active,
+          });
+        }
         const changed = [
           before.name !== name && 'nama',
           before.icon !== values.icon && 'ikon',
@@ -438,13 +580,17 @@ export function AdminProvider({ actor, initialState, children }) {
         );
       },
 
-      toggleCategory: (id, reason) => {
+      toggleCategory: async (id, reason) => {
         const item = data.categories.find((c) => c.id === id);
+        const nextActive = !item.active;
+        if (live) {
+          await updateAdminCategory(id, { is_active: nextActive });
+        }
         commit(
           (prev, now) => ({
             ...prev,
             categories: prev.categories.map((c) =>
-              c.id === id ? { ...c, active: !c.active, updatedAt: now.toISOString() } : c,
+              c.id === id ? { ...c, active: nextActive, updatedAt: now.toISOString() } : c,
             ),
           }),
           {
@@ -465,12 +611,11 @@ export function AdminProvider({ actor, initialState, children }) {
         });
       },
     };
-  }, [data, commit, me]);
+  }, [data, commit, me, live, refreshStats]);
 
   const settingsActions = useMemo(() => {
     const selfTarget = { type: 'user', label: me.name };
     return {
-      /** Simpan Profil Saya; `changes` = daftar nama field yang berubah. */
       updateProfile: (values, changes) =>
         commit(
           (prev) => ({
@@ -497,7 +642,6 @@ export function AdminProvider({ actor, initialState, children }) {
           },
         ),
 
-      /** Ubah kata sandi: sesi di perangkat lain ikut dikeluarkan. */
       changePassword: () =>
         commit((prev) => ({ ...prev, sessions: prev.sessions.filter((x) => x.current) }), {
           action: 'ubah_sandi',
@@ -505,7 +649,6 @@ export function AdminProvider({ actor, initialState, children }) {
           reason: 'Kata sandi diperbarui; sesi di perangkat lain dikeluarkan.',
         }),
 
-      /** Keluarkan satu sesi (`id`) atau semua sesi lain (tanpa `id`). */
       revokeSessions: (id) => {
         const targets = data.sessions.filter((x) => !x.current && (!id || x.id === id));
         commit(
@@ -526,7 +669,6 @@ export function AdminProvider({ actor, initialState, children }) {
         );
       },
 
-      /** Preferensi notifikasi pribadi (tanpa Audit Log). */
       setNotificationPref: (id, channel, value) =>
         commit((prev) => ({
           ...prev,
@@ -535,7 +677,6 @@ export function AdminProvider({ actor, initialState, children }) {
           ),
         })),
 
-      /** Simpan Informasi Platform; `changes` dari diffPlatformInfo. */
       updatePlatformInfo: (values, changes, reason) => {
         const single = changes.length === 1 && changes[0].before != null ? changes[0] : null;
         const sections = [...new Set(changes.map((c) => c.section))];
@@ -575,13 +716,33 @@ export function AdminProvider({ actor, initialState, children }) {
       ...actions,
       ...settingsActions,
       actor: me,
+      live,
+      dashboardStats,
+      loadState,
+      loadError,
+      refreshAdmin,
       commit,
       run,
       toast,
       notify,
       dismissToast,
     }),
-    [data, actions, settingsActions, me, commit, run, toast, notify, dismissToast],
+    [
+      data,
+      actions,
+      settingsActions,
+      me,
+      live,
+      dashboardStats,
+      loadState,
+      loadError,
+      refreshAdmin,
+      commit,
+      run,
+      toast,
+      notify,
+      dismissToast,
+    ],
   );
 
   return <AdminContext.Provider value={value}>{children}</AdminContext.Provider>;

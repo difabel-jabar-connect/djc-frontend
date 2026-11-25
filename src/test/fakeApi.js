@@ -232,6 +232,104 @@ const demoProviderState = () => ({
   portfolio: [],
 });
 
+const demoAdminState = () => ({
+  providers: [
+    {
+      id: 'aaaa1111-1111-4111-8111-111111111111',
+      display_name: 'Yusuf Hidayat',
+      alumni_reg_no: 'AL-2024-006',
+      city: 'Kota Cimahi',
+      district: 'Cimahi Utara',
+      has_location: true,
+      verification_status: 'pending',
+      verified_at: null,
+      rating_avg: 0,
+      rating_count: 0,
+      created_at: '2026-10-18T08:00:00.000Z',
+      user: {
+        id: 'bbbb1111-1111-4111-8111-111111111111',
+        name: 'Yusuf Hidayat',
+        email: 'yusuf@djc.test',
+        phone: '+6281234567891',
+        status: 'active',
+      },
+    },
+    {
+      id: 'aaaa2222-2222-4222-8222-222222222222',
+      display_name: 'Deni Setiawan',
+      alumni_reg_no: 'AL-2024-001',
+      city: 'Kota Bekasi',
+      district: 'Bekasi Selatan',
+      has_location: true,
+      verification_status: 'verified',
+      verified_at: '2026-10-01T08:00:00.000Z',
+      rating_avg: 4.8,
+      rating_count: 2,
+      created_at: '2026-09-20T08:00:00.000Z',
+      user: {
+        id: 'bbbb2222-2222-4222-8222-222222222222',
+        name: 'Deni Setiawan',
+        email: 'deni@djc.test',
+        phone: '+6281234567892',
+        status: 'active',
+      },
+    },
+  ],
+  categories: [
+    {
+      id: 'cccc1111-1111-4111-8111-111111111111',
+      name: 'Servis Elektronik',
+      slug: 'servis-elektronik',
+      icon: 'wrench',
+      sort_order: 1,
+      is_active: true,
+      services_count: 3,
+    },
+    {
+      id: 'cccc2222-2222-4222-8222-222222222222',
+      name: 'Kerajinan',
+      slug: 'kerajinan',
+      icon: 'gift',
+      sort_order: 2,
+      is_active: false,
+      services_count: 0,
+    },
+  ],
+  reviews: [
+    {
+      id: 'dddd1111-1111-4111-8111-111111111111',
+      booking_id: 'eeee1111-1111-4111-8111-111111111111',
+      rating: 5,
+      comment: 'Sangat rapi dan tepat waktu.',
+      is_hidden: false,
+      hidden_reason: null,
+      created_at: '2026-10-20T10:00:00.000Z',
+      provider: { id: 'aaaa2222-2222-4222-8222-222222222222', display_name: 'Deni Setiawan' },
+      customer: { id: 'bbbb3333-3333-4333-8333-333333333333', name: 'Budi Santoso' },
+    },
+  ],
+  users: [
+    {
+      id: 'bbbb3333-3333-4333-8333-333333333333',
+      role: 'customer',
+      name: 'Budi Santoso',
+      email: 'budi@djc.test',
+      phone: '+6281234567890',
+      status: 'active',
+      created_at: '2026-09-15T08:00:00.000Z',
+    },
+    {
+      id: 'bbbb2222-2222-4222-8222-222222222222',
+      role: 'provider',
+      name: 'Deni Setiawan',
+      email: 'deni@djc.test',
+      phone: '+6281234567892',
+      status: 'active',
+      created_at: '2026-09-10T08:00:00.000Z',
+    },
+  ],
+});
+
 const validationError = (field, message) =>
   json(
     {
@@ -338,6 +436,8 @@ export const fakeApi = {
   account: demoAccount(),
   /** Data milik provider di balik endpoint /provider/*. */
   provider: demoProviderState(),
+  /** Data milik admin di balik endpoint /admin/*. */
+  admin: demoAdminState(),
   reset() {
     this.calls = [];
     this.offline = false;
@@ -347,14 +447,17 @@ export const fakeApi = {
     this.reviewError = null;
     this.account = demoAccount();
     this.provider = demoProviderState();
+    this.admin = demoAdminState();
     bookingSeq = 0;
     addressSeq = 0;
     providerServiceSeq = 0;
+    adminCategorySeq = 0;
   },
 };
 
 let bookingSeq = 0;
 let providerServiceSeq = 0;
+let adminCategorySeq = 0;
 
 export async function fakeFetch(input, init = {}) {
   const url = new URL(typeof input === 'string' ? input : input.url);
@@ -387,6 +490,121 @@ export async function fakeFetch(input, init = {}) {
   if (path === '/me' || path.startsWith('/me/')) {
     const response = accountRoute(method, path, body ?? {});
     if (response) return response;
+  }
+
+  if (path === '/admin/dashboard' && method === 'GET') {
+    const a = fakeApi.admin;
+    const providers = {
+      pending: a.providers.filter((p) => p.verification_status === 'pending').length,
+      verified: a.providers.filter((p) => p.verification_status === 'verified').length,
+      rejected: a.providers.filter((p) => p.verification_status === 'rejected').length,
+    };
+    return json({
+      data: {
+        users: {
+          total: a.users.length,
+          customers: a.users.filter((u) => u.role === 'customer').length,
+          providers: a.users.filter((u) => u.role === 'provider').length,
+          admins: 1,
+          suspended: a.users.filter((u) => u.status === 'suspended').length,
+        },
+        providers,
+        bookings: {
+          total: 7,
+          requested: 1,
+          accepted: 1,
+          in_progress: 1,
+          completed: 2,
+          rejected: 1,
+          cancelled: 1,
+        },
+        reviews: {
+          total: a.reviews.length,
+          hidden: a.reviews.filter((r) => r.is_hidden).length,
+          average_rating: 4.8,
+        },
+      },
+    });
+  }
+  if (path === '/admin/providers' && method === 'GET') {
+    return json({
+      data: fakeApi.admin.providers,
+      meta: { page: 1, limit: 50, total_items: fakeApi.admin.providers.length, total_pages: 1 },
+    });
+  }
+  const adminVerify = /^\/admin\/providers\/([^/]+)\/verify$/.exec(path);
+  if (adminVerify && method === 'PUT') {
+    const id = decodeURIComponent(adminVerify[1]);
+    const row = fakeApi.admin.providers.find((p) => p.id === id);
+    if (!row) return notFound('Penyedia jasa tidak ditemukan.');
+    row.verification_status = body?.status ?? 'verified';
+    row.verified_at = '2026-11-25T08:00:00.000Z';
+    return json({
+      data: {
+        id: row.id,
+        display_name: row.display_name,
+        verification_status: row.verification_status,
+        verified_at: row.verified_at,
+      },
+    });
+  }
+  if (path === '/admin/categories') {
+    if (method === 'GET') return json({ data: fakeApi.admin.categories });
+    if (method === 'POST') {
+      adminCategorySeq += 1;
+      const slug = String(body?.name ?? 'kategori')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-');
+      const created = {
+        id: `cat-admin-${adminCategorySeq}`,
+        name: body?.name,
+        slug,
+        icon: body?.icon ?? null,
+        sort_order: body?.sort_order ?? 0,
+        is_active: body?.is_active ?? true,
+        services_count: 0,
+      };
+      fakeApi.admin.categories = [...fakeApi.admin.categories, created];
+      return json({ data: created }, 201);
+    }
+  }
+  const adminCatOne = /^\/admin\/categories\/([^/]+)$/.exec(path);
+  if (adminCatOne && method === 'PUT') {
+    const id = decodeURIComponent(adminCatOne[1]);
+    const row = fakeApi.admin.categories.find((c) => c.id === id);
+    if (!row) return notFound('Kategori tidak ditemukan.');
+    Object.assign(row, body ?? {});
+    return json({ data: { ...row } });
+  }
+  if (path === '/admin/reviews' && method === 'GET') {
+    return json({
+      data: fakeApi.admin.reviews,
+      meta: { page: 1, limit: 50, total_items: fakeApi.admin.reviews.length, total_pages: 1 },
+    });
+  }
+  const adminReviewMod = /^\/admin\/reviews\/([^/]+)\/moderate$/.exec(path);
+  if (adminReviewMod && method === 'PUT') {
+    const id = decodeURIComponent(adminReviewMod[1]);
+    const row = fakeApi.admin.reviews.find((r) => r.id === id);
+    if (!row) return notFound('Ulasan tidak ditemukan.');
+    row.is_hidden = Boolean(body?.is_hidden);
+    row.hidden_reason = row.is_hidden ? (body?.reason ?? null) : null;
+    return json({ data: { ...row } });
+  }
+  if (path === '/admin/users' && method === 'GET') {
+    return json({
+      data: fakeApi.admin.users,
+      meta: { page: 1, limit: 50, total_items: fakeApi.admin.users.length, total_pages: 1 },
+    });
+  }
+  const adminUserStatus = /^\/admin\/users\/([^/]+)\/(suspend|activate)$/.exec(path);
+  if (adminUserStatus && method === 'PUT') {
+    const id = decodeURIComponent(adminUserStatus[1]);
+    const action = adminUserStatus[2];
+    const row = fakeApi.admin.users.find((u) => u.id === id);
+    if (!row) return notFound('Pengguna tidak ditemukan.');
+    row.status = action === 'suspend' ? 'suspended' : 'active';
+    return json({ data: { user: { ...row }, cancelled_bookings: 0 } });
   }
 
   if (path === '/provider/profile') {

@@ -1,6 +1,9 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderAt } from '@/test/renderWithRouter';
+import { DEMO_ACCOUNTS } from '@/features/auth/session';
+import { renderAt as baseRenderAt } from '@/test/renderWithRouter';
+
+const renderAt = (path, opts) => baseRenderAt(path, { user: DEMO_ACCOUNTS.admin, ...opts });
 
 const subnav = () => within(screen.getByRole('navigation', { name: 'Sub-menu pengaturan' }));
 const adminNav = () => within(screen.getByRole('navigation', { name: /menu admin/i }));

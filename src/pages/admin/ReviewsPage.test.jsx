@@ -1,6 +1,9 @@
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderAt } from '@/test/renderWithRouter';
+import { DEMO_ACCOUNTS } from '@/features/auth/session';
+import { renderAt as baseRenderAt } from '@/test/renderWithRouter';
+
+const renderAt = (path, opts) => baseRenderAt(path, { user: DEMO_ACCOUNTS.admin, ...opts });
 
 const list = () => within(screen.getByRole('list', { name: 'Daftar ulasan' }));
 const cardOf = (code) => list().getByText(code).closest('li');

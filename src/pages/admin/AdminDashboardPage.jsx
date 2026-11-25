@@ -189,18 +189,29 @@ function activitySentence(entry) {
 /** Dashboard Admin UPTD PPSGHD (desain Admin Dashboard). */
 export default function AdminDashboardPage() {
   useDocumentTitle('Dashboard Admin');
-  const { actor, verifications, reviews, categories, orders, audit } = useAdmin();
+  const { actor, verifications, reviews, categories, orders, audit, live, dashboardStats } =
+    useAdmin();
   const [range, setRange] = useState('30');
 
   const pending = verifications
     .filter((v) => v.status === 'menunggu')
     .sort((a, b) => new Date(a.registeredAt) - new Date(b.registeredAt));
   const reported = reviews.filter((r) => r.status === 'dilaporkan').length;
+  const hiddenReviews =
+    dashboardStats?.reviews?.hidden ?? reviews.filter((r) => r.status === 'disembunyikan').length;
   const emptyCategories = categories.filter((c) => c.services === 0).length;
   const lateOrders = orders.filter(
     (o) => o.status === 'menunggu' && hoursSince(o.createdAt) > 20,
   ).length;
   const categoryOf = (id) => categories.find((c) => c.id === id);
+
+  const pendingCount = dashboardStats?.providers?.pending ?? pending.length;
+  const activeProvidersCount =
+    dashboardStats?.providers?.verified ?? PLATFORM_STATS.providers.value;
+  const totalUsersCount = dashboardStats?.users?.total ?? PLATFORM_STATS.users.value;
+  const ordersMetricCount = dashboardStats?.bookings?.total ?? PLATFORM_STATS.ordersThisMonth.value;
+  const completedOrdersCount = dashboardStats?.bookings?.completed ?? ORDER_TREND.completed.value;
+  const cancelledOrdersCount = dashboardStats?.bookings?.cancelled ?? ORDER_TREND.cancelled;
 
   const actionItems = [
     {
@@ -241,8 +252,9 @@ export default function AdminDashboardPage() {
             <span>Selamat Datang,</span> {actor.name}
           </h1>
           <p>
-            Ada <strong>{pending.length} penyedia</strong> menunggu verifikasi dan{' '}
-            <strong>{reported} ulasan</strong> dilaporkan.
+            Ada <strong>{pendingCount} penyedia</strong> menunggu verifikasi dan{' '}
+            <strong>{live ? hiddenReviews : reported} ulasan</strong>{' '}
+            {live ? 'disembunyikan' : 'dilaporkan'}.
           </p>
         </div>
         <div className="ad-welcome__side">
@@ -258,7 +270,7 @@ export default function AdminDashboardPage() {
           label="Menunggu Verifikasi"
           icon={ShieldCheckIcon}
           tone="amber"
-          value={fmt(pending.length)}
+          value={fmt(pendingCount)}
         >
           <Link to={PATHS.adminVerification} className="dash-panel__link ad-stat-link">
             Tinjau sekarang
@@ -269,24 +281,39 @@ export default function AdminDashboardPage() {
           label="Penyedia Aktif"
           icon={BriefcaseIcon}
           tone="teal"
-          value={fmt(PLATFORM_STATS.providers.value)}
+          value={fmt(activeProvidersCount)}
         >
-          <Trend value={PLATFORM_STATS.providers.trend} />
+          {live ? (
+            <span className="dash-muted">
+              Ditolak: {fmt(dashboardStats?.providers?.rejected ?? 0)}
+            </span>
+          ) : (
+            <Trend value={PLATFORM_STATS.providers.trend} />
+          )}
+        </StatCard>
+        <StatCard label="Pengguna Terdaftar" icon={UsersIcon} value={fmt(totalUsersCount)}>
+          {live ? (
+            <span className="dash-muted">
+              Disuspensi: {fmt(dashboardStats?.users?.suspended ?? 0)}
+            </span>
+          ) : (
+            <Trend value={PLATFORM_STATS.users.trend} />
+          )}
         </StatCard>
         <StatCard
-          label="Pengguna Terdaftar"
-          icon={UsersIcon}
-          value={fmt(PLATFORM_STATS.users.value)}
-        >
-          <Trend value={PLATFORM_STATS.users.trend} />
-        </StatCard>
-        <StatCard
-          label="Pesanan Bulan Ini"
+          label={live ? 'Total Pesanan' : 'Pesanan Bulan Ini'}
           icon={ClipboardListIcon}
           tone="green"
-          value={fmt(PLATFORM_STATS.ordersThisMonth.value)}
+          value={fmt(ordersMetricCount)}
         >
-          <Trend value={PLATFORM_STATS.ordersThisMonth.trend} />
+          {live ? (
+            <span className="dash-muted">
+              Selesai: {fmt(completedOrdersCount)} · Rating{' '}
+              {dashboardStats?.reviews?.average_rating ?? 0}
+            </span>
+          ) : (
+            <Trend value={PLATFORM_STATS.ordersThisMonth.trend} />
+          )}
         </StatCard>
       </section>
 
@@ -372,22 +399,26 @@ export default function AdminDashboardPage() {
               <ArrowRightIcon size={18} />
             </Link>
           </div>
-          <ol className="ad-activity">
-            {audit.slice(0, 4).map((entry) => (
-              <li key={entry.id}>
-                <span
-                  className={`ad-activity__icon tone-${AUDIT_ACTIONS[entry.action].tone}`}
-                  aria-hidden="true"
-                >
-                  <AuditActionIcon action={entry.action} size={20} strokeWidth={2.25} />
-                </span>
-                <div>
-                  <p>{activitySentence(entry)}</p>
-                  <time dateTime={entry.at}>{formatDateTime(entry.at)}</time>
-                </div>
-              </li>
-            ))}
-          </ol>
+          {audit.length ? (
+            <ol className="ad-activity">
+              {audit.slice(0, 4).map((entry) => (
+                <li key={entry.id}>
+                  <span
+                    className={`ad-activity__icon tone-${AUDIT_ACTIONS[entry.action].tone}`}
+                    aria-hidden="true"
+                  >
+                    <AuditActionIcon action={entry.action} size={20} strokeWidth={2.25} />
+                  </span>
+                  <div>
+                    <p>{activitySentence(entry)}</p>
+                    <time dateTime={entry.at}>{formatDateTime(entry.at)}</time>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className="ad-panel-empty">Belum ada aktivitas pada sesi ini.</p>
+          )}
         </section>
       </div>
 
@@ -411,13 +442,15 @@ export default function AdminDashboardPage() {
             <div className="ad-trend__side">
               <div className="ad-mini-stat">
                 <span>Pesanan Selesai</span>
-                <strong>{fmt(ORDER_TREND.completed.value)}</strong>
-                <Trend value={ORDER_TREND.completed.trend} note="30 hari terakhir" />
+                <strong>{fmt(completedOrdersCount)}</strong>
+                {!live && <Trend value={ORDER_TREND.completed.trend} note="30 hari terakhir" />}
               </div>
               <div className="ad-mini-stat">
                 <span>Pesanan Dibatalkan</span>
-                <strong>{fmt(ORDER_TREND.cancelled)}</strong>
-                <span className="ad-mini-stat__note">2% dari total, 30 hari terakhir</span>
+                <strong>{fmt(cancelledOrdersCount)}</strong>
+                <span className="ad-mini-stat__note">
+                  {live ? 'Data kumulatif database' : '2% dari total, 30 hari terakhir'}
+                </span>
               </div>
             </div>
           </div>

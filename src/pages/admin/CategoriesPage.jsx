@@ -18,7 +18,8 @@ export default function CategoriesPage({
   tabs = null,
 }) {
   useDocumentTitle(tabs ? `${title} · Kategori` : title);
-  const { categories, saveCategory, toggleCategory, deleteCategory, run, notify } = useAdmin();
+  const { categories, live, saveCategory, toggleCategory, deleteCategory, run, notify } =
+    useAdmin();
   const headingRef = useRef(null);
   const [editing, setEditing] = useState(null); // { category } — category null = tambah
   const [toggling, setToggling] = useState(null);
@@ -120,7 +121,7 @@ export default function CategoriesPage({
                         <PowerIcon size={18} strokeWidth={2.25} />
                         {category.active ? 'Nonaktifkan' : 'Aktifkan'}
                       </button>
-                      {category.services === 0 && (
+                      {!live && category.services === 0 && (
                         <button
                           type="button"
                           className="btn btn--danger ad-btn-sm"
@@ -146,9 +147,9 @@ export default function CategoriesPage({
         category={editing?.category ?? null}
         categories={categories}
         onClose={() => setEditing(null)}
-        onSave={(values) => {
+        onSave={async (values) => {
           const isNew = !editing.category;
-          saveCategory(values, editing.category?.id);
+          await saveCategory(values, editing.category?.id);
           setEditing(null);
           done(
             `Kategori “${values.name.trim()}” ${isNew ? 'ditambahkan' : 'disimpan'}. Aksi tercatat di Audit Log.`,

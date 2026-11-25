@@ -15,6 +15,8 @@ function CategoryForm({ ids, category, takenNames, onClose, onSave }) {
     active: category?.active ?? true,
   }));
   const [touched, setTouched] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const name = values.name.trim();
   const duplicate = takenNames.includes(name.toLowerCase());
   const error = duplicate
@@ -29,10 +31,19 @@ function CategoryForm({ ids, category, takenNames, onClose, onSave }) {
     <form
       className="dialog__form"
       noValidate
-      onSubmit={(event) => {
+      onSubmit={async (event) => {
         event.preventDefault();
         setTouched(true);
-        if (valid) onSave(values);
+        if (!valid || busy) return;
+        setSubmitError('');
+        setBusy(true);
+        try {
+          await onSave(values);
+        } catch (err) {
+          setSubmitError(err?.message || 'Gagal menyimpan kategori.');
+        } finally {
+          setBusy(false);
+        }
       }}
     >
       <div className="dialog__head">
@@ -142,12 +153,23 @@ function CategoryForm({ ids, category, takenNames, onClose, onSave }) {
         </div>
       </div>
 
+      {submitError && (
+        <p className="ad-callout tone-danger" role="alert">
+          {submitError}
+        </p>
+      )}
+
       <div className="dialog__actions ad-actions-end">
-        <button type="button" className="btn btn--outline btn--md" onClick={onClose}>
+        <button
+          type="button"
+          className="btn btn--outline btn--md"
+          onClick={onClose}
+          disabled={busy}
+        >
           Batal
         </button>
-        <button type="submit" className="btn btn--primary btn--md" disabled={!valid}>
-          Simpan
+        <button type="submit" className="btn btn--primary btn--md" disabled={!valid || busy}>
+          {busy ? 'Menyimpan...' : 'Simpan'}
         </button>
       </div>
     </form>

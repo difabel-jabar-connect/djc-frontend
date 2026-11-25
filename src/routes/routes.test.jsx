@@ -49,13 +49,13 @@ describe('Routing dasar', () => {
     // Pesan Layanan terbuka untuk tamu sampai langkah Jadwal (masuk diminta sesudahnya).
     ['/pesan/rizki-maulana', /pesan layanan/i],
     ['/dashboard/provider', /selamat datang kembali/i],
-    ['/admin', /selamat datang/i],
-    ['/admin/verifikasi', /verifikasi penyedia/i],
-    ['/admin/user', /kelola user/i],
-    ['/admin/kategori', /kategori layanan/i],
-    ['/admin/ulasan', /moderasi ulasan/i],
-    ['/admin/pesanan', /monitoring pesanan/i],
-    ['/admin/audit', /audit log/i],
+    ['/admin', /selamat datang kembali/i],
+    ['/admin/verifikasi', /selamat datang kembali/i],
+    ['/admin/user', /selamat datang kembali/i],
+    ['/admin/kategori', /selamat datang kembali/i],
+    ['/admin/ulasan', /selamat datang kembali/i],
+    ['/admin/pesanan', /selamat datang kembali/i],
+    ['/admin/audit', /selamat datang kembali/i],
   ])('rute %s merender halaman placeholder', async (path, heading) => {
     renderAt(path);
     // Profil & Pesan Layanan memuat data penyedia dari backend (tiruan) lebih dulu.
