@@ -64,9 +64,14 @@ export const routes = [
       { path: PATHS.forgotPasswordSent, element: <CheckEmailPage /> },
       { path: PATHS.resetPassword, element: <ResetPasswordPage /> },
       { path: PATHS.resetPasswordSuccess, element: <ResetPasswordSuccessPage /> },
-      { path: PATHS.providerDashboard, element: <ProviderDashboardPage /> },
-      { path: PATHS.providerChat, element: <ProviderChatPage /> },
-      { path: PATHS.providerChatThread, element: <ProviderChatPage /> },
+      {
+        element: <RequireAuth allow="provider" />,
+        children: [
+          { path: PATHS.providerDashboard, element: <ProviderDashboardPage /> },
+          { path: PATHS.providerChat, element: <ProviderChatPage /> },
+          { path: PATHS.providerChatThread, element: <ProviderChatPage /> },
+        ],
+      },
       {
         path: PATHS.adminDashboard,
         element: <AdminLayout />,
