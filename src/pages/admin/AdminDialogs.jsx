@@ -76,6 +76,7 @@ function ReasonForm({
 }) {
   const [reason, setReason] = useState('');
   const [touched, setTouched] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const fieldRef = useRef(null);
   const error = touched ? reasonError(reason, { required }) : '';
   const valid = isReasonValid(reason, { required });
@@ -98,9 +99,12 @@ function ReasonForm({
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!valid || busy) return;
+    setSubmitError('');
     setBusy(true);
     try {
       await onConfirm(reason.trim());
+    } catch (err) {
+      setSubmitError(err?.message || 'Aksi gagal diproses. Silakan coba lagi.');
     } finally {
       setBusy(false);
     }
@@ -194,6 +198,12 @@ function ReasonForm({
         </div>
       </div>
 
+      {submitError && (
+        <p className="ad-callout tone-danger" role="alert">
+          {submitError}
+        </p>
+      )}
+
       <div className="dialog__actions">
         <button
           type="button"
@@ -268,13 +278,20 @@ export function ConfirmDialog({
 }) {
   const id = useId();
   const [busy, setBusy] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const close = () => {
-    if (!busy) onClose();
+    if (!busy) {
+      setSubmitError('');
+      onClose();
+    }
   };
   const confirm = async () => {
+    setSubmitError('');
     setBusy(true);
     try {
       await onConfirm();
+    } catch (err) {
+      setSubmitError(err?.message || 'Aksi gagal diproses. Silakan coba lagi.');
     } finally {
       setBusy(false);
     }
@@ -302,6 +319,12 @@ export function ConfirmDialog({
         </div>
       </div>
       {subject && <SubjectCard subject={subject} />}
+      {submitError && (
+        <p className="ad-callout tone-danger" role="alert">
+          {submitError}
+        </p>
+      )}
+
       <div className="dialog__actions">
         <button type="button" className="btn btn--outline btn--md" onClick={close} disabled={busy}>
           {cancelLabel}

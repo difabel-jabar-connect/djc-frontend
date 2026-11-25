@@ -69,7 +69,7 @@ function Toast() {
 }
 
 function AdminShell() {
-  const { verifications, reviews, actor } = useAdmin();
+  const { verifications, reviews, actor, loadState, loadError, refreshAdmin } = useAdmin();
   const pending = verifications.filter((v) => v.status === 'menunggu').length;
   const reported = reviews.filter((r) => r.status === 'dilaporkan').length;
 
@@ -119,6 +119,19 @@ function AdminShell() {
         art: <SkylineArt />,
       }}
     >
+      {loadState === 'loading' && (
+        <p className="ad-callout tone-navy" role="status">
+          Memuat data admin dari server...
+        </p>
+      )}
+      {loadState === 'error' && (
+        <div className="ad-callout tone-danger" role="alert">
+          <span>{loadError}</span>
+          <button type="button" className="btn btn--outline ad-btn-sm" onClick={refreshAdmin}>
+            Muat Ulang
+          </button>
+        </div>
+      )}
       <Outlet />
       <Toast />
     </DashboardShell>
@@ -138,6 +151,7 @@ export default function AdminLayout() {
             ...ADMIN_ME,
             id: user.id ?? ADMIN_ME.id,
             name: user.name,
+            email: user.email ?? '',
             initials: user.initials ?? initialsOf(user.name),
           }
         : ADMIN_ME,
