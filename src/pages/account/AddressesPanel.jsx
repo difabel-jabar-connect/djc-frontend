@@ -60,7 +60,12 @@ function AddressPinMap({ addresses, activeId, onPick }) {
       scrollWheelZoom: false,
       keyboard: false,
     });
-    L.tileLayer(TILE_URL, { maxZoom: 19, attribution: TILE_ATTRIBUTION }).addTo(map);
+    L.tileLayer(TILE_URL, {
+      maxZoom: 19,
+      attribution: TILE_ATTRIBUTION,
+      // Tile server OSM menolak request tanpa Referer (index.html memasang no-referrer).
+      referrerPolicy: 'strict-origin-when-cross-origin',
+    }).addTo(map);
     map.attributionControl.setPrefix(false);
     mapRef.current = map;
     return () => {
