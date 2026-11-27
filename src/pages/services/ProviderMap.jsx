@@ -206,6 +206,8 @@ export default function ProviderMap({
     L.tileLayer(TILE_URL, {
       maxZoom: 19,
       attribution: TILE_ATTRIBUTION,
+      // Tile server OSM menolak request tanpa Referer (index.html memasang no-referrer).
+      referrerPolicy: 'strict-origin-when-cross-origin',
     }).addTo(map);
     map.attributionControl.setPrefix('<a href="https://leafletjs.com">Leaflet</a>');
 

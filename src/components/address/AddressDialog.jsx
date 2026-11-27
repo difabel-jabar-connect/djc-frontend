@@ -52,7 +52,12 @@ function fromNominatim(result) {
 
 async function reverseGeocode({ lat, lng }, signal) {
   const url = `${NOMINATIM}/reverse?format=jsonv2&addressdetails=1&zoom=18&accept-language=id&lat=${lat}&lon=${lng}`;
-  const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
+  const response = await fetch(url, {
+    signal,
+    headers: { Accept: 'application/json' },
+    // Nominatim mewajibkan identitas aplikasi via Referer; kirim origin saja.
+    referrerPolicy: 'strict-origin-when-cross-origin',
+  });
   if (!response.ok) throw new Error('reverse geocode gagal');
   return fromNominatim(await response.json());
 }
@@ -60,7 +65,12 @@ async function reverseGeocode({ lat, lng }, signal) {
 async function searchPlaces(query, signal) {
   const [[south, west], [north, east]] = JABAR_MAX_BOUNDS;
   const url = `${NOMINATIM}/search?format=jsonv2&addressdetails=1&limit=5&countrycodes=id&accept-language=id&bounded=1&viewbox=${west},${north},${east},${south}&q=${encodeURIComponent(query)}`;
-  const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
+  const response = await fetch(url, {
+    signal,
+    headers: { Accept: 'application/json' },
+    // Nominatim mewajibkan identitas aplikasi via Referer; kirim origin saja.
+    referrerPolicy: 'strict-origin-when-cross-origin',
+  });
   if (!response.ok) throw new Error('pencarian gagal');
   const results = await response.json();
   return (Array.isArray(results) ? results : []).map((item) => ({
@@ -89,7 +99,12 @@ function PinMap({ center, onMove, mapRef }) {
       maxBoundsViscosity: 0.9,
       attributionControl: true,
     }).setView([center.lat, center.lng], 16);
-    L.tileLayer(TILE_URL, { maxZoom: 19, attribution: TILE_ATTRIBUTION }).addTo(map);
+    L.tileLayer(TILE_URL, {
+      maxZoom: 19,
+      attribution: TILE_ATTRIBUTION,
+      // Tile server OSM menolak request tanpa Referer (index.html memasang no-referrer).
+      referrerPolicy: 'strict-origin-when-cross-origin',
+    }).addTo(map);
     map.attributionControl.setPrefix(false);
     map.on('moveend', () => {
       const point = map.getCenter();
